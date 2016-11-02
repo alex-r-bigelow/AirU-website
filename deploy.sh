@@ -27,9 +27,12 @@ systemctl enable mongod
 
 echo "*** Installing needed libraries for REST server..."
 pip install eve --upgrade
-# There's a problem with pip autoinstalling the wrong version of python-cffi (dependency of flask-sentinel)
 pip install flask-sentinel --upgrade
-if [ ! -d $WORKING_DIR/rest_server/lib ] ; then
-  mkdir $WORKING_DIR/rest_server/lib
-  git clone https://github.com/nicolaiarocci/eve-oauth2 $WORKING_DIR/rest_server/lib/eve-oauth2
-fi
+
+# TODO: Set up OAuth
+# if [ ! -d $WORKING_DIR/rest_server/lib ] ; then
+#   mkdir $WORKING_DIR/rest_server/lib
+#   git clone https://github.com/nicolaiarocci/eve-oauth2 $WORKING_DIR/rest_server/lib/eve-oauth2
+# fi
+
+echo "*** Setting up REST server..."

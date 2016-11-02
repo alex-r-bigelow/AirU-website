@@ -1,40 +1,66 @@
 {
-    "people": {
-        "item_title": "person",
-        "additional_lookup": {
-            "url": "regex(\"[\\w]+\")",
-            "field": "lastname"
-        },
-        "cache_control": "max-age=10,must-revalidate",
-        "cache_expires": 10,
-        "resource_methods": ["GET", "POST"],
+  "stations": {
+    "additional_lookup": {
+      "url": "regex(\"[\\w]+\")",
+      "field": "device_id"
+    },
+    "schema": {
+      "device_id": {
+        "type": "string",
+        "required": "true",
+        "unique": "true"
+      },
+      "contact_email": {
+        "type": "string"
+      },
+      "location": {
+        "type": "dict",
         "schema": {
-            "firstname": {
-                "type": "string",
-                "minlength": 1,
-                "maxlength": 10
-            },
-            "lastname": {
-                "type": "string",
-                "minlength": 1,
-                "maxlength": 15,
-                "required": true,
-                "unique": true
-            },
-            "role": {
-                "type": "list",
-                "allowed": ["author", "contributor", "copy"]
-            },
-            "location": {
-                "type": "dict",
-                "schema": {
-                    "address": {"type": "string"},
-                    "city": {"type": "string"}
-                }
-            },
-            "born": {
-                "type": "datetime"
-            }
+          "latitude": {
+            "type": "float",
+            "required": "true",
+            "min": -90,
+            "max": 90
+          },
+          "longitude": {
+            "type": "float",
+            "required": "true",
+            "min": -180,
+            "max": 180
+          },
+          "uncertainty_radius": {
+            "type": "float"
+          }
         }
+      },
+      "make_public": {
+        "type": "boolean"
+      }
     }
+  },
+  "measurements": {
+    "schema": {
+      "timestamp": {
+        "type": "datetime"
+      },
+      "ambient_light": {
+        "type": "float"
+      },
+      "temperature": {
+        "type": "float"
+      },
+      "humidity": {
+        "type": "float"
+      },
+      "CO2": {
+        "type": "float"
+      },
+      "NO2": {
+        "type": "float"
+      },
+      "PM1.5": {
+        "type": "float"
+      }
+    }
+  }
 }
