@@ -13,10 +13,11 @@ Vagrant.configure(2) do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "debian/jessie64"
-  config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: ".vagrant/"
-  config.vm.provision :shell, path:"deploy.sh"
+  config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: [".vagrant/", "rest_server/lib/"]
+  config.vm.provision :shell, path:"deploy.sh", args: ["/vagrant"]
   config.vm.network :forwarded_port, guest: 27017, host: 27017
   config.vm.network :forwarded_port, guest: 5000, host: 5000
+  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
