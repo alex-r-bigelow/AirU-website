@@ -25,9 +25,9 @@ fi
 cp $WORKING_DIR/config/mongod.service /lib/systemd/system/mongod.service
 systemctl enable mongod
 
-echo "*** Installing needed libraries for REST server..."
-pip install eve --upgrade
-pip install flask-sentinel --upgrade
+
+echo "*** Setting up REST server..."
+pip install eve eve-swagger flask-sentinel --upgrade
 
 # TODO: Set up OAuth
 # if [ ! -d $WORKING_DIR/rest_server/lib ] ; then
@@ -35,4 +35,14 @@ pip install flask-sentinel --upgrade
 #   git clone https://github.com/nicolaiarocci/eve-oauth2 $WORKING_DIR/rest_server/lib/eve-oauth2
 # fi
 
-echo "*** Setting up REST server..."
+cp $WORKING_DIR/config/restserver.service /lib/systemd/system/restserver.service
+echo "WorkingDirectory=$WORKING_DIR/rest_server" >> /lib/systemd/system/restserver.service
+echo "ExecStart=$WORKING_DIR/rest_server/run.py" >> /lib/systemd/system/restserver.service
+systemctl enable restserver
+
+# echo "*** Setting up web server..."
+# apt-get install apache2 libapache2-mod-wsgi
+# cp -TR $WORKING_DIR/web_server /var/www/html
+# cp -R $WORKING_DIR/rest_server /var/www/rest_server
+# cp $WORKING_DIR/config/restserver.conf /etc/apache2/sites-enabled
+# echo "import sys"

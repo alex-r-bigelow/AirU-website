@@ -58,7 +58,7 @@
       "NO2": {
         "type": "float"
       },
-      "PM1.5": {
+      "PM1_5": {
         "type": "float"
       }
     }

@@ -1,0 +1,9 @@
+[Unit]
+Description=Serve the REST API on port 5000
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Restart=always
