@@ -4,45 +4,48 @@ WORKING_DIR=${1:-`pwd`}
 echo "*** Using $WORKING_DIR as working directory"
 
 echo "*** Installing the basics..."
-apt-get install -y curl g++ git libssl-dev libffi-dev make python-dev python-pip libjpeg-dev zlib1g-dev
-apt-get install -y python-pip python-dev build-essential
-pip install pip --upgrade
-pip install virtualenv --upgrade
+apt-get install -y curl wget python3-pip python3-dev build-essential apt-transport-https
+pip3 install pip --upgrade
+pip3 install virtualenv --upgrade
 
-echo "*** Installing mongodb..."
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-echo 'deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
+echo "*** Installing and Setting Up InfluxDB..."
+curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+source /etc/os-release
+test $VERSION_ID = "7" && echo "deb https://repos.influxdata.com/debian wheezy stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+test $VERSION_ID = "8" && echo "deb https://repos.influxdata.com/debian jessie stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+
 apt-get update
-apt-get install -y mongodb-org-shell mongodb-org-server
+apt-get install -y influxdb
+systemctl start influxdb
 
-if [ $1 = "/vagrant" ] ; then
-  # Only apply our custom mongo.conf for vagrant installs (it allows
-  # connections from outside the VM, but we want the more secure settings in
-  # deployment)
-  echo "*** Allow foreign mongo connections"
-  cp $WORKING_DIR/config/mongod.conf /etc/mongod.conf
+echo "*** Setting up API server..."
+apt-get install -y apache2 libapache2-mod-wsgi-py3
+pip3 install -r $WORKING_DIR/api_server/requirements.txt --upgrade
+
+if [ `id -u api 2>/dev/null || echo -1` -eq -1 ]
+then
+  # quietly add the api user without password
+  adduser --quiet --disabled-password --shell /bin/bash --home /home/api --gecos "User" api
+  addgroup apache
 fi
-cp $WORKING_DIR/config/mongod.service /lib/systemd/system/mongod.service
-systemctl enable mongod
 
+if [ ! -e /var/www/api_server ]
+then
+  # add symlink for the server
+  ln -s $WORKING_DIR/api_server /var/www/
+fi
 
-echo "*** Setting up REST server..."
-pip install eve eve-swagger flask-sentinel --upgrade
+if [ ! -e /etc/apache2/sites-available/api_server.conf ]
+then
+  # add symlink for the server config file
+  ln -s $WORKING_DIR/config/api_server.conf /etc/apache2/sites-available/api_server.conf
+fi
 
-# TODO: Set up OAuth
-# if [ ! -d $WORKING_DIR/rest_server/lib ] ; then
-#   mkdir $WORKING_DIR/rest_server/lib
-#   git clone https://github.com/nicolaiarocci/eve-oauth2 $WORKING_DIR/rest_server/lib/eve-oauth2
-# fi
+if ! grep 'Listen 8001' /etc/apache2/ports.conf
+then
+  # listen to port 8001
+  sed -i '/Listen 80/aListen 8001\n' /etc/apache2/ports.conf
+fi
 
-cp $WORKING_DIR/config/restserver.service /lib/systemd/system/restserver.service
-echo "WorkingDirectory=$WORKING_DIR/rest_server" >> /lib/systemd/system/restserver.service
-echo "ExecStart=$WORKING_DIR/rest_server/run.py" >> /lib/systemd/system/restserver.service
-systemctl enable restserver
-
-# echo "*** Setting up web server..."
-# apt-get install apache2 libapache2-mod-wsgi
-# cp -TR $WORKING_DIR/web_server /var/www/html
-# cp -R $WORKING_DIR/rest_server /var/www/rest_server
-# cp $WORKING_DIR/config/restserver.conf /etc/apache2/sites-enabled
-# echo "import sys"
+a2ensite api_server.conf
+apachectl restart

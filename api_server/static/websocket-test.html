@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Websocket Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/styles/tomorrow-night.min.css">
+</head>
+<body>
+
+<button id="button">Click me</button>
+<div id="result"><pre><code></code></pre></div>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/highlight.min.js"></script>
+<script>
+    var toType = function(obj) {
+      return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+    }
+    var socket = io('http://localhost:5000/v1');
+
+    socket.on('connect', function(){
+        console.log('Connected!');
+    });
+
+    socket.on('disconnect', function(){
+        console.log('Disconnect!');
+    });
+
+    $('#button').click(function(){
+        console.log('Requesting data...');
+        socket.emit('data_request', 'prisms_house', '2016-07-01T19:00:00', '2016-07-03T19:01:00',
+            function(data) {
+                data = JSON.parse(data);
+                $("#result pre code").html(JSON.stringify(data, null, 4));
+
+                $('pre code').each(function(i, block) {
+                    hljs.highlightBlock(block);
+                });
+        });
+        console.log('Finished requesting...');
+    });
+
+</script>
+</body>
+</html>

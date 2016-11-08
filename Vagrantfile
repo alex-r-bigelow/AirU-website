@@ -15,8 +15,8 @@ Vagrant.configure(2) do |config|
   config.vm.box = "debian/jessie64"
   config.vm.synced_folder ".", "/vagrant", type: "rsync", rsync__exclude: [".vagrant/", "rest_server/lib/"]
   config.vm.provision :shell, path:"deploy.sh", args: ["/vagrant"]
-  config.vm.network :forwarded_port, guest: 27017, host: 27017
-  config.vm.network :forwarded_port, guest: 5000, host: 5000
+  config.vm.network :forwarded_port, guest: 80, host: 8123
+  config.vm.network :forwarded_port, guest: 8001, host: 8001
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
   # Disable automatic box update checking. If you disable this, then

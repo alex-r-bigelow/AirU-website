@@ -1,0 +1,4 @@
+{
+    "dylos": ["large", "small"],
+    "airu": ["pm1", "pm10", "pm25"]
+}

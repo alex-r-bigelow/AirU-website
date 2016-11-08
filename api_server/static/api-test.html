@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/styles/tomorrow-night.min.css">
+</head>
+<body>
+
+<button id="button">Click me</button>
+<div id="result"><pre><code></code></pre></div>
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/highlight.min.js"></script>
+<script>
+    var toType = function(obj) {
+      return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+    }
+
+    $('#button').click(function(){
+        var request = $.ajax({
+            url: "https://viz.app.lundrigan.org/api/v1/data/prisms_house/2016-07-01T19:00:00/2016-07-01T19:01:00/",
+            dataType: "json",
+            headers: {
+                "Authorization": "Basic " + btoa("jimmy:prisms")
+            },
+        })
+
+        request.done(function (data) {
+            $("#result pre code").html(JSON.stringify(data, null, 4));
+
+            $('pre code').each(function(i, block) {
+                hljs.highlightBlock(block);
+            });
+        });
+
+        request.fail(function(jqXHR, textStatus) {
+            $("#result pre code").html("Error: " + textStatus);
+            console.log(jqXHR);
+            console.log(textStatus);
+        });
+    });
+
+</script>
+</body>
+</html>
