@@ -2,6 +2,8 @@ Setup
 =====
 This server is designed to work on a fresh Debian system (though it very well could work on other systems). To set up the server, run `./deploy.sh`; it should handle everything.
 
+*Make sure to change the DB admin password*: immediately after installation, it's stupidly "password".
+
 Development
 ===========
 You can work on the server without actually deploying it by using [Vagrant](https://www.vagrantup.com/). With it installed on your local machine, type `vagrant up` in this directory, and you will have a running virtual machine identical to the deployed server (plus any of your changes).
