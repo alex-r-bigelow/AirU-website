@@ -16,6 +16,9 @@ apt-get update
 apt-get install -y influxdb
 systemctl start influxdb
 
+# Comment out this line if you don't want to start with a fresh database every time you provision
+rm /etc/influxdb/influxdb.conf
+
 echo "*** Setting Up InfluxDB..."
 if [ ! -L /etc/influxdb/influxdb.conf ]
 then
@@ -24,6 +27,13 @@ then
   rm /etc/influxdb/influxdb.conf
   ln -s $WORKING_DIR/influxdb.conf /etc/influxdb/influxdb.conf
   systemctl restart influxdb
+
+  echo "*** Populating with sample data..."
+  apt-get install python python-dev python-pip
+  pip install pip --upgrade
+  pip install influxdb --upgrade
+
+  python $WORKING_DIR/populateSampleData.py
 fi
 
 echo "*** Setting up web server..."
