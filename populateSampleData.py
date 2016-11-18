@@ -9,6 +9,7 @@ EMAIL_ADDRESSES = set()
 RANGES = {
     'Latitude': (40.5, 40.8),
     'Longitude': (-112.1, -111.6),
+    'Radius': (0, 5),
     'PM 2.5': (0.0, 400.0),
     'PM 10': (0.0, 400.0),
     'CO2': (0.0, 400.0),
@@ -51,6 +52,7 @@ def generateStation():
     return {
         'latitude': generateNumberInRange(RANGES['Latitude']),
         'longitude': generateNumberInRange(RANGES['Longitude']),
+        'radius': generateNumberInRange(RANGES['Radius']),
         'mac_address': generateMacAddress(),
         'contact_email': generateEmailAddress()
     }
