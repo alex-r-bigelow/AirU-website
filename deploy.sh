@@ -9,7 +9,8 @@ echo "*** Installing the basics..."
 apt-get install -y curl wget apt-transport-https
 
 echo "*** Installing InfluxDB..."
-curl -sL https://repos.influxdata.com/influxdb.key | apt-key add - source /etc/os-release
+curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+source /etc/os-release
 test $VERSION_ID = "7" && echo "deb https://repos.influxdata.com/debian wheezy stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
 test $VERSION_ID = "8" && echo "deb https://repos.influxdata.com/debian jessie stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
 
