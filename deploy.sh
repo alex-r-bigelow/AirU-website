@@ -41,6 +41,12 @@ then
   python $WORKING_DIR/populateSampleData.py
 fi
 
+if ! grep 'Listen 8086' /etc/apache2/ports.conf
+then
+  # listen to port 8086
+  sed -i '/Listen 80/aListen 8083\nListen 8086' /etc/apache2/ports.conf
+fi
+
 echo "*** Setting up web server..."
 apt-get install -y apache2
 if [ ! -L /var/www/html ]
@@ -84,6 +90,7 @@ then
   # listen to port 8001
   sed -i '/Listen 80/aListen 8001\n' /etc/apache2/ports.conf
 fi
+chmod o+x $WORKING_DIR/ $WORKING_DIR/web_server
 
 a2ensite api_server.conf
 apachectl restart
