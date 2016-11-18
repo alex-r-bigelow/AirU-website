@@ -19,7 +19,7 @@ apt-get install -y influxdb
 systemctl start influxdb
 
 # Comment out this line if you don't want to start with a fresh database every time you provision
-rm /etc/influxdb/influxdb.conf
+# rm /etc/influxdb/influxdb.conf
 
 echo "*** Setting Up InfluxDB..."
 if [ ! -L /etc/influxdb/influxdb.conf ]

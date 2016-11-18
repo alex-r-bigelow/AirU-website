@@ -91,7 +91,7 @@ def generateReadingSeries():
     return series
 
 if __name__ == '__main__':
-    client = InfluxDBClient('localhost', 8086, 'admin', 'password', 'defaultdb')
+    client = InfluxDBClient('127.0.0.1', 8086, 'admin', 'password', 'defaultdb')
     for s in xrange(N_STATIONS):
         print '.',
         station = generateStation()
