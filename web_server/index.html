@@ -1,16 +1,46 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
     <script type="application/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="application/javascript" src="script.js"></script>
   </head>
   <body>
     <div id="overview">
-      Overview
+      <div id="visualization">
+        TODO: cool visualization here
+      </div>
+      <div id="deviceStatusList">
+
+      </div>
     </div>
     <div id="userManagement">
-      <div id="login"></div>
-      <div id="registerUser"></div>
-      <div id="registerDevice"></div>
+      <form id="logout">
+        <span>Logged in as <label id="currentUser"></label></span>
+        <button type="submit">Log out</button>
+      </form>
+      <form id="login">
+        <input type="text" placeholder="Username" name="uname" required/>
+        <input type="password" placeholder="Password" name="pwd" required/>
+        <button>Log in</button>
+      </form>
+      <form id="registerUser">
+        <input type="email" placeholder="Email Address" name="email" required/>
+        <input type="text" placeholder="Choose a username" name="uname" required/>
+        <input type="password" placeholder="Choose a password" name="pwd" required/>
+        <input type="password" placeholder="Re-enter your password" name="validate_pwd" required/>
+        <button>Register</button>
+      </form>
+      <form id="registerDevice">
+        <input type="text" name="mac_address" placeholder="Sensor MAC Address" required/>
+        <input type="number" name="latitude" placeholder="Latitude" required/>
+        <input type="number" name="longitude" placeholder="Longitude" required/>
+        <span>
+          <label>Location precision</label>
+          <input type="number" name="radius" required/>
+        </span>
+        <button>Register A Sensor</button>
+      </form>
     </div>
   </body>
 </html>
