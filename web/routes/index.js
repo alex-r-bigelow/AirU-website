@@ -3,21 +3,21 @@ var router = express.Router();
 
 var passwordless = require('passwordless');
 
-function respondWithUser (req, res) {
-  res.json({ user: req.user });
+function renderIndex (req, res) {
+  res.render('index', { user: req.user });
 }
 
 /* GET home page. */
-router.get('/', respondWithUser);
+router.get('/', renderIndex);
 
 /* GET restricted site. */
-router.get('/restricted', passwordless.restricted(), respondWithUser);
+router.get('/restricted', passwordless.restricted(), renderIndex);
 
 /* GET login screen. */
-router.get('/login', respondWithUser);
+router.get('/login', renderIndex);
 
 /* GET logout. */
-router.get('/logout', passwordless.logout(), respondWithUser);
+router.get('/logout', passwordless.logout(), renderIndex);
 
 /* POST login screen. */
 router.post('/sendtoken',
@@ -27,7 +27,7 @@ router.post('/sendtoken',
       callback(null, user);
     }),
     function (req, res) {
-      res.json({ 'sentToken': true });
+      res.render('index', { 'sentToken': true });
     });
 
 module.exports = router;

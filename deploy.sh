@@ -12,20 +12,7 @@ tellUser "Using $WORKING_DIR as working directory"
 tellUser "Installing the basics..."
 apt-get install -y curl apt-transport-https
 
-chmod a+x $WORKING_DIR
-
-tellUser "Setting up web server..."
-apt-get install -y apache2
-if [ ! -L /var/www/html ]
-then
-  # Add the symlink for the api server
-  if [ -e /var/www/html ]
-  then
-    rm -rf /var/www/html
-  fi
-  ln -s $WORKING_DIR/web_server /var/www/html
-  chmod a+x $WORKING_DIR/web_server
-fi
+chmod -R a+x $WORKING_DIR
 
 tellUser "Installing InfluxDB..."
 curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
@@ -83,32 +70,28 @@ fi
 cp $WORKING_DIR/config/mongod.service /lib/systemd/system/mongod.service
 systemctl enable mongod
 
-tellUser "Setting up the authentication server..."
+tellUser "Setting up the web server..."
 curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
 sudo apt-get install -y nodejs build-essential
 
-npm --prefix $WORKING_DIR/authentication install $WORKING_DIR/authentication
+npm --prefix $WORKING_DIR/web install $WORKING_DIR/web
 
 if [ `id -u authapi 2>/dev/null || echo -1` -eq -1 ]
 then
   # quietly add the authapi user without password
   adduser --quiet --disabled-password --shell /bin/bash --home /home/authapi --gecos "User" authapi
+  chgrp -R authapi $WORKING_DIR/web
+  chown -R authapi $WORKING_DIR/web
 fi
 
-if [ ! -L /var/www/authentication ]
-then
-  # Add the symlink for the authentication server
-  rm -rf /var/www/authentication
-  ln -s $WORKING_DIR/authentication /var/www/authentication
-  chgrp -R authapi $WORKING_DIR/authentication
-  chown -R authapi $WORKING_DIR/authentication
-  chmod a+x $WORKING_DIR/authentication $WORKING_DIR/authentication/app.js
-fi
+cp $WORKING_DIR/config/web.service /lib/systemd/system/web.service
+echo "WorkingDirectory=$WORKING_DIR/web" >> /lib/systemd/system/web.service
+echo "ExecStart=$WORKING_DIR/web/app.js" >> /lib/systemd/system/web.service
+systemctl enable web
+systemctl start web
 
-cp $WORKING_DIR/config/authentication.service /lib/systemd/system/authentication.service
-echo "WorkingDirectory=$WORKING_DIR/authentication" >> /lib/systemd/system/authentication.service
-echo "ExecStart=$WORKING_DIR/authentication/app.js" >> /lib/systemd/system/authentication.service
-systemctl enable authentication
-systemctl start authentication
+# Redirect port 80 to port 3000
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000
+iptables -t nat -I OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 3000
 
 tellUser "Successfully finished deployment script"

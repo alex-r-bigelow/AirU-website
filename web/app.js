@@ -29,8 +29,8 @@ var smtpServer = email.server.connect({
 // TODO: MongoDB setup (given default can be used)
 var pathToMongoDb = 'mongodb://localhost/passwordless-simple-mail';
 
-// TODO: Path to be send via email
-var host = config.host + ':3000';
+// Path to be sent via email
+var host = config.host;
 
 // Setup of Passwordless
 passwordless.init(new MongoStore(pathToMongoDb));
@@ -52,8 +52,8 @@ passwordless.addDelivery(
   });
 
 // view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 // Standard express setup
 app.use(logger('dev'));
@@ -80,7 +80,7 @@ app.use(function (req, res, next) {
 // development error handler
 app.use(function (err, req, res, next) {
   res.status(err.status || 500);
-  res.json(err);
+  res.render('index', { error: err });
 });
 
 app.set('port', process.env.PORT || 3000);

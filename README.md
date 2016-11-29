@@ -12,7 +12,7 @@ Edit every entry in `config/config.json`. Some details about each of these:
 
 Once `config.json` has been set up, run `./deploy.sh`; it should handle everything.
 
-You should be able to access the web interface (use localhost:7080 if you're running in Vagrant, otherwise, it will be served on port 80), the authentication endpoints (port 3000), and the influxdb API interface (port 8083).
+You should be able to access the web interface (use localhost:7080 if you're running in Vagrant, otherwise, it will be served on port 80), and the influxdb API interface (port 8083).
 
 Development
 ===========
@@ -22,6 +22,6 @@ You can work on the server without actually deploying it by using [Vagrant](http
 
 To sync changes that you make to the vagrant VM, run `vagrant rsync-auto` in this directory; it will watch for changes and propagate them to the VM. To access the VM's command line, type `vagrant ssh`; inside the VM, this directory is synced to `/vagrant`.
 
-To restart the authentication server (from inside the VM): `sudo systemctl restart authentication`
+To restart the web server (from inside the VM): `sudo systemctl restart web`
 
 *Note:* I've noticed some irregularities with syncing shared folders / forwarded ports. `vagrant plugin install vagrant-vbguest` may help if you encounter these issues.

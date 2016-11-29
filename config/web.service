@@ -1,5 +1,5 @@
 [Unit]
-Description=Serve the authentication endpoints on port 3000
+Description=Serve the web app on port 80
 After=network.target
 
 [Install]
