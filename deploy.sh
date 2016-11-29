@@ -2,52 +2,19 @@
 
 set -e
 
+function tellUser {
+  printf "\e[0;1;36m""$1""\e[0;0m\n"
+}
+
 WORKING_DIR=${1:-`pwd`}
-echo "*** Using $WORKING_DIR as working directory"
+tellUser "Using $WORKING_DIR as working directory"
 
-echo "*** Installing the basics..."
-apt-get install -y curl wget apt-transport-https
+tellUser "Installing the basics..."
+apt-get install -y curl apt-transport-https
 
-echo "*** Installing InfluxDB..."
-curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
-source /etc/os-release
-test $VERSION_ID = "7" && echo "deb https://repos.influxdata.com/debian wheezy stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
-test $VERSION_ID = "8" && echo "deb https://repos.influxdata.com/debian jessie stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+chmod a+x $WORKING_DIR
 
-apt-get update
-apt-get install -y influxdb
-systemctl start influxdb
-
-# Comment out this line if you don't want to start with a fresh database every time you provision
-# rm /etc/influxdb/influxdb.conf
-
-echo "*** Setting Up InfluxDB..."
-if [ ! -L /etc/influxdb/influxdb.conf ]
-then
-  echo "*** First time admin account setup (change the password!!!!)..."
-  influx -execute "`cat $WORKING_DIR/dbSetup.influxql`"
-  if [ -e /etc/influxdb/influxdb.conf ]
-  then
-    rm /etc/influxdb/influxdb.conf
-  fi
-  ln -s $WORKING_DIR/influxdb.conf /etc/influxdb/influxdb.conf
-  systemctl restart influxdb
-
-  echo "*** Populating with sample data..."
-  apt-get install -y python python-dev python-pip
-  pip install pip --upgrade
-  pip install influxdb --upgrade
-
-  python $WORKING_DIR/populateSampleData.py
-fi
-
-if ! grep 'Listen 8086' /etc/apache2/ports.conf
-then
-  # listen to port 8086
-  sed -i '/Listen 80/aListen 8083\nListen 8086' /etc/apache2/ports.conf
-fi
-
-echo "*** Setting up web server..."
+tellUser "Setting up web server..."
 apt-get install -y apache2
 if [ ! -L /var/www/html ]
 then
@@ -57,43 +24,95 @@ then
     rm -rf /var/www/html
   fi
   ln -s $WORKING_DIR/web_server /var/www/html
+  chmod a+x $WORKING_DIR/web_server
 fi
 
-echo "*** Setting up the api server..."
-# Much of this setup was stolen from https://github.com/kerzner/flask_skeleton
-apt-get install -y libapache2-mod-wsgi python-flask
-pip install Flask-RESTful --upgrade
-pip install Flask-Cors --upgrade
+tellUser "Installing InfluxDB..."
+curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+source /etc/os-release
+test $VERSION_ID = "7" && echo "deb https://repos.influxdata.com/debian wheezy stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+test $VERSION_ID = "8" && echo "deb https://repos.influxdata.com/debian jessie stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
 
-if [ `id -u api 2>/dev/null || echo -1` -eq -1 ]
+apt-get update
+apt-get install -y influxdb
+systemctl start influxdb
+
+# Uncomment this line if you want to start with a fresh database every time you provision
+# (or if you want a one-off)
+# rm /etc/influxdb/influxdb.conf
+
+tellUser "Setting Up InfluxDB..."
+if [ ! -L /etc/influxdb/influxdb.conf ]
 then
-  # quietly add the api user without password
-  adduser --quiet --disabled-password --shell /bin/bash --home /home/api --gecos "User" api
-  addgroup apache
+  tellUser "First time admin account setup..."
+  sleep 10  # give influxdb a chance to start up
+  influx -execute "`cat $WORKING_DIR/config/dbSetup.influxql`"
+  if [ -e /etc/influxdb/influxdb.conf ]
+  then
+    rm /etc/influxdb/influxdb.conf
+  fi
+  ln -s $WORKING_DIR/config/influxdb.conf /etc/influxdb/influxdb.conf
+  systemctl restart influxdb
+
+  tellUser "Populating with sample data..."
+  apt-get install -y python python-dev python-pip
+  pip install pip --upgrade
+  pip install influxdb --upgrade
+
+  python $WORKING_DIR/config/populateSampleData.py
 fi
 
-if [ ! -L /var/www/api_server ]
+tellUser "Installing mongodb..."
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+echo 'deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
+apt-get update
+apt-get install -y mongodb-org-shell mongodb-org-server
+
+if [ $1 = "/vagrant" ] ; then
+  # Only apply our custom mongo.conf for vagrant installs (it allows
+  # connections from outside the VM, but we want the more secure settings in
+  # deployment)
+  tellUser "Allowing foreign mongo connections"
+  cp $WORKING_DIR/config/mongod.conf /etc/mongod.conf
+fi
+cp $WORKING_DIR/config/mongod.service /lib/systemd/system/mongod.service
+systemctl enable mongod
+
+tellUser "Setting up the authentication server..."
+curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
+sudo apt-get install -y nodejs build-essential
+
+npm --prefix $WORKING_DIR/authentication install $WORKING_DIR/authentication
+
+if [ `id -u authapi 2>/dev/null || echo -1` -eq -1 ]
 then
-  # Add the symlink for the api server
-  rm -rf /var/www/api_server
-  ln -s $WORKING_DIR/api_server /var/www/api_server
+  # quietly add the authapi user without password
+  adduser --quiet --disabled-password --shell /bin/bash --home /home/authapi --gecos "User" authapi
 fi
 
-if [ ! -L /etc/apache2/sites-available/api_server.conf ]
+if [ ! -L /var/www/authentication ]
 then
-  # Add the symlink for the server config file
-  ln -s $WORKING_DIR/api_server.conf /etc/apache2/sites-available/api_server.conf
+  # Add the symlink for the authentication server
+  rm -rf /var/www/authentication
+  ln -s $WORKING_DIR/authentication /var/www/authentication
+  chgrp -R authapi $WORKING_DIR/authentication
+  chown -R authapi $WORKING_DIR/authentication
+  chmod a+x $WORKING_DIR/authentication $WORKING_DIR/authentication/app.js
 fi
 
-if ! grep 'Listen 8001' /etc/apache2/ports.conf
-then
-  # listen to port 8001
-  sed -i '/Listen 80/aListen 8001\n' /etc/apache2/ports.conf
-fi
-chmod o+x $WORKING_DIR/ $WORKING_DIR/web_server
+# if ! grep 'Listen 3000' /etc/apache2/ports.conf
+# then
+#   # tell apache to listen to port 3000
+#   sed -i '/Listen 80/aListen 3000' /etc/apache2/ports.conf
+# fi
 
-a2ensite api_server.conf
-apachectl restart
+cp $WORKING_DIR/config/authentication.service /lib/systemd/system/authentication.service
+echo "WorkingDirectory=$WORKING_DIR/authentication" >> /lib/systemd/system/authentication.service
+echo "ExecStart=$WORKING_DIR/authentication/app.js" >> /lib/systemd/system/authentication.service
+systemctl enable authentication
+systemctl start authentication
+
+tellUser "Successfully finished deployment script"
 
 # To test, try this command (outside the VM; use port 8001 inside, or on the live server):
 # curl -X POST -d {"query":"some shitty query"} http://localhost:7001/ --header Content-Type:application/json

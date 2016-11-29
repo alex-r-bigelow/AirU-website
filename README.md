@@ -1,8 +1,11 @@
 Setup
 =====
-This server is designed to work on a fresh Debian system (though it very well could work on other systems). To set up the server, run `./deploy.sh`; it should handle everything.
+This server is designed to work on a fresh Debian system (though it very well could work on other systems). To set up the server:
 
-*Make sure to change the DB admin password*: immediately after installation, it's stupidly "password".
+Edit every entry in `config/config.json`. Some details about each of these:
+- TODO
+
+Once `config.json` has been set up, run `./deploy.sh`; it should handle everything.
 
 Development
 ===========

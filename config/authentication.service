@@ -1,0 +1,11 @@
+[Unit]
+Description=Serve the authentication endpoints on port 3000
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Restart=always
+User=authapi
+Group=authapi

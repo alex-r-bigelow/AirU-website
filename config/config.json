@@ -1,0 +1,7 @@
+{
+  "email": "tokenSender@example.com",
+  "emailPassword": "changeme",
+  "smtpHost": "smtp.example.com",
+  "influxdbPassword": "changeme",
+  "host": "http://localhost"
+}
