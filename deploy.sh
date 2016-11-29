@@ -45,8 +45,13 @@ tellUser "Setting Up InfluxDB..."
 if [ ! -L /etc/influxdb/influxdb.conf ]
 then
   tellUser "First time admin account setup..."
-  sleep 10  # give influxdb a chance to start up
-  influx -execute "`cat $WORKING_DIR/config/dbSetup.influxql`"
+  apt-get install -y jq
+  INFLUXDBUSERNAME=`cat $WORKING_DIR/config/config.json | jq -r '.influxdbUsername'`
+  INFLUXDBPASSWORD=`cat $WORKING_DIR/config/config.json | jq -r '.influxdbPassword'`
+  cat $WORKING_DIR/config/dbSetup.influxql > temp.influxql
+  echo "CREATE USER \"$INFLUXDBUSERNAME\" WITH PASSWORD '$INFLUXDBPASSWORD' WITH ALL PRIVILEGES" >> temp.influxql
+  influx -execute "`cat temp.influxql`"
+  rm temp.influxql
   if [ -e /etc/influxdb/influxdb.conf ]
   then
     rm /etc/influxdb/influxdb.conf
@@ -100,12 +105,6 @@ then
   chmod a+x $WORKING_DIR/authentication $WORKING_DIR/authentication/app.js
 fi
 
-# if ! grep 'Listen 3000' /etc/apache2/ports.conf
-# then
-#   # tell apache to listen to port 3000
-#   sed -i '/Listen 80/aListen 3000' /etc/apache2/ports.conf
-# fi
-
 cp $WORKING_DIR/config/authentication.service /lib/systemd/system/authentication.service
 echo "WorkingDirectory=$WORKING_DIR/authentication" >> /lib/systemd/system/authentication.service
 echo "ExecStart=$WORKING_DIR/authentication/app.js" >> /lib/systemd/system/authentication.service
@@ -113,6 +112,3 @@ systemctl enable authentication
 systemctl start authentication
 
 tellUser "Successfully finished deployment script"
-
-# To test, try this command (outside the VM; use port 8001 inside, or on the live server):
-# curl -X POST -d {"query":"some shitty query"} http://localhost:7001/ --header Content-Type:application/json
