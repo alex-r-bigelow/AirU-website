@@ -1,15 +1,60 @@
 #!/bin/bash
 
+set -e
+
+function tellUser {
+  printf "\e[0;1;36m""$1""\e[0;0m\n"
+}
+
 WORKING_DIR=${1:-`pwd`}
-echo "*** Using $WORKING_DIR as working directory"
+tellUser "Using $WORKING_DIR as working directory"
 
-echo "*** Installing the basics..."
-apt-get install -y curl g++ git libssl-dev libffi-dev make python-dev python-pip libjpeg-dev zlib1g-dev
-apt-get install -y python-pip python-dev build-essential
-pip install pip --upgrade
-pip install virtualenv --upgrade
+tellUser "Installing the basics..."
+apt-get install -y curl apt-transport-https
 
-echo "*** Installing mongodb..."
+chmod -R a+x $WORKING_DIR
+
+tellUser "Installing InfluxDB..."
+curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+source /etc/os-release
+test $VERSION_ID = "7" && echo "deb https://repos.influxdata.com/debian wheezy stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+test $VERSION_ID = "8" && echo "deb https://repos.influxdata.com/debian jessie stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+
+apt-get update
+apt-get install -y influxdb
+systemctl start influxdb
+
+# Uncomment this line if you want to start with a fresh database every time you provision
+# (or if you want a one-off)
+# rm /etc/influxdb/influxdb.conf
+
+tellUser "Setting Up InfluxDB..."
+if [ ! -L /etc/influxdb/influxdb.conf ]
+then
+  tellUser "First time admin account setup..."
+  apt-get install -y jq
+  INFLUXDBUSERNAME=`cat $WORKING_DIR/config/config.json | jq -r '.influxdbUsername'`
+  INFLUXDBPASSWORD=`cat $WORKING_DIR/config/config.json | jq -r '.influxdbPassword'`
+  cat $WORKING_DIR/config/dbSetup.influxql > temp.influxql
+  echo "CREATE USER \"$INFLUXDBUSERNAME\" WITH PASSWORD '$INFLUXDBPASSWORD' WITH ALL PRIVILEGES" >> temp.influxql
+  influx -execute "`cat temp.influxql`"
+  rm temp.influxql
+  if [ -e /etc/influxdb/influxdb.conf ]
+  then
+    rm /etc/influxdb/influxdb.conf
+  fi
+  ln -s $WORKING_DIR/config/influxdb.conf /etc/influxdb/influxdb.conf
+  systemctl restart influxdb
+
+  tellUser "Populating with sample data..."
+  apt-get install -y python python-dev python-pip
+  pip install pip --upgrade
+  pip install influxdb --upgrade
+
+  python $WORKING_DIR/config/populateSampleData.py
+fi
+
+tellUser "Installing mongodb..."
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 echo 'deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
 apt-get update
@@ -19,30 +64,34 @@ if [ $1 = "/vagrant" ] ; then
   # Only apply our custom mongo.conf for vagrant installs (it allows
   # connections from outside the VM, but we want the more secure settings in
   # deployment)
-  echo "*** Allow foreign mongo connections"
+  tellUser "Allowing foreign mongo connections"
   cp $WORKING_DIR/config/mongod.conf /etc/mongod.conf
 fi
 cp $WORKING_DIR/config/mongod.service /lib/systemd/system/mongod.service
 systemctl enable mongod
 
+tellUser "Setting up the web server..."
+curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
+sudo apt-get install -y nodejs build-essential
 
-echo "*** Setting up REST server..."
-pip install eve eve-swagger flask-sentinel --upgrade
+npm --prefix $WORKING_DIR/web install $WORKING_DIR/web
 
-# TODO: Set up OAuth
-# if [ ! -d $WORKING_DIR/rest_server/lib ] ; then
-#   mkdir $WORKING_DIR/rest_server/lib
-#   git clone https://github.com/nicolaiarocci/eve-oauth2 $WORKING_DIR/rest_server/lib/eve-oauth2
-# fi
+if [ `id -u authapi 2>/dev/null || echo -1` -eq -1 ]
+then
+  # quietly add the authapi user without password
+  adduser --quiet --disabled-password --shell /bin/bash --home /home/authapi --gecos "User" authapi
+  chgrp -R authapi $WORKING_DIR/web
+  chown -R authapi $WORKING_DIR/web
+fi
 
-cp $WORKING_DIR/config/restserver.service /lib/systemd/system/restserver.service
-echo "WorkingDirectory=$WORKING_DIR/rest_server" >> /lib/systemd/system/restserver.service
-echo "ExecStart=$WORKING_DIR/rest_server/run.py" >> /lib/systemd/system/restserver.service
-systemctl enable restserver
+cp $WORKING_DIR/config/web.service /lib/systemd/system/web.service
+echo "WorkingDirectory=$WORKING_DIR/web" >> /lib/systemd/system/web.service
+echo "ExecStart=$WORKING_DIR/web/app.js" >> /lib/systemd/system/web.service
+systemctl enable web
+systemctl start web
 
-# echo "*** Setting up web server..."
-# apt-get install apache2 libapache2-mod-wsgi
-# cp -TR $WORKING_DIR/web_server /var/www/html
-# cp -R $WORKING_DIR/rest_server /var/www/rest_server
-# cp $WORKING_DIR/config/restserver.conf /etc/apache2/sites-enabled
-# echo "import sys"
+# Redirect port 80 to port 3000
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3000
+iptables -t nat -I OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 3000
+
+tellUser "Successfully finished deployment script"

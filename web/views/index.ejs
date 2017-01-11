@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <script type="application/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="application/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script type="application/javascript">
+      <% console.log(Object.keys(this)); %>
+      <% console.log(typeof serverState === 'undefined' ? 'undefined' : JSON.stringify(serverState, null, 4)); %>
+      <% if(typeof serverState === 'undefined') { var serverState = {}; } %>
+      <% if(serverState) { %>
+      	window.serverState = JSON.parse(jQuery('<textarea/>').html('<%= JSON.stringify(serverState) %>').text());
+      <% } else { %>
+        window.serverState = {};
+      <% } %>
+    </script>
+    <script type="application/javascript" src="script.js"></script>
+  </head>
+  <body>
+    <img src="logo.png" id="logo"/>
+    <div id="map">
+      <p class="tempMessage">TODO: put a map here?</p>
+    </div>
+    <div id="sidebar">
+      <div id="hamburger">
+        <img src="hamburger.svg"/>
+      </div>
+      <div id="content">
+        <% if(serverState.user) { %>
+          <form id="logout" action="/logout">
+            <span>Logged in as <label id="currentUser"><%= serverState.user %></label></span>
+            <input type="submit" value="Log out"/>
+          </form>
+          <hr/>
+          <form id="registerDevice" action="/registerDevice" method="POST">
+            <input type="text" name="mac_address" placeholder="Sensor MAC Address" required/>
+            <input type="submit" value="Register Sensor"/>
+          </form>
+        <% } else { %>
+          <form id="login" action="/sendtoken" method="POST">
+            <input type="email" placeholder="Email Address" name="user" required/>
+            <input type="submit" value="Log in / Register"/>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  </body>
+</html>
