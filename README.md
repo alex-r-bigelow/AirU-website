@@ -16,7 +16,7 @@ You should be able to access the web interface (use localhost:7080 if you're run
 
 Development
 ===========
-**WARNING:** Make sure that credentials in config/config.json are excluded from any commits. `git update-index --assume-unchanged config/config.json` is a good way to prevent this from happening.
+**WARNING:** Make sure that credentials in config/config.json are excluded from any commits. I've added a rule to the `.gitignore` file to help us avoid accidentally committing credentials, but be aware that that is there.
 
 You can work on the server without actually deploying it by using [Vagrant](https://www.vagrantup.com/). With it installed on your local machine, type `vagrant up` in this directory (this will run `deploy.sh` for you inside the VM), and you will have a running virtual machine that should be identical to the deployed server (plus any of your changes).
 

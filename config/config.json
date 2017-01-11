@@ -4,5 +4,5 @@
   "smtpHost": "smtp.example.com",
   "influxdbUsername": "admin",
   "influxdbPassword": "changeme",
-  "host": "http://localhost"
+  "host": "http://localhost:7080"
 }
