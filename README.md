@@ -8,7 +8,7 @@ Edit every entry in `config/config.json`. Some details about each of these:
 - smtpHost: The SMTP server for that email address
 - influxdbUsername: A username to administer the influxDB database
 - influxdbPassword: The password for that account
-- host: The address of the server where this is being deployed (if setting up in Vagrant, use "http://localhost", otherwise, use the public name, e.g. "http://yola.coe.utah.edu")
+- host: The address of the server where this is being deployed (if setting up in Vagrant, use "http://localhost", otherwise, use the public name, e.g. "http://air.eng.utah.edu")
 
 Once `config.json` has been set up, run `./deploy.sh`; it should handle everything.
 

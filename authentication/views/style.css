@@ -1,0 +1,23 @@
+body {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  display: flex;
+  justify-content: space-around;
+}
+#userManagement {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 100%;
+}
+#userManagement form {
+  display: flex;
+  flex-direction: column;
+}
+#userManagement form > input,
+#userManagement form > span {
+  margin: 1em;
+}

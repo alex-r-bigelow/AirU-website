@@ -10,6 +10,7 @@ Vagrant.configure(2) do |config|
   config.vm.network :forwarded_port, guest: 8086, host: 8086
   config.vm.network :forwarded_port, guest: 27017, host: 27017
   config.vm.network :forwarded_port, guest: 80, host: 7080
+  config.vm.network :forwarded_port, guest: 3000, host: 3000
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
 
 end

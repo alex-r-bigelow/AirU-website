@@ -1,23 +1,57 @@
-body {
+#logo {
+  position: fixed;
+  height: 3em;
+  bottom: 0em;
+  left: 0.5em;
+}
+#map {
   position: absolute;
   top: 0px;
   left: 0px;
   right: 0px;
   bottom: 0px;
-  display: flex;
-  justify-content: space-around;
 }
-#userManagement {
+.tempMessage {
+  position: absolute;
+  margin: auto 0em;
+  width: 100%;
+  top: calc(50% - 1em);
+  color: #cccccc;
+  text-align: center;
+}
+#sidebar {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  height: calc(100vh - 3px - 2em);
+  width: 20em;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  background-color: rgba(255,255,255, 0.75);
+  border: 1px solid #cccccc;
+  border-radius: 3em;
+  padding: 1em;
+}
+#sidebar #hamburger {
+  width: 100%;
+  cursor: pointer;
+}
+#sidebar #hamburger img {
+  display: block;
+  width: 2em;
+  height: 2em;
+  margin: 1em auto;
+}
+#sidebar #content {
+  overflow-y: auto;
   height: 100%;
+  margin: 0em 1em 2em 1em;
 }
-#userManagement form {
-  display: flex;
-  flex-direction: column;
+#sidebar.collapsed {
+  width: 4em;
+  height: 4em;
+  overflow: hidden;
 }
-#userManagement form > input,
-#userManagement form > span {
-  margin: 1em;
+#sidebar.collapsed #content {
+  display: none;
 }

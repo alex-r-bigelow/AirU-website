@@ -12,6 +12,8 @@ var passwordless = require('passwordless');
 var MongoStore = require('passwordless-mongostore');
 var email = require('emailjs');
 
+var routes = require('./routes/index');
+
 var app = express();
 
 // Email setup
@@ -42,7 +44,6 @@ passwordless.addDelivery(
       to: recipient,
       subject: 'Token for ' + host
     }, function (err, message) {
-      console.log('sent token');
       if (err) {
         console.log(err);
       }
@@ -66,39 +67,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(passwordless.sessionSupport());
 app.use(passwordless.acceptToken({ successRedirect: '/' }));
 
-function renderIndex (req, res) {
-  var serverState = {};
-  serverState.user = req.user;
-  serverState.sentToken = !!(res.locals.sentToken);
-  res.render('index', { serverState: serverState });
-}
-
-var router = express.Router();
-
-/* GET home page. */
-router.get('/', renderIndex);
-
-/* GET restricted site. */
-router.get('/restricted', passwordless.restricted(), renderIndex);
-
-/* GET logout. */
-router.get('/logout', passwordless.logout(), renderIndex);
-
-/* POST login screen. */
-router.post('/sendtoken',
-  passwordless.requestToken(function (user, delivery, callback) {
-    callback(null, user);
-  }),
-  function (req, res, next) {
-    res.locals.sentToken = true;
-    renderIndex(req, res);
-  });
-
-router.get('/failSendToken', function (req, res, next) {
-  renderIndex(req, res);
-});
-
-app.use('/', router);
+// CHECK /routes/index.js to better understand which routes are needed at a minimum
+app.use('/', routes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -109,9 +79,8 @@ app.use(function (req, res, next) {
 
 // development error handler
 app.use(function (err, req, res, next) {
-  console.log('error b', err.message);
   res.status(err.status || 500);
-  res.render('index', { error: err });
+  res.json(err);
 });
 
 app.set('port', process.env.PORT || 3000);
