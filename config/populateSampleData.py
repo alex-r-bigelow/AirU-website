@@ -1,5 +1,6 @@
 from influxdb import InfluxDBClient
 from datetime import datetime, timedelta
+from dateutil import parser
 import string
 import random
 
@@ -7,19 +8,20 @@ import random
 MAC_ADDRESSES = set()
 EMAIL_ADDRESSES = set()
 RANGES = {
+    'Time (UTC)': (parser.parse('2016-08-31 16:00:00.000000'),
+                   parser.parse('2016-09-01 04:00:00.000000')),
     'Latitude': (40.5, 40.8),
     'Longitude': (-112.1, -111.6),
-    'Radius': (0, 5),
-    'PM 2.5': (0.0, 400.0),
-    'PM 10': (0.0, 400.0),
-    'CO2': (0.0, 400.0),
-    'NO2': (0.0, 400.0),
-    'Ambient Lux': (0.0, 100000.0),
-    'Humidity': (0.0, 1.0),
-    'Temperature': (-10.0, 110.0)
+    'Altitude (m)': (1400.0, 1600.0),
+    'Pressure (Pa)': (84000.0, 86000.0),
+    'Humidity (%)': (3.0, 40.0),
+    'Temp (*C)': (-10.0, 110.0),
+    'pm1 (ug/m^3)': (0.0, 400.0),
+    'pm2.5 (ug/m^3)': (0.0, 400.0),
+    'pm10 (ug/m^3)': (0.0, 400.0)
 }
-TIME_RANGE = (datetime.now() - timedelta(weeks=3), datetime.now())
-SAMPLE_INTERVAL = timedelta(hours=3)
+IGNORE_RANGES_FOR_READINGS = set(['Time (UTC)', 'Latitude', 'Longitude'])
+SAMPLE_INTERVAL = timedelta(minutes=1)
 ONLINE_STATUS_CHANGE_THRESHOLD = 0.95
 N_STATIONS = 30
 
@@ -27,7 +29,7 @@ N_STATIONS = 30
 def generateMacAddress():
     macAddress = None
     while macAddress is None or macAddress in MAC_ADDRESSES:
-        macAddress = '-'.join([hex(random.randint(0, 0xFF))[2:].zfill(2) for x in xrange(6)])
+        macAddress = ''.join([hex(random.randint(0, 0xFF))[2:].zfill(2) for x in xrange(6)])
     return macAddress
 
 
@@ -50,11 +52,10 @@ def adjustNumberInRange(n, r, perc):
 
 def generateStation():
     return {
-        'latitude': generateNumberInRange(RANGES['Latitude']),
-        'longitude': generateNumberInRange(RANGES['Longitude']),
-        'radius': generateNumberInRange(RANGES['Radius']),
-        'mac_address': generateMacAddress(),
-        'contact_email': generateEmailAddress()
+        'Latitude': generateNumberInRange(RANGES['Latitude']),
+        'Longitude': generateNumberInRange(RANGES['Longitude']),
+        'Mac Address': generateMacAddress(),
+        'Contact Email': generateEmailAddress()
     }
 
 
@@ -62,21 +63,23 @@ def generateReading(lastReading=None):
     if lastReading is None:
         lastReading = {}
         for k, v in RANGES.iteritems():
-            lastReading[k] = generateNumberInRange(v)
+            if k not in IGNORE_RANGES_FOR_READINGS:
+                lastReading[k] = generateNumberInRange(v)
 
     # apply up to a 5% change to each reading
     newReading = {}
     for k, v in RANGES.iteritems():
-        newReading[k] = adjustNumberInRange(lastReading[k], v, 0.05)
+        if k not in IGNORE_RANGES_FOR_READINGS:
+            newReading[k] = adjustNumberInRange(lastReading[k], v, 0.05)
     return newReading
 
 
 def generateReadingSeries():
     series = []
-    t = TIME_RANGE[0]
+    t = RANGES['Time (UTC)'][0]
     reading = None
     online = True
-    while t < TIME_RANGE[1]:
+    while t < RANGES['Time (UTC)'][1]:
         reading = generateReading(reading)
         point = {
             'measurement': 'airQuality',

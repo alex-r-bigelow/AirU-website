@@ -50,6 +50,7 @@ then
   apt-get install -y python python-dev python-pip
   pip install pip --upgrade
   pip install influxdb --upgrade
+  pip install python-dateutil --upgrade
 
   python $WORKING_DIR/config/populateSampleData.py
 fi

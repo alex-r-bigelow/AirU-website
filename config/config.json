@@ -1,7 +1,7 @@
 {
-  "email": "tokenSender@example.com",
-  "emailPassword": "changeme",
-  "smtpHost": "smtp.example.com",
+  "email": "air@eng.utah.edu",
+  "emailPassword": "|sLh9f5wj",
+  "smtpHost": "mailgate.eng.utah.edu",
   "influxdbUsername": "admin",
   "influxdbPassword": "changeme",
   "host": "http://localhost:7080"
