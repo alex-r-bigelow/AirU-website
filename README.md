@@ -1,6 +1,6 @@
 Development Setup
 =================
-Prerequisites: Install [VirtualBox]() and [Vagrant]().
+Prerequisites: Install [VirtualBox](https://www.virtualbox.org/wiki/VirtualBox) and [Vagrant](https://www.vagrantup.com/).
 
 1. Create a file `config/config.json`, with this content (this should be ignored in any git commits).
 
