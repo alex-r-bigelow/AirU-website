@@ -53,6 +53,7 @@ apt-get install -y cron python python-dev python-pip
 pip install pip --upgrade
 pip install influxdb --upgrade
 pip install python-dateutil
+pip install pytz
 
 if [ `id -u poller 2>/dev/null || echo -1` -eq -1 ]
 then
