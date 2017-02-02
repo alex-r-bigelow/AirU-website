@@ -7,6 +7,7 @@ function tellUser {
 }
 
 WORKING_DIR=${1:-`pwd`}
+ESCAPED_WORKING_DIR=$(printf '%s\n' "$WORKING_DIR" | sed 's/[[\.*^$/]/\\&/g')
 tellUser "Using $WORKING_DIR as working directory"
 
 tellUser "Installing the basics..."
@@ -45,14 +46,27 @@ then
   fi
   ln -s $WORKING_DIR/config/influxdb.conf /etc/influxdb/influxdb.conf
   systemctl restart influxdb
+fi
 
-  tellUser "Populating with sample data..."
-  apt-get install -y python python-dev python-pip
-  pip install pip --upgrade
-  pip install influxdb --upgrade
-  pip install python-dateutil --upgrade
+tellUser "Setting up polling script for periodically populating the database..."
+apt-get install -y cron python python-dev python-pip
+pip install pip --upgrade
+pip install influxdb --upgrade
+pip install python-dateutil
+pip install pytz
 
-  python $WORKING_DIR/config/populateSampleData.py
+if [ `id -u poller 2>/dev/null || echo -1` -eq -1 ]
+then
+  # quietly add the poller user without password
+  adduser --quiet --disabled-password --shell /bin/bash --home /home/poller --gecos "User" poller
+  chgrp -R poller $WORKING_DIR/poll
+  chown -R poller $WORKING_DIR/poll
+  chmod -R a+x $WORKING_DIR/web
+
+  # Append the job info to the crontab file
+  sed "s/\$WORKING_DIR/$ESCAPED_WORKING_DIR/g" $WORKING_DIR/config/poll.cron >> /etc/crontab
+  systemctl enable cron
+  systemctl start cron
 fi
 
 tellUser "Installing mongodb..."
@@ -83,11 +97,11 @@ then
   adduser --quiet --disabled-password --shell /bin/bash --home /home/authapi --gecos "User" authapi
   chgrp -R authapi $WORKING_DIR/web
   chown -R authapi $WORKING_DIR/web
+  chmod -R a+x $WORKING_DIR/web
 fi
 
-cp $WORKING_DIR/config/web.service /lib/systemd/system/web.service
-echo "WorkingDirectory=$WORKING_DIR/web" >> /lib/systemd/system/web.service
-echo "ExecStart=$WORKING_DIR/web/app.js" >> /lib/systemd/system/web.service
+# Create and start the web service
+sed "s/\$WORKING_DIR/$ESCAPED_WORKING_DIR/g" $WORKING_DIR/config/web.service > /lib/systemd/system/web.service
 systemctl enable web
 systemctl start web
 
