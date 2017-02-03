@@ -19,8 +19,8 @@ Prerequisites: Install [VirtualBox](https://www.virtualbox.org/wiki/VirtualBox) 
   - email: A secure email address that you own (this address will be used to send out user authentication credentials)
   - emailPassword: The password for that email address
   - smtpHost: The SMTP server for that email address
-  - influxdbUsername: A username to administer the influxDB database
-  - influxdbPassword: The password for that account
+  - influxdbUsername: A username to administer the influxDB database (this will be created by the setup script; choose whatever username and password you wish)
+  - influxdbPassword: A password for that account
   - host: The address of the server where this is being deployed (if setting up in Vagrant, use "http://localhost", otherwise, use the public name, e.g. "http://air.eng.utah.edu")
 
 2. Once you've created `config.json`, type `vagrant up`; it will set up and start a virtual machine that should be identical to the deployed server (plus any of your changes).
