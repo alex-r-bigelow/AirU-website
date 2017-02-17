@@ -8,6 +8,9 @@ from influxdb import InfluxDBClient
 
 TIMESTAMP = datetime.now().isoformat()
 
+# TODO: pull historical data; the url format is:
+# https://thingspeak.com/channels/194967/feed.json?offset=0&start=2010-01-01%2000:00:00&end=2017-03-01%2000:00:00
+
 def getConfig():
     with open (sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
@@ -20,12 +23,14 @@ PURPLE_AIR_VALUES = {
     'Pressure (Pa)': 'pressure',
     'Humidity (%)': 'humidity',
     'Temp (*C)': 'temp_f',  # this gets converted specifically in the function
-    'pm2.5 (ug/m^3)': 'PM2_5Value'
+    'pm2.5 (ug/m^3)': 'PM2_5Value',
+    'Sensor age': 'AGE'
 }
 
 PURPLE_AIR_TAGS = {
     'ID': 'ID',
-    'Sensor Model': 'Type'
+    'Sensor Model': 'Type',
+    'Sensor Version': 'Version'
 }
 
 def uploadPurpleAirData(client):
