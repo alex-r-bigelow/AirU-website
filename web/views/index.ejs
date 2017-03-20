@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="style.css"/>
     <script type="application/javascript" src="https://d3js.org/d3.v4.min.js"></script>
     <script type="application/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script type="application/javascript">
+    <!-- <script type="application/javascript">
       <% console.log(Object.keys(this)); %>
       <% console.log(typeof serverState === 'undefined' ? 'undefined' : JSON.stringify(serverState, null, 4)); %>
       <% if(typeof serverState === 'undefined') { var serverState = {}; } %>
@@ -13,20 +13,19 @@
       <% } else { %>
         window.serverState = {};
       <% } %>
-    </script>
+    </script> -->
     <script type="application/javascript" src="script.js"></script>
   </head>
   <body>
     <img src="logo.png" id="logo"/>
     <div id="map">
-      <p class="tempMessage">TODO: put a map here?</p>
     </div>
     <div id="sidebar">
       <div id="hamburger">
         <img src="hamburger.svg"/>
       </div>
       <div id="content">
-        <% if(serverState.user) { %>
+        <!-- <% if(serverState.user) { %>
           <form id="logout" action="/logout">
             <span>Logged in as <label id="currentUser"><%= serverState.user %></label></span>
             <input type="submit" value="Log out"/>
@@ -41,8 +40,112 @@
             <input type="email" placeholder="Email Address" name="user" required/>
             <input type="submit" value="Log in / Register"/>
           </form>
-        <% } %>
+        <% } %> -->
       </div>
     </div>
   </body>
+  <script>
+
+    function createObjectDict(siArray) {
+      var objectDictTime = {};
+      siArray.forEach(function(item, index) {
+        if (Array.isArray(objectDictTime[item["ID"]])) {
+          objectDictTime[item["ID"]].push(item);
+        } else {
+          objectDictTime[item["ID"]] = [item];
+        }
+      });
+
+      return objectDictTime;
+    }
+
+
+    function sortByTime(odWtime) {
+      for (var itemID in odWtime) {
+        if (!odWtime.hasOwnProperty(itemID)) {
+          continue;
+        }
+
+        odWtime[itemID].sort(function(item1, item2) {
+          var date1 = new Date(item1.time);
+          var date2 = new Date(item2.time);
+
+          return date1.getTime() - date2.getTime();
+        });
+      }
+
+      return odWtime;
+    }
+
+
+    function initMap() {
+      var uluru = {lat: 40.7608, lng: -111.8910};
+      var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 8,
+        center: uluru
+      });
+
+      var locations = [];
+
+	    $.ajax({
+	      url: 'http://air.eng.utah.edu:8086/query',
+	      data: {
+	        db: 'defaultdb',
+	        q: 'SELECT * FROM airQuality WHERE time >= \'2017-02-01\' LIMIT 100'
+	      },
+
+        success: function (response) {
+          response = response.results[0].series[0];
+          //console.log(response);
+          var sensorInfoArray = [];
+
+          for( var k = 0; k < response.values.length; k += 1) {
+            var infoObject = {};
+
+            for (var i = 0; i < response.columns.length; i += 1){
+              infoObject[response.columns[i]] = response.values[k][i];
+            }
+
+            sensorInfoArray.push(infoObject);
+          }
+
+          //create dictionary with ID as key and tuples of
+          var objectDictWTime = createObjectDict(sensorInfoArray);
+
+          sortByTime(objectDictWTime);
+
+
+          // Produces markers for objects created from data, adds listeners for click function
+
+          sensorInfoArray.forEach(function(item, index) {
+            if (item["Latitude"] !== null && item["Longitude"] !== null) {
+              console.log(item);
+              var marker = new google.maps.Marker({
+                position: {lat: item["Latitude"], lng: item["Longitude"]}, map: map
+              });
+
+              //var contentBox = makeGraph(item, objectDictWTime);
+              var contentBox = "Sensor: " + item["ID"] +"<br/>Air Quality (pm2.5): " + item["pm2.5 (ug/m^3)"];
+              var infowindow = new google.maps.InfoWindow({content: contentBox});
+
+              marker.addListener('click', function() {
+                infowindow.open(marker.get('map'), marker);
+              });
+            }
+          });
+
+          console.log(objectDictWTime);
+
+        },
+
+        error: function () {
+          console.warn(arguments);
+        }
+      }); //close ajax
+    }
+  </script>
+
+  <script async defer
+    src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDw1jMFlGG1jkK4-6PTleKwZ5MxJd9tPNw&callback=initMap">
+  </script>
 </html>
