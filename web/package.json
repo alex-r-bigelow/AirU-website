@@ -6,7 +6,9 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "angular-route": "^1.6.3",
     "body-parser": "~1.17.1",
+    "bootstrap": "^3.3.7",
     "cookie-parser": "~1.4.3",
     "ejs": "~2.5.6",
     "express": "~4.15.2",

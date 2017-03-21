@@ -20,8 +20,8 @@ router.get('/devices', function (req, res, next) {
   Device.find(function (err, devices) {
     if (err) { return next(err); }
 
-    // res.json(devices);
-    res.json({ message: 'hooray! welcome to our api!' });
+    res.jsonp(devices);
+    // res.json({ message: 'hooray! welcome to our api!' });
   });
 });
 
