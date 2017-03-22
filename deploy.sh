@@ -89,7 +89,9 @@ tellUser "Setting up the web server..."
 curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -
 sudo apt-get install -y nodejs build-essential
 
+# npm --prefix $WORKING_DIR/web install bower
 npm --prefix $WORKING_DIR/web install $WORKING_DIR/web
+# bower --prefix $WORKING_DIR/web install $WORKING_DIR/web
 
 if [ `id -u authapi 2>/dev/null || echo -1` -eq -1 ]
 then
