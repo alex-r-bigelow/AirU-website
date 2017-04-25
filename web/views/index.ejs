@@ -69,7 +69,8 @@
       infowindow.open(marker.get('map'), marker);
 
       $.ajax({
-        url: 'http://air.eng.utah.edu:8086/query',
+        // url: 'http://air.eng.utah.edu:8086/query',
+        url: 'http://locahost:8086/query',
         data: {
           db: 'defaultdb',
           q: "SELECT * FROM airQuality WHERE ID = '" + id  + "' LIMIT 100"
@@ -145,11 +146,12 @@
       var locations = [];
 
 	    $.ajax({
-	      url: 'http://air.eng.utah.edu:8086/query',
+	      // url: 'http://air.eng.utah.edu:8086/query',
+	      url: 'http://localhost:8086/query',
 	      data: {
 	        db: 'defaultdb',
-	        // q: 'SELECT * FROM airQuality WHERE time >= \'2017-02-01\' LIMIT 100'
-          q: 'SELECT * FROM airQuality WHERE time >= \'2017-02-01\' GROUP BY ID LIMIT 1'
+	        q: 'SELECT * FROM airQuality WHERE time >= \'2017-02-01\' LIMIT 200'
+          // q: 'SELECT * FROM airQuality WHERE time >= \'2017-02-01\' GROUP BY "ID" LIMIT 1'
 	      },
 
         success: function (response) {
