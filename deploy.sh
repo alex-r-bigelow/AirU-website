@@ -54,6 +54,8 @@ pip install pip --upgrade
 pip install influxdb --upgrade
 pip install python-dateutil
 pip install pytz
+pip install bs4
+pip install datetime
 
 if [ `id -u poller 2>/dev/null || echo -1` -eq -1 ]
 then
