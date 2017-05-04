@@ -1,4 +1,4 @@
-import json
+wimport json
 # import logging
 import pytz
 import sys
@@ -52,7 +52,7 @@ DAQ_SITES = [{
     'lon': -111.8845,
     'elevation': None
     }, {
-    'ID': 'Magna',
+    'ID': 'Magna (Met only)',
     'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=mg',
     'lat': 40.7068,
     'lon': -112.0947,
@@ -90,7 +90,7 @@ PURPLE_AIR_TAGS = {
     'Sensor Version': 'Version',
     'Latitude': 'Lat',
     'Longitude': 'Lon',
-    # 'Altitude': 'elevation'
+    # 'Altitude (m)': 'elevation'
     'Start': 'created_at'
 }
 
@@ -102,8 +102,8 @@ DAQ_FIELDS = {
     'pm2.5 (ug/m^3)': 'pm25',
     # 'pm1.0 (ug/m^3)': 'pm1',
     'pm10.0 (ug/m^3)': 'pm10',
-    'wind direction (degrees)': 'wind_direction',
-    'wind speed (m/s)': 'wind_speed'
+    'Wind direction (compass degree)': 'wind_direction',
+    'Wind speed (m/s)': 'wind_speed'
 }
 
 DAQ_TAGS = {
@@ -112,7 +112,7 @@ DAQ_TAGS = {
     # 'Sensor Version': 'Version',
     'Latitude': 'lat',
     'Longitude': 'lon',
-    'Altitude': 'elevation'
+    'Altitude (m)': 'elevation'
     # 'Start': 'created_at'
 }
 
@@ -124,12 +124,12 @@ MESOWEST_FIELDS = {
     'pm2.5 (ug/m^3)': 'PM_25_concentration_set_1',
     # pm1.0 (ug/m^3),
     # pm10.0 (ug/m^3),
-    'wind direction (degrees)': 'wind_direction_set_1',
-    'wind speed (m/s)': 'wind_speed_set_1',
-    'ozon concentration (ppb)': 'ozone_concentration_set_1',
-    'sensor error code': 'sensor_error_code_set_1',
-    'solar radiation (W/m**2)': 'solar_radiation_set_1',
-    'wind gust (m/s)': 'wind_gust_set_1'
+    'Wind direction (compass degree)': 'wind_direction_set_1',
+    'Wind speed (m/s)': 'wind_speed_set_1',
+    'Ozon concentration (ppb)': 'ozone_concentration_set_1',
+    'Sensor error code': 'sensor_error_code_set_1',
+    'Solar radiation (W/m**2)': 'solar_radiation_set_1',
+    'Wind gust (m/s)': 'wind_gust_set_1'
 }
 
 MESOWEST_TAGS = {
@@ -427,7 +427,12 @@ def uploadDAQAirData(client):
                     except (ValueError, TypeError):
                         pass    # just leave bad / missing values blank
 
-            # Convert the purple air deg F to deg C
+            # Convert miles per hour to meter per seconds for the wind speed
+            windSpeedField = point['fields'].get('Wind speed (m/s)')
+            if windSpeedField is not None:
+                point['fields']['Wind speed (m/s)'] = windSpeedField * (1609.344 / 3600)
+
+            # Convert the daq deg F to deg C
             tmpField = point['fields'].get('Temp (*C)')
             if tmpField is not None:
                 point['fields']['Temp (*C)'] = (tmpField - 32) * 5 / 9
@@ -442,7 +447,7 @@ def uploadDAQAirData(client):
 def uploadMesowestData(client):
 
     # the recent argument is in minutes
-    mesowestURL = 'http://api.mesowest.net/v2/stations/timeseries?recent=15&token=demotoken&stid=mtmet,wbb,NAA,MSI01,UFD10,UFD11&vars=wind_speed,air_temp,solar_radiation,wind_gust,relative_humidity,wind_direction,volt,pressure,precip_accum_fifteen_minute,precip_accum_five_minute,ozone_concentration,altimeter,PM_25_concentration,soil_temp,sensor_error_code,photosynthetically_active_radiation,clear_sky_solar_radiation,flow_rate,internal_relative_humidity,air_flow_temperature,evapotranspiration'
+    mesowestURL = 'http://api.mesowest.net/v2/stations/timeseries?recent=15&token=demotoken&stid=mtmet,wbb,NAA,MSI01,UFD10,UFD11&vars=wind_speed,air_temp,solar_radiation,wind_gust,relative_humidity,wind_direction,pressure,ozone_concentration,altimeter,PM_25_concentration,sensor_error_code,clear_sky_solar_radiation,internal_relative_humidity,air_flow_temperature'
 
     try:
         mesowestData = urllib2.urlopen(mesowestURL).read()
@@ -464,11 +469,10 @@ def uploadMesowestData(client):
         }
 
         # timezone will not be stored in db
-        aTimezone = aMesowestStation['TIMEZONE']
-        local = pytz.timezone(aTimezone)
+        # aTimezone = aMesowestStation['TIMEZONE']
+        # local = pytz.timezone(aTimezone)
         # print local
 
-        # TODO do we also change the start to the UTC timezone,
         # however we might only be interested in the day
         # get the 'Start' information
         mesowestStartTag = MESOWEST_TAGS['Start']
@@ -499,6 +503,7 @@ def uploadMesowestData(client):
         for idx, aMeasurement in enumerate(measurements['date_time']):
             # get time of measurment
             try:
+                # time is provided in UTC by default
                 point['time'] = datetime.strptime(aMeasurement, '%Y-%m-%dT%H:%M:%SZ')
                 # print 'non UTC timezone'
                 # print point['time']
@@ -507,9 +512,9 @@ def uploadMesowestData(client):
                 # don't include the point if we can't parse the timestamp
                 continue
 
-            local_dt = local.localize(point['time'], is_dst=None)
-            utc_dt = local_dt.astimezone(pytz.utc)
-            point['time'] = utc_dt
+            # local_dt = local.localize(point['time'], is_dst=None)
+            # utc_dt = local_dt.astimezone(pytz.utc)
+            # point['time'] = utc_dt
             # print 'UTC timezone'
             # print point['time']
 
