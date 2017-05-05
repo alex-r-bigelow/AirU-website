@@ -27,7 +27,7 @@ systemctl start influxdb
 
 # Uncomment this line if you want to start with a fresh database every time you provision
 # (or if you want a one-off)
-rm /etc/influxdb/influxdb.conf
+# rm /etc/influxdb/influxdb.conf
 
 tellUser "Setting Up InfluxDB..."
 if [ ! -L /etc/influxdb/influxdb.conf ]
