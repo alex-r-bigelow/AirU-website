@@ -12,7 +12,7 @@ require('./models/Devices');
 var index = require('./routes/index');
 
 
-mongoose.connect('mongodb://localhost/sensors');
+mongoose.connect('mongodb://air.eng.utah.edu/sensors');
 
 //Get the default connection
 var db = mongoose.connection;
@@ -35,7 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/bower_components',  express.static(__dirname + '/bower_components')); // Use BowerComponents
+app.use('../bower_components',  express.static(__dirname + '/bower_components')); // Use BowerComponents
 
 
 app.use('/', index);
