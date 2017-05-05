@@ -27,6 +27,7 @@ angular.module('gservice', [])
         selectedLong = longitude;
 
         // Perform an AJAX call to get all of the records in the db.
+// TODO     when /devices works uncomment
         $http.get('/devices').then(function(response){
 
             // Convert the results into Google Map Format
