@@ -1,4 +1,4 @@
-wimport json
+import json
 # import logging
 import pytz
 import sys
@@ -138,7 +138,7 @@ MESOWEST_TAGS = {
     # 'Sensor Version': 'Version',
     'Latitude': 'LATITUDE',
     'Longitude': 'LONGITUDE',
-    'Altitude': 'ELEVATION',
+    'Altitude (m)': 'ELEVATION',
     'Start': 'PERIOD_OF_RECORD'  # plus .start
 }
 
