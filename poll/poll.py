@@ -564,8 +564,7 @@ if __name__ == '__main__':
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
-#         'defaultdb'
-		airqualitydb
+        'defaultdb'
     )
 
     uploadPurpleAirData(client)
