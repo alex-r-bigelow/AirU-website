@@ -177,7 +177,7 @@
             if (item["Latitude"] !== null && item["Longitude"] !== null) {
 //               console.log(item);
               var marker = new google.maps.Marker({
-                position: {lat: item["Latitude"], lng: item["Longitude"]}, map: window.testMap, icon: image
+                position: {lat: parseFloat(item["Latitude"]), lng: parseFloat(item["Longitude"])}, map: window.testMap, icon: image
               });
 
               // //var contentBox = makeGraph(item, objectDictWTime);
