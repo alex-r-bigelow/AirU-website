@@ -69,8 +69,8 @@
       infowindow.open(marker.get('map'), marker);
 
       $.ajax({
-        // url: 'http://air.eng.utah.edu:8086/query',
-        url: 'http://locahost:8086/query',
+        url: 'http://air.eng.utah.edu:8086/query',
+//         url: 'http://locahost:8086/query',
         data: {
           db: 'defaultdb',
           q: "SELECT * FROM airQuality WHERE ID = '" + id  + "' LIMIT 100"
@@ -146,7 +146,7 @@
       var locations = [];
 
 	    $.ajax({
-	      // url: 'http://air.eng.utah.edu:8086/query',
+	      // url: 'http://localhostw:8086/query',
 	      url: 'http://air.eng.utah.edu:8086/query',
 	      data: {
 	        db: 'defaultdb',
@@ -173,8 +173,9 @@
           // Produces markers for objects created from data, adds listeners for click function
           var image = 'purple_MarkerP.png';
           sensorInfoArray.forEach(function(item, index) {
+	          console.log(item);
             if (item["Latitude"] !== null && item["Longitude"] !== null) {
-              // console.log(item);
+//               console.log(item);
               var marker = new google.maps.Marker({
                 position: {lat: item["Latitude"], lng: item["Longitude"]}, map: window.testMap, icon: image
               });
