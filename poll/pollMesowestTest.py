@@ -244,8 +244,8 @@ def uploadPurpleAirData(client):
 
         # go through the primary feed data
         for idx, aMeasurement in enumerate(purpleAirDataPrimaryFeed):
-            # print 'aMeasurement'
-            # print aMeasurement
+            print 'aMeasurement'
+            print aMeasurement
 
             point['fields'] = {}
 
@@ -328,9 +328,9 @@ def uploadPurpleAirData(client):
             if tempVal is not None:
                 point['fields']['Temp (*C)'] = (tempVal - 32) * 5 / 9
 
-            # print point['time']
-            # print point['tags']
-            # print point['fields']
+            print point['time']
+            print point['tags']
+            print point['fields']
 
             client.write_points([point])
 
@@ -437,9 +437,9 @@ def uploadDAQAirData(client):
             if tmpField is not None:
                 point['fields']['Temp (*C)'] = (tmpField - 32) * 5 / 9
 
-            # print point['time']
-            # print point['tags']
-            # print point['fields']
+            print point['time']
+            print point['tags']
+            print point['fields']
 
             client.write_points([point])
 
@@ -554,7 +554,14 @@ def uploadMesowestData(client):
             # print point['tags']
             # print point['fields']
 
-            client.write_points([point])
+            try:
+                client.write_points([point])
+            except influxdb.exceptions.InfluxDBClientError:
+                print 'influxdb.exceptions.InfluxDBClientError'
+                print point['time']
+                print point['tags']
+                print point['fields']
+                sys.stderr.write('%s\tWrite error to influxdb.\n' % TIMESTAMP)
 
 
 if __name__ == '__main__':
@@ -564,11 +571,11 @@ if __name__ == '__main__':
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
-        'defaultdb'
+        'mesowestTest'
     )
 
-    uploadPurpleAirData(client)
-    uploadDAQAirData(client)
+    # uploadPurpleAirData(client)
+    # uploadDAQAirData(client)
     uploadMesowestData(client)
 
     sys.stdout.write('%s\tPolling successful.\n' % TIMESTAMP)
