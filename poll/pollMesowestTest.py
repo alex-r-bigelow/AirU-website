@@ -7,8 +7,8 @@ import urllib2
 from bs4 import BeautifulSoup
 from datetime import datetime
 from dateutil import parser
-from influxdb import influxdb
 from influxdb import InfluxDBClient
+from influxdb import InfluxDBClientError
 
 
 TIMESTAMP = datetime.now().isoformat()
@@ -557,7 +557,7 @@ def uploadMesowestData(client):
 
             try:
                 client.write_points([point])
-            except influxdb.exceptions.InfluxDBClientError:
+            except InfluxDBClientError:
                 print 'influxdb.exceptions.InfluxDBClientError'
                 print point['time']
                 print point['tags']
