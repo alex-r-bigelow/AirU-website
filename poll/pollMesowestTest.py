@@ -551,18 +551,22 @@ def uploadMesowestData(client):
                     except (ValueError, TypeError):
                         pass    # just leave bad / missing values blank
 
-            # print point['time']
-            # print point['tags']
-            # print point['fields']
+            # go through the fields and check if there is at least one field
+            # that is not none
+            notNoneValue = False
+            for key, value in point['fields'].iteritems():
+                if value is not None:
+                    notNoneValue = True
+                    break
 
-            try:
-                client.write_points([point])
-            except InfluxDBClientError:
-                print 'influxdb.exceptions.InfluxDBClientError'
-                print point['time']
-                print point['tags']
-                print point['fields']
-                sys.stderr.write('%s\tWrite error to influxdb.\n' % TIMESTAMP)
+            if notNoneValue:
+                try:
+                    client.write_points([point])
+                except InfluxDBClientError:
+                    print point['time']
+                    print point['tags']
+                    print point['fields']
+                    sys.stderr.write('%s\tWriting mesowest data to influxdb lead to a write error.\n' % TIMESTAMP)
 
 
 if __name__ == '__main__':
