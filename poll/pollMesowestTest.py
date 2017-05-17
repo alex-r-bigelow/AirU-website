@@ -7,6 +7,7 @@ import urllib2
 from bs4 import BeautifulSoup
 from datetime import datetime
 from dateutil import parser
+from influxdb import influxdb
 from influxdb import InfluxDBClient
 
 
