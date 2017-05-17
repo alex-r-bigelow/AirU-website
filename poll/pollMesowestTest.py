@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from dateutil import parser
 from influxdb import InfluxDBClient
-from influxdb import InfluxDBClientError
+from influxdb.exceptions import InfluxDBClientError
 
 
 TIMESTAMP = datetime.now().isoformat()
@@ -65,7 +65,7 @@ DAQ_SITES = [{
 
 
 def getConfig():
-    with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
+    with open(sys.path[0] + './../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
