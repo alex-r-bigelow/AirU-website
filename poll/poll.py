@@ -7,6 +7,7 @@ import urllib2
 from bs4 import BeautifulSoup
 from datetime import datetime
 from dateutil import parser
+from influxdb.exceptions import InfluxDBClientError
 from influxdb import InfluxDBClient
 
 
@@ -200,7 +201,8 @@ def uploadPurpleAirData(client):
             purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
         except urllib2.URLError:
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
-            return []
+            # return []
+            continue
 
         purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
         purpleAirDataPrimaryChannel = json.loads(purpleAirDataPrimary)['channel']
@@ -222,7 +224,7 @@ def uploadPurpleAirData(client):
         secondaryIDReadKey = station['THINGSPEAK_SECONDARY_ID_READ_KEY']
 
         if secondaryID is None or secondaryIDReadKey is None:
-            logging.info('secondary information is None')
+            # logging.info('secondary information is None')
             pass
 
         secondaryPart1 = 'https://api.thingspeak.com/channels/'
@@ -234,7 +236,8 @@ def uploadPurpleAirData(client):
             purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
         except urllib2.URLError:
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
-            return []
+            # return []
+            continue
 
         purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
         # purpleAirDataSecondaryChannel = json.loads(purpleAirDataSecondary)['channel']
@@ -332,7 +335,13 @@ def uploadPurpleAirData(client):
             # print point['tags']
             # print point['fields']
 
-            client.write_points([point])
+            try:
+                client.write_points([point])
+            except InfluxDBClientError:
+                print point['time']
+                print point['tags']
+                print point['fields']
+                sys.stderr.write('%s\tWriting Purple Air data to influxdb lead to a write error.\n' % TIMESTAMP)
 
 
 def uploadDAQAirData(client):
@@ -441,7 +450,13 @@ def uploadDAQAirData(client):
             # print point['tags']
             # print point['fields']
 
-            client.write_points([point])
+            try:
+                client.write_points([point])
+            except InfluxDBClientError:
+                print point['time']
+                print point['tags']
+                print point['fields']
+                sys.stderr.write('%s\tWriting DAQ data to influxdb lead to a write error.\n' % TIMESTAMP)
 
 
 def uploadMesowestData(client):
@@ -550,11 +565,22 @@ def uploadMesowestData(client):
                     except (ValueError, TypeError):
                         pass    # just leave bad / missing values blank
 
-            # print point['time']
-            # print point['tags']
-            # print point['fields']
+            # go through the fields and check if there is at least one field
+            # that is not none
+            notNoneValue = False
+            for key, value in point['fields'].iteritems():
+                if value is not None:
+                    notNoneValue = True
+                    break
 
-            client.write_points([point])
+            if notNoneValue:
+                try:
+                    client.write_points([point])
+                except InfluxDBClientError:
+                    print point['time']
+                    print point['tags']
+                    print point['fields']
+                    sys.stderr.write('%s\tWriting mesowest data to influxdb lead to a write error.\n' % TIMESTAMP)
 
 
 if __name__ == '__main__':
