@@ -148,7 +148,7 @@ def uploadPurpleAirData(client):
     try:
         purpleAirData = urllib2.urlopen("https://map.purpleair.org/json").read()
     except urllib2.URLError:
-        sys.stderr.write('%s\tProblem acquiring PurpleAir data; their server appears to be down.\n' % TIMESTAMP)
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; their server appears to be down. Problem here: https://map.purpleair.org/json\n' % TIMESTAMP)
         return []
 
     purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
@@ -200,7 +200,7 @@ def uploadPurpleAirData(client):
         try:
             purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
         except urllib2.URLError:
-            sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
+            sys.stderr.write('%s\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s.\n' % TIMESTAMP, primaryID, primaryIDReadKey)
             # return []
             continue
 
@@ -235,7 +235,7 @@ def uploadPurpleAirData(client):
         try:
             purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
         except urllib2.URLError:
-            sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
+            sys.stderr.write('%s\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % TIMESTAMP, secondaryID, secondaryIDReadKey)
             # return []
             continue
 
