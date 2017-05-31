@@ -30,7 +30,7 @@ PURPLE_AIR_TAGS = {
 
 
 def getConfig():
-    with open(sys.path[0] + './../config/config.json', 'r') as configfile:
+    with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
