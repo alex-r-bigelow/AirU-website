@@ -32,6 +32,8 @@ app.use(bodyParser.json({type:'application/vnd.api+json'}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/files/updates', express.static(path.join(__dirname, 'updates')));
+
 app.use('/', index);
 app.use('/sensors', sensors);
 
