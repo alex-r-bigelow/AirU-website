@@ -1,3 +1,4 @@
+import httplib
 import json
 # import logging
 import pytz
@@ -203,6 +204,9 @@ def uploadPurpleAirData(client):
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, primaryID, primaryIDReadKey))
             # return []
             continue
+        except httplib.BadStatusLine:
+            sys.stderr.write('%s\t%s' % (TIMESTAMP, queryPrimaryFeed))
+            continue
 
         purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
         purpleAirDataPrimaryChannel = json.loads(purpleAirDataPrimary)['channel']
@@ -237,6 +241,9 @@ def uploadPurpleAirData(client):
         except urllib2.URLError:
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
             # return []
+            continue
+        except httplib.BadStatusLine:
+            sys.stderr.write('%s\t%s' % (TIMESTAMP, queryPrimaryFeed))
             continue
 
         purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
