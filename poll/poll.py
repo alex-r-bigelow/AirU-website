@@ -306,8 +306,8 @@ def uploadPurpleAirData(client):
 
             # Only include the point if we haven't stored this measurement before
             lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % point['tags']['ID'])
-            print 'LAST POINT'
-            print lastPoint
+            # print 'LAST POINT'
+            # print lastPoint
             print "new POINT"
             print pytz.utc.localize(point['time'])
             # print pytz.utc.localize(lastPoint['time'])
@@ -316,6 +316,8 @@ def uploadPurpleAirData(client):
                 lastPoint = lastPoint.get_points().next()
                 # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
                 # print point['time']
+                print lastPoint
+                print pytz.utc.localize(lastPoint, is_dst=None)
                 if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
                     continue
 
