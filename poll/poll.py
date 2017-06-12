@@ -316,7 +316,7 @@ def uploadPurpleAirData(client):
                 lastPoint = lastPoint.get_points().next()
                 # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
                 # print point['time']
-                if point['time'] <= parser.parse(lastPoint['time']):
+                if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
                     continue
 
             # Convert all the fields to floats
