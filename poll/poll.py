@@ -302,12 +302,14 @@ def uploadPurpleAirData(client):
             # prefix the ID with "Purple Air " so that there aren't
             # collisions with other data sources
             point['tags']['ID'] = idTag
-            # print point['tags']['ID']
+            print point['tags']['ID']
 
             # Only include the point if we haven't stored this measurement before
             lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % point['tags']['ID'])
             print 'LAST POINT'
             print lastPoint
+            print "new POINT"
+            print point['time']
             if len(lastPoint) > 0:
                 lastPoint = lastPoint.get_points().next()
                 # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
