@@ -593,7 +593,7 @@ def uploadMesowestData(client):
 if __name__ == '__main__':
     config = getConfig()
     client = InfluxDBClient(
-        '127.0.0.1',
+        'air.eng.utah.edu',
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
