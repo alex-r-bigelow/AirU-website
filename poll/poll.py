@@ -68,7 +68,7 @@ DAQ_SITES = [{
 def getConfig():
     with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
-    sys.stderr.write('%s\tProblem reading config file.\n' % TIMESTAMP)
+    sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
 
 
@@ -149,7 +149,7 @@ def uploadPurpleAirData(client):
     try:
         purpleAirData = urllib2.urlopen("https://map.purpleair.org/json").read()
     except urllib2.URLError:
-        sys.stderr.write('%s\tProblem acquiring PurpleAir data; their server appears to be down. Problem here: https://map.purpleair.org/json\n' % TIMESTAMP)
+        sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data; their server appears to be down. Problem here: https://map.purpleair.org/json\n' % TIMESTAMP)
         return []
 
     purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
@@ -201,11 +201,11 @@ def uploadPurpleAirData(client):
         try:
             purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
         except urllib2.URLError:
-            sys.stderr.write('%s\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, primaryID, primaryIDReadKey))
+            sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, primaryID, primaryIDReadKey))
             # return []
             continue
         except httplib.BadStatusLine:
-            sys.stderr.write('%s\t%s' % (TIMESTAMP, queryPrimaryFeed))
+            sys.stderr.write('%s\tBadStatusLine\t%s' % (TIMESTAMP, queryPrimaryFeed))
             continue
 
         purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
@@ -239,11 +239,11 @@ def uploadPurpleAirData(client):
         try:
             purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
         except urllib2.URLError:
-            sys.stderr.write('%s\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
+            sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
             # return []
             continue
         except httplib.BadStatusLine:
-            sys.stderr.write('%s\t%s' % (TIMESTAMP, queryPrimaryFeed))
+            sys.stderr.write('%s\tBadStatusLine\t%s' % (TIMESTAMP, queryPrimaryFeed))
             continue
 
         purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
@@ -348,7 +348,7 @@ def uploadPurpleAirData(client):
                 print point['time']
                 print point['tags']
                 print point['fields']
-                sys.stderr.write('%s\tWriting Purple Air data to influxdb lead to a write error.\n' % TIMESTAMP)
+                sys.stderr.write('%s\tInfluxDBClientError\tWriting Purple Air data to influxdb lead to a write error.\n' % TIMESTAMP)
 
 
 def uploadDAQAirData(client):
@@ -359,7 +359,7 @@ def uploadDAQAirData(client):
         try:
             daqData = urllib2.urlopen(daqSites['dataFeed']).read()
         except urllib2.URLError:
-            sys.stderr.write('%s\tProblem acquiring DAQ data; their server appears to be down.\n' % TIMESTAMP)
+            sys.stderr.write('%s\tURLError\tProblem acquiring DAQ data; their server appears to be down.\n' % TIMESTAMP)
             continue
 
         daqData = unicode(daqData, 'ISO-8859-1')
@@ -463,7 +463,7 @@ def uploadDAQAirData(client):
                 print point['time']
                 print point['tags']
                 print point['fields']
-                sys.stderr.write('%s\tWriting DAQ data to influxdb lead to a write error.\n' % TIMESTAMP)
+                sys.stderr.write('%s\tInfluxDBClientError\tWriting DAQ data to influxdb lead to a write error.\n' % TIMESTAMP)
 
 
 def uploadMesowestData(client):
@@ -474,7 +474,7 @@ def uploadMesowestData(client):
     try:
         mesowestData = urllib2.urlopen(mesowestURL).read()
     except urllib2.URLError:
-        sys.stderr.write('%s\tProblem acquiring Mesowest data; their server appears to be down.\n' % TIMESTAMP)
+        sys.stderr.write('%s\tURLError\tProblem acquiring Mesowest data; their server appears to be down.\n' % TIMESTAMP)
 
     mesowestData = unicode(mesowestData, 'ISO-8859-1')
     mesowestData = json.loads(mesowestData)['STATION']
@@ -587,7 +587,7 @@ def uploadMesowestData(client):
                     print point['time']
                     print point['tags']
                     print point['fields']
-                    sys.stderr.write('%s\tWriting mesowest data to influxdb lead to a write error.\n' % TIMESTAMP)
+                    sys.stderr.write('%s\tInfluxDBClientError\tWriting mesowest data to influxdb lead to a write error.\n' % TIMESTAMP)
 
 
 if __name__ == '__main__':
@@ -597,7 +597,9 @@ if __name__ == '__main__':
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
-        'defaultdb'
+        'defaultdb',
+        ssl=True,
+        verify_ssl=True
     )
 
     uploadPurpleAirData(client)
