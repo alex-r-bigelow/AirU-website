@@ -310,7 +310,7 @@ def uploadPurpleAirData(client):
             print lastPoint
             print "new POINT"
             print pytz.utc.localize(point['time'])
-            print pytz.utc.localize(lastPoint['time'])
+            # print pytz.utc.localize(lastPoint['time'])
             # print point['time'] <= parser.parse(lastPoint['time'], tzinfo=pytz.utc)
             if len(lastPoint) > 0:
                 lastPoint = lastPoint.get_points().next()
