@@ -305,9 +305,9 @@ def uploadPurpleAirData(client):
             # print point['tags']['ID']
 
             # Only include the point if we haven't stored this measurement before
-            lastPoint = client.query("""SELECT last("ID") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % point['tags']['ID'])
-            # print 'LAST POINT'
-            # print lastPoint
+            lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % point['tags']['ID'])
+            print 'LAST POINT'
+            print lastPoint
             if len(lastPoint) > 0:
                 lastPoint = lastPoint.get_points().next()
                 # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
@@ -423,7 +423,7 @@ def uploadDAQAirData(client):
                     point['fields'][standardKey] = daqValue.get_text()
 
             # Only include the point if we haven't stored this measurement before
-            lastPoint = client.query("""SELECT last("ID") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'DAQ'""" % point['tags']['ID'])
+            lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'DAQ'""" % point['tags']['ID'])
             # print 'LAST POINT'
             # print lastPoint
             if len(lastPoint) > 0:
@@ -553,7 +553,7 @@ def uploadMesowestData(client):
                     point['fields'][standardKey] = mesowestField[idx]
 
             # Only include the point if we haven't stored this measurement before
-            lastPoint = client.query("""SELECT last("ID") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Mesowest'""" % point['tags']['ID'])
+            lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Mesowest'""" % point['tags']['ID'])
             # print 'LAST POINT'
             # print lastPoint
             if len(lastPoint) > 0:
