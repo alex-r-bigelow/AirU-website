@@ -243,7 +243,7 @@ def uploadPurpleAirData(client):
             # return []
             continue
         except httplib.BadStatusLine:
-            sys.stderr.write('%s\tBadStatusLine\t%s' % (TIMESTAMP, queryPrimaryFeed))
+            sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, queryPrimaryFeed))
             continue
 
         purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
