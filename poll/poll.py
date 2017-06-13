@@ -438,7 +438,12 @@ def uploadDAQAirData(client):
                 lastPoint = lastPoint.get_points().next()
                 # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
                 # print point['time']
-                if point['time'] <= parser.parse(lastPoint['time']):
+                lastPointParsed = datetime.strptime(lastPoint['time'], '%Y-%m-%dT%H:%M:%SZ')
+                lastPointLocalized = pytz.utc.localize(lastPointParsed, is_dst=None)
+                # print lastPointLocalized
+                # if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
+                if pytz.utc.localize(point['time']) <= lastPointLocalized:
+                    # if point['time'] <= parser.parse(lastPoint['time']):
                     # print 'POINT NOT INCLUDED'
                     continue
 
@@ -457,7 +462,7 @@ def uploadDAQAirData(client):
                 point['fields']['Wind speed (m/s)'] = windSpeedField * (1609.344 / 3600)
 
             # Convert the daq deg F to deg C
-            print point['fields']
+            # print point['fields']
             tmpField = point['fields'].get('Temp (*C)')
             if tmpField is not None:
                 point['fields']['Temp (*C)'] = (tmpField - 32) * 5 / 9
@@ -569,7 +574,12 @@ def uploadMesowestData(client):
                 lastPoint = lastPoint.get_points().next()
                 # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
                 # print point['time']
-                if point['time'] <= parser.parse(lastPoint['time']):
+                lastPointParsed = datetime.strptime(lastPoint['time'], '%Y-%m-%dT%H:%M:%SZ')
+                lastPointLocalized = pytz.utc.localize(lastPointParsed, is_dst=None)
+                # print lastPointLocalized
+                # if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
+                if pytz.utc.localize(point['time']) <= lastPointLocalized:
+                    # if point['time'] <= parser.parse(lastPoint['time']):
                     # print 'POINT NOT INCLUDED'
                     continue
 
