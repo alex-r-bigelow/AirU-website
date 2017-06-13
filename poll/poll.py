@@ -442,7 +442,7 @@ def uploadDAQAirData(client):
                 lastPointLocalized = pytz.utc.localize(lastPointParsed, is_dst=None)
                 # print lastPointLocalized
                 # if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
-                if pytz.utc.localize(point['time']) <= lastPointLocalized:
+                if point['time'] <= lastPointLocalized:
                     # if point['time'] <= parser.parse(lastPoint['time']):
                     # print 'POINT NOT INCLUDED'
                     continue
