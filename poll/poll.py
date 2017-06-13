@@ -423,7 +423,8 @@ def uploadDAQAirData(client):
 
             for standardKey, daqKey in DAQ_FIELDS.iteritems():
                 daqValue = measurement.find(daqKey)
-                if daqKey != 'pm25' and daqValue is not None:
+                # need to check if daqValue is null but also if it is an empty string, empty string means not usable
+                if daqKey != 'pm25' and daqValue is not None and daqValue:
                     theValue = daqValue.get_text()
                     point['fields'][standardKey] = daqValue.get_text()
 
