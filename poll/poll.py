@@ -454,8 +454,8 @@ def uploadDAQAirData(client):
                 point['fields']['Wind speed (m/s)'] = windSpeedField * (1609.344 / 3600)
 
             # Convert the daq deg F to deg C
+            print point['fields']
             tmpField = point['fields'].get('Temp (*C)')
-            print tmpField
             if tmpField is not None:
                 point['fields']['Temp (*C)'] = (tmpField - 32) * 5 / 9
 
