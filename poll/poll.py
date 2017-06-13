@@ -455,6 +455,7 @@ def uploadDAQAirData(client):
 
             # Convert the daq deg F to deg C
             tmpField = point['fields'].get('Temp (*C)')
+            print tmpField
             if tmpField is not None:
                 point['fields']['Temp (*C)'] = (tmpField - 32) * 5 / 9
 
