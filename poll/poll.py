@@ -617,8 +617,8 @@ if __name__ == '__main__':
         config['influxdbUsername'],
         config['influxdbPassword'],
         'defaultdb',
-        ssl=True,
-        verify_ssl=True
+        #ssl=True,
+        #verify_ssl=True
     )
 
     uploadPurpleAirData(client)
