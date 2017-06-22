@@ -3,9 +3,12 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var Sensor = require('../models/Sensors.js');
 
+var log = require('../log.js')
+
 /* GET ALL SENSOR */
 router.get('/', function(req, res, next) {
   Sensor.find(function (err, sensors) {
+    log.warn('testing');
     if (err) return next(err);
     res.json(sensors);
   });

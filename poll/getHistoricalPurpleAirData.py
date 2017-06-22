@@ -403,8 +403,8 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
 if __name__ == '__main__':
     config = getConfig()
     client = InfluxDBClient(
-        # 'air.eng.utah.edu',
-        'localhost',
+        'air.eng.utah.edu',
+        #'localhost',
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
