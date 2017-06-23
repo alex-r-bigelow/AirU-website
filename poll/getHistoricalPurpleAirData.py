@@ -415,7 +415,7 @@ if __name__ == '__main__':
     if sys.argv[1] == 'vagrant':
         serverUrl = 'localhost'
     elif sys.argv[1] == 'airUServer':
-        serverUrl == 'air.eng.utah.edu'
+        serverUrl = 'air.eng.utah.edu'
 
     client = InfluxDBClient(
         serverUrl,
