@@ -383,8 +383,8 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
         print stationID
 
         for anEndDate in hourlyDates:
-            print initialDate
-            print anEndDate
+            #print initialDate
+            #print anEndDate
             # print 'SELECT * FROM airQuality WHERE Source = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
         #         result = client.query('SELECT * FROM airQuality WHERE ID=\'84\' AND time >= \'' + initialDate + '\' AND time <= \'' + anEndDate + '\';')
             result = client.query('SELECT * FROM airQuality WHERE ID = \'' + str(stationID) + '\' AND time >= \'' + initialDate + '\' AND time <= \'' + anEndDate + '\';')
@@ -393,7 +393,7 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
             print result
             for row in result:
 
-                writeLoggingDataToFile(filename, [row['time'], row['ID'], station['ParentID'], row['Latitude'], row['Longitude'], row['pm2.5 (ug/m^3)']])
+                writeLoggingDataToFile(filename, [row['time'], row['ID'], station['parentID'], row['Latitude'], row['Longitude'], row['pm2.5 (ug/m^3)']])
 
             initialDate = anEndDate
 
