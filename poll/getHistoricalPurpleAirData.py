@@ -374,7 +374,7 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
     ])
 
     hourlyDates = generateHourlyDates(start, end, timedelta(hours=1))
-    initialDate = start.strftime('%Y-%m-%d%%00%H:%M:%S')
+    initialDate = start.strftime('%Y-%m-%dT%H:%M:%SZ')
 
     dualStations = getDualStationsWithPartner()
 
