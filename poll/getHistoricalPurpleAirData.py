@@ -42,9 +42,15 @@ PURPLE_AIR_TAGS = {
 }
 
 
-def getConfig():
-    # for use on the server '/../config/config.json' for use on Vagrant './../config/config.json'
-    with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
+def getConfig(locationRun):
+
+    configPath = ''
+    if locationRun == 'vagrant':
+        configPath = './../config/config.json'
+    elif locationRun == 'airUServer':
+        configPath = '/../config/config.json'
+
+    with open(sys.path[0] + configPath, 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
@@ -399,9 +405,11 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
 
         print 'DONE'
 
-
+# usage python getHistoricalPurpleAirData.py vagrant/airUServer populateDB/storeDualSensorsInFile 2016-12-15%0000:00:00 2016-12-22%0000:00:00
+# vagrant/airUServer is found in sys.argv[1]
+# populateDB/storeDualSensorsInFile is found in sys.argv[2]
 if __name__ == '__main__':
-    config = getConfig()
+    config = getConfig(sys.argv[1])
     client = InfluxDBClient(
         #'air.eng.utah.edu',
         'localhost',
@@ -412,13 +420,17 @@ if __name__ == '__main__':
     )
 
     # roughly 15 Dec to 28 Feb
-    startDate = '2016-12-15%0000:00:00'
-    endDate = '2016-12-22%0000:00:00'
+    # startDate = '2016-12-15%0000:00:00'
+    # endDate = '2016-12-22%0000:00:00'
+    startDate = sys.argv[3]
+    endDate = sys.argv[4]
 
-    if (sys.argv[1] == 'populateDB'):
-        # uncomment when building the db
+    if (sys.argv[2] == 'populateDB'):
+        # to populate the db
         getHistoricalPurpleAirData(client, startDate, endDate)
-        sys.stdout.write('%s\tPolling successful.\n' % TIMESTAMP)
-    elif (sys.argv[1] == 'storeInFile'):
-        # take the data for the dual sensors from the db and store it in a file
+        sys.stdout.write('%s\tPopulating db has been successful.\n' % TIMESTAMP)
+
+    elif (sys.argv[2] == 'storeDualSensorsInFile'):
+        # to store the dual sensors in a csv file
         storeDualSensorDataInCSV(client, startDate, endDate)
+        sys.stdout.write('%s\tAll the dual sensors have been written to the file.\n' % TIMESTAMP)

@@ -84,11 +84,6 @@ if __name__ == "__main__":
 
         result = list(result.get_points())
         for row in result:
-            # if row['Latitude'] is None or row['Longitude'] is None:
-#                 continue
-# 
-#             if not((float(row['Longitude']) < float(utahBbox['top'])) and (float(row['Longitude']) > float(utahBbox['bottom']))) or not((float(row['Latitude']) > float(utahBbox['left'])) and (float(row['Latitude']) < float(utahBbox['right']))):
-#                 continue
 
             writeLoggingDataToFile([row['time'], row['ID'], row['Latitude'], row['Longitude'], row['pm2.5 (ug/m^3)']])
 
