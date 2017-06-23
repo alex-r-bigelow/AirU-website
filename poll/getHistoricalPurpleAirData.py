@@ -44,7 +44,7 @@ PURPLE_AIR_TAGS = {
 
 def getConfig():
     # for use on the server '/../config/config.json' for use on Vagrant './../config/config.json'
-    with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
+    with open(sys.path[0] + './../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
@@ -403,8 +403,8 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
 if __name__ == '__main__':
     config = getConfig()
     client = InfluxDBClient(
-        'air.eng.utah.edu',
-        #'localhost',
+        #'air.eng.utah.edu',
+        'localhost',
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
@@ -415,10 +415,10 @@ if __name__ == '__main__':
     startDate = '2016-12-15%0000:00:00'
     endDate = '2016-12-22%0000:00:00'
 
-
-    # uncomment when building the db
-    getHistoricalPurpleAirData(client, startDate, endDate)
-    sys.stdout.write('%s\tPolling successful.\n' % TIMESTAMP)
-
-    # take the data for the dual sensors from the db and store it in a file
-    # storeDualSensorDataInCSV(client, startDate, endDate)
+    if (sys.argv[1] == 'populateDB'):
+        # uncomment when building the db
+        getHistoricalPurpleAirData(client, startDate, endDate)
+        sys.stdout.write('%s\tPolling successful.\n' % TIMESTAMP)
+    elif (sys.argv[1] == 'storeInFile'):
+        # take the data for the dual sensors from the db and store it in a file
+        storeDualSensorDataInCSV(client, startDate, endDate)
