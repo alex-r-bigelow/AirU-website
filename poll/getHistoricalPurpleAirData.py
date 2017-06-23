@@ -355,7 +355,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
 def storeDualSensorDataInCSV(client, startDate, endDate):
 
-    filename = 'winter-dual-sensor-pm-data.csv'
+    filename = '/home/pgoffin/winter-dual-sensor-pm-data.csv'
 
     # transform to datetime
     start = datetime.strptime(startDate, '%Y-%m-%d%%00%H:%M:%S')
