@@ -44,7 +44,7 @@ PURPLE_AIR_TAGS = {
 
 def getConfig():
     # for use on the server '/../config/config.json' for use on Vagrant './../config/config.json'
-    with open(sys.path[0] + './../config/config.json', 'r') as configfile:
+    with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
