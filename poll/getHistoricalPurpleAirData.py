@@ -410,9 +410,15 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
 # populateDB/storeDualSensorsInFile is found in sys.argv[2]
 if __name__ == '__main__':
     config = getConfig(sys.argv[1])
+
+    serverUrl = ''
+    if sys.argv[1] == 'vagrant':
+        serverUrl = 'localhost'
+    elif sys.argv[1] == 'airUServer':
+        serverUrl == 'air.eng.utah.edu'
+
     client = InfluxDBClient(
-        #'air.eng.utah.edu',
-        'localhost',
+        serverUrl,
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
