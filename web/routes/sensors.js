@@ -26,7 +26,9 @@ router.get('/:id', function(req, res, next) {
 router.post('/', function(req, res, next) {
   Sensor.create(req.body, function (err, post) {
     if (err) return next(err);
-    res.jsonp(post);
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.json(post);
   });
 });
 
