@@ -245,7 +245,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
         # end = datetime.strptime(endDate, '%Y-%m-%d%%00%H:%M:%S')
 
         dailyDates = generateDailyDates(startDate, endDate, timedelta(days=1))
-        print dailyDates
+        # print dailyDates
 
         initialDate = dailyDates[0]
         for aDay in dailyDates[1:]:
@@ -317,17 +317,17 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
             purpleAirDataSecondaryFeed = json.loads(purpleAirDataSecondary)['feeds']
-            print 'purpleAirDataSecondaryFeed'
-            print len(purpleAirDataSecondaryFeed)
-            print 'purpleAirDataPrimaryFeed'
-            print len(purpleAirDataPrimaryFeed)
+            # print 'purpleAirDataSecondaryFeed'
+            # print len(purpleAirDataSecondaryFeed)
+            # print 'purpleAirDataPrimaryFeed'
+            # print len(purpleAirDataPrimaryFeed)
 
             diff = 0
             if len(purpleAirDataPrimaryFeed) != len(purpleAirDataSecondaryFeed):
                 print 'do not have the same length'
                 print 'purpleAirDataPrimaryFeed' + str(len(purpleAirDataPrimaryFeed)) and 'purpleAirDataSecondaryFeed' + str(len(purpleAirDataSecondaryFeed))
                 diff = len(purpleAirDataPrimaryFeed) - len(purpleAirDataSecondaryFeed)
-                print diff
+                # print diff
 
             # go through the primary feed data
             for idx, aMeasurement in enumerate(purpleAirDataPrimaryFeed):
