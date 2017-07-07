@@ -71,6 +71,18 @@ then
   systemctl start cron
 fi
 
+# tellUser "Installing grafana..."
+# wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_4.3.1_amd64.deb
+# sudo apt-get install -y adduser libfontconfig
+# sudo dpkg -i grafana_4.3.1_amd64.deb
+# 
+# sudo apt-get update
+# sudo apt-get install grafana
+# 
+# systemctl daemon-reload
+# systemctl start grafana-server
+# systemctl status grafana-server
+
 tellUser "Installing mongodb..."
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 echo 'deb http://downloads-distro.mongodb.org/repo/debian-sysvinit dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list

@@ -1,0 +1,480 @@
+/*=========================*/
+
+/*MAIN PAGE SETTINGS*/
+
+/*=========================*/
+
+html,body{
+    height:100%;
+    width:100%;
+    background-color: #2E2C2C;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    align-items:center;
+}
+
+#scrubContainer{
+    margin: 0px;
+}
+
+#btnDiv{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-around;
+    height: 420px;
+    /*margin:0 auto;*/
+    margin-right:15px;
+}
+
+#dataSource{
+    width: 40%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+/*===========================*/
+
+/* TOP CLOCK SETTINGS*/
+
+/*===========================*/
+
+
+#clockDisplay{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+#clockTime{
+    margin:0;
+    font-family: Helvetica;
+    font-weight: lighter;
+    font-size: 72px;
+    color: #d0d0d0;
+}
+
+#writtenTime{
+    font-family: 'Open Sans',arial,sans-serif;
+    font-style: normal;
+    font-weight: 300;
+    font-size: 48px;
+    color: #d0d0d0;
+    src: local('Open Sans'), local('OpenSans'), url('http://themes.googleusercontent.com/static/fonts/opensans/v5/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff') format('woff');
+
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+/*=============================*/
+
+/*MAIN CHART SETTINGS*/
+
+/*=============================*/
+
+svg {
+    font: 10px sans-serif;
+}
+
+path.line{
+    stroke:"red";
+}
+
+.line {
+    stroke-width: 1px;
+    clip-path: url(#clip);
+    fill:none;
+}
+
+.zoom {
+    cursor: move;
+    fill: none;
+    pointer-events: click;
+}
+
+
+/*.axis path,*/
+.axis line {
+    fill: none;
+    stroke: #d0d0d0;   /*Change this to revise the chart axes color( X and Y)*/
+    shape-rendering: crispEdges;
+}
+
+.axis--y path{
+    fill: none;
+    stroke: #d0d0d0;   /*Change this to revise the chart axes color( X and Y)*/
+    shape-rendering: crispEdges;
+}
+
+.axis--x path{
+    display: none;  /*remove the x-axis path from the plot*/
+}
+
+#touchPane{
+    opacity: 0;
+    z-index:10000;
+}
+.overLine{
+    stroke: #20e2da;
+    stroke-width:1px;
+    stroke-dasharray: 4,4; /* (pixels on, pixels off)*/
+}
+.glyph{
+    fill: #ff1975;
+    stroke: purple;
+    font-family: FontAwesome;
+    clip-path: url(#clip);
+}
+.glyph.active{
+    fill: #20e2da;
+}
+
+text{
+    fill: #d0d0d0;   /*Change this to revise  highlight and scrub text color*/
+}
+
+.brush .extent {
+    stroke: #919191;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+
+.axis--y .domain,
+.axis .tick:nth-child(2n - 1) text {
+    /*display: none;*/
+}
+
+
+.axis .tick line {
+    stroke: grey;
+    stroke-opacity: 0.5;
+}
+
+.legend {
+    color:orange;
+    font-family: Helvetica;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: left;
+}
+
+
+/*===========================*/
+
+/*TOOL TIP BOXES*/
+
+/*===========================*/
+
+
+.tooltip{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    min-width: 60px;
+    max-width: 120px;
+    padding: 2px;
+    border:0px;
+    border-radius: 8px;
+}
+
+.tooltip>text{
+    text-anchor: start;
+    font-size: 12px;
+    font-weight: bold;
+
+.style("text-anchor", "middle")
+.attr("font-size", "12px")
+.attr("font-weight", "bold");
+}
+.tooltipBox{
+    width: 100px;
+    height: 30px;
+    fill: white;
+    opacity:0.25;
+}
+
+.annoText{
+    fill: #20e2da;
+    text-anchor: middle;
+    font-family: Helvetica;
+    font-weight: bold;
+    font-size: 12pt;
+}
+
+text{
+    textLength: 200px;
+}
+
+
+
+/*========================*/
+
+/*NAVIGATION BUTTONS*/
+
+/*========================*/
+
+form{
+    height: 70px;
+    overflow: hidden;
+    padding-left: 40px;
+    padding-top: 0;
+}
+
+.sbtn {
+
+    display: inline-block;
+    border-style: solid;
+    border-radius: 10px;
+
+    width: 100%;
+    height: 35px;
+
+    padding-left:12px;      /* Interior padding for button*/
+    padding-right: 12px;        /* Interior padding for button*/
+
+    background-color: #E9E6ED;   /* Button fill color */
+    border: 3px solid #919191;  /*button border data*/
+    color: #B4B4B4;             /*font color*/
+
+    font-size: 16px;
+    font-weight: normal;
+    text-align: center;
+    text-decoration: none;
+}
+
+
+/*.sbtn:focus{*/
+    /*vertical-align: top;*/
+
+    /*background-color: #F8805C;   !* Button fill color *!*/
+    /*color: #A81E32;     !*font color*!*/
+    /*border: 3px solid #934F3B;  !*button border data*!*/
+/*}*/
+
+.clicked{
+    vertical-align: top;
+    background-color: #F8805C;   /* Button fill color */
+    color: #A81E32;     /*font color*/
+    border: 3px solid #934F3B;  /*button border data*/
+}
+
+
+/*===========================*/
+
+/*LEGEND PANE STYLING*/
+
+/*===========================*/
+
+.legend{
+    display: flex;
+    flex-direction:column;
+    align-content: left;
+    justify-content: space-around;
+    align-content: center;
+    height:320px;
+    margin-top:75px;
+}
+
+.legendItem{
+    padding:1px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    border-style: solid;
+    border-width:1px;
+}
+
+.deactivate{
+    opacity:0.4;
+    color:dimgray;
+    fill:dimgray;
+    font-color:dimgray;
+}
+
+/*==================================*/
+
+/*Bottom Date Rage formatting*/
+
+/*=================================*/
+
+#dateRange{
+    display: flex;
+    justify-content: center;
+    margin-top:5px;
+    /*color: #d0d0d0;*/
+    color: #888888;
+    font-size: 18px;
+    font-weight: lighter;
+    font-family: Helvetica;
+}
+
+/*===================================*/
+
+/*MODAL WINDOW STYLING*/
+
+/*===================================*/
+
+
+
+.modal {
+    display: none;       /* Hidden by default */
+    position: fixed;     /* Stay in place */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    z-index: 1;          /* Sit on top */
+    top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(25,31,38,0.4); /* Black w/ opacity */
+}
+
+
+.textArea{
+    width:340px;
+    height: 65px;
+    margin:0px;
+}
+#modalHeader{
+    background-color: inherit;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    margin:0px;
+}
+#modalHeader>h4{
+    margin:3px;
+}
+.modal-content>p{
+    margin:5px;
+}
+
+#modalSubmitButton{
+    background-color: inherit;
+}
+
+#img-container{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Modal Content/Box Styling */
+.modal-content {
+    border-radius: 8px ;
+    border: 4px solid #888;
+    background-color:#888888;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    width: 350px; /* Could be more or less, depending on screen size */
+}
+
+#modalTimeDisplay{
+    background-color: inherit;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+#modalTimeDisplay>p{
+    margin-top:2px;
+    margin-bottom:15px;
+    color:#9BB75E;
+
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#modalSubmitButton{
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+
+
+
+/*==============================*/
+
+/*MOBILE DEVICE SETTINGS*/
+
+/*==============================*/
+/* Smartphones (portrait and landscape) ----------- */
+@media only screen
+and (min-device-width : 200px)
+and (max-device-width : 1300px) {
+
+
+    /*Top Clock Options*/
+    #clockDisplay{
+        display: inline-block;
+
+    }
+    #clockTime{
+        font-size: 24px;
+        margin:0;
+        float: right;
+        font-family: 'Open Sans',arial,sans-serif;
+        font-style: normal;
+        font-weight: 300;
+        color: #d0d0d0;
+        src: local('Open Sans'), local('OpenSans'), url('http://themes.googleusercontent.com/static/fonts/opensans/v5/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff') format('woff');
+
+    }
+    #writtenTime{
+        margin:0;
+        font-weight: lighter;
+        font-size: 24px;
+        float:left;
+        padding-right:15px;
+    }
+
+    /* Styles */
+    #btnDiv{
+        margin-top:5px;
+    }
+
+    /*Modal Window*/
+    textarea{
+        cols:5;
+    }
+
+}
+
+
+/* Smartphones (landscape) ----------- */
+@media only screen
+and (min-width : 321px) {
+    /* Styles */
+}
+
+/* Smartphones (portrait) ----------- */
+@media only screen
+and (max-width : 320px) {
+    /* Styles */
+}
