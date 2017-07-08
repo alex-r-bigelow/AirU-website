@@ -303,11 +303,19 @@ function moveBrushToLastPosition() {
         selectedExtent = globalExtent;
         console.log("selectedExent is empty");
 
+        console.log("the selectedextent: " + selectedExtent)
         //highlight the entire view
-        context.select(".brush").call(brush.move, [ x2Scale( selectedExtent[0] ), x2Scale( selectedExtent[1] ) ] );
+        context.select(".brush").call(brush.move, [x2Scale(selectedExtent[0]), x2Scale(selectedExtent[1])]);
     } else {
+        // if (d3.select('button.clicked').empty()) {
+        //   selectedExtent = globalExtent;
+        //
+        // }
+
+        console.log("the selectedextent: " + selectedExtent)
+
         console.log("SElectedExtent has a value.");
-        context.select("brush").call(brush.move, [xScale(selectedExtent[0]),xScale(selectedExtent[1])])
+        context.select(".brush").call(brush.move, [x2Scale(selectedExtent[0]), x2Scale(selectedExtent[1])])
     }//end if-esle
 
 }//end moveBrushtoLastPosition
@@ -982,7 +990,8 @@ function drawBrush(e) {
     let start = new Date (+midpoint - timeWindow*60*60*1000/2);
     let end = new Date (+midpoint + timeWindow*60*60*1000/2);
 
-    selectedExtent = [start,end];
+    selectedExtent = [start.getTime(),end.getTime()];
+    console.log("The selected extend: " + selectedExtent);
 
     brushStart = x2Scale(start);
     brushEnd = x2Scale(end);
