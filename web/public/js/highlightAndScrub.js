@@ -307,10 +307,10 @@ function moveBrushToLastPosition() {
         //highlight the entire view
         context.select(".brush").call(brush.move, [x2Scale(selectedExtent[0]), x2Scale(selectedExtent[1])]);
     } else {
-        // if (d3.select('button.clicked').empty()) {
-        //   selectedExtent = globalExtent;
-        //
-        // }
+        if (d3.select('button.clicked').empty()) {
+          selectedExtent = globalExtent;
+
+        }
 
         console.log("the selectedextent: " + selectedExtent)
 
