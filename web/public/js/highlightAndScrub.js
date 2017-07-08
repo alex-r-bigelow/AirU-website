@@ -256,13 +256,13 @@ function getDatasets(){
 
         //Update globals with this new data:
         scaledDatasets = {
-          'day': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'full': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'six': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'three': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'twelve': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'twoDay': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'week': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}]
+          'day': [{'id': 'tony', 'name': 'Tony Butterfield, Outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'full': [{'id': 'tony', 'name': 'Tony Butterfield, Outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'six': [{'id': 'tony', 'name': 'Tony Butterfield, Outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'three': [{'id': 'tony', 'name': 'Tony Butterfield, Outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'twelve': [{'id': 'tony', 'name': 'Tony Butterfield, Outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'twoDay': [{'id': 'tony', 'name': 'Tony Butterfield, Outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'week': [{'id': 'tony', 'name': 'Tony Butterfield, Outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}]
         }
         globalMax = 50;
         globalExtent = [data.results[0].series[0].values[0][0], data.results[0].series[0].values[data.results[0].series[0].values.length-1][0]];
