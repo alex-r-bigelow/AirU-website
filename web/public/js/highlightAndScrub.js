@@ -32,8 +32,8 @@ let easing = d3.easeQuad;           //easing method         (coded but not used)
 let scaleType = "";                 //choose what scale type we're using (Log or linear)
 
 let colorList=["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#6a3d9a"];
-let baseURL = "https://viz.app.lundrigan.org";
-let updateTime = 200;   // Refresh rate (in seconds)
+// let baseURL = "https://viz.app.lundrigan.org";
+let updateTime = 60;   // Refresh rate (in seconds)
 
 //define canvas
 let svg = d3.select("svg"),   //Define graph sizes
@@ -123,27 +123,27 @@ let xAxisGroupBrush = context.append("g")
     .attr("transform", "translate(0," + height2 + ")")
     .call(xAxis2);
 
-let annotationPane = svg.append("g")
-    .attr("class", "annotations")
-.attr("id","annotations");
-    // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-let annotationBrushPane =svg.append("g")
-    .attr("class", "brushAnnotations")
-    .attr("transform", "translate(" + margin.left + "," + margin2.top + ")");
+// let annotationPane = svg.append("g")
+//     .attr("class", "annotations")
+// .attr("id","annotations");
+//     // .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+//
+// let annotationBrushPane =svg.append("g")
+//     .attr("class", "brushAnnotations")
+//     .attr("transform", "translate(" + margin.left + "," + margin2.top + ")");
 
 
 // modify the height of the svg to add the annotations at the bottom
 d3.select('svg').attr('height', 550);
 
-annotationPane.attr("transform", "translate(" + margin.left + "," + (height+100)+ ")"); //change multiplying factor to move the annotation pane closer to SVG plot
-annotationPane.append('rect')
-    .attr('width', 720)
-    .attr('height', 30)
-    .attr('y', 14)
-    .style('fill', 'none')
-    .style('stroke', '#d0d0d0')
-    .style('stroke-width', 1);
+// annotationPane.attr("transform", "translate(" + margin.left + "," + (height+100)+ ")"); //change multiplying factor to move the annotation pane closer to SVG plot
+// annotationPane.append('rect')
+//     .attr('width', 720)
+//     .attr('height', 30)
+//     .attr('y', 14)
+//     .style('fill', 'none')
+//     .style('stroke', '#d0d0d0')
+//     .style('stroke-width', 1);
 
 
 //define brushing behavior
@@ -184,8 +184,8 @@ let modal = document.getElementById('myModal');// Get the modal
 let loadingScreen = document.getElementById('loadingModal');
 let span = document.getElementsByClassName("close")[0];             // Get the <span> element that closes the modal
 span.onclick = closeModalWindow;                                    // When the user clicks on <span> (x), close the modal
-let modalSubmit = document.getElementsByClassName("modalSubmit")[0];
-modalSubmit.onclick = handleModalSubmission;                        //when the user clicks on the submit button
+// let modalSubmit = document.getElementsByClassName("modalSubmit")[0];
+// modalSubmit.onclick = handleModalSubmission;                        //when the user clicks on the submit button
 let textArea = document.getElementsByClassName("textArea")[0];
 
 //add a listener to the SVG to tell when we are pressing
@@ -256,13 +256,13 @@ function getDatasets(){
 
         //Update globals with this new data:
         scaledDatasets = {
-          'day': [{'id': 'tony', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'full': [{'id': 'tony', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'six': [{'id': 'tony', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'three': [{'id': 'tony', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'twelve': [{'id': 'tony', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'twoDay': [{'id': 'tony', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
-          'week': [{'id': 'tony', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}]
+          'day': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'full': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'six': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'three': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'twelve': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'twoDay': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}],
+          'week': [{'id': 'tony', 'name': 'tony outside', 'active': true, 'location': 'outside', 'values': data.results[0].series[0].values, 'tags': {'entity_id': "tony"}}]
         }
         globalMax = 50;
         globalExtent = [data.results[0].series[0].values[0][0], data.results[0].series[0].values[data.results[0].series[0].values.length-1][0]];
@@ -369,15 +369,15 @@ function renderBrushView(globalExtent, globalMax, loadedDataset){
         .style("stroke",assignColor);
 
 
-    //update annotations
-    if(typeof globalAnnotations !='undefined'){  //.....If you actually have annotations to add.....
-        //Draw evets on the brush panel
-        drawBrushAnnotations(globalAnnotations)
-
-    } else{                                //....if you don't have any new annotations, remove them.....
-        annotationBrushPane.selectAll("rect").remove();
-        console.log(">>NO ANNOTATIONS");
-    }//end if-else
+    // //update annotations
+    // if(typeof globalAnnotations !='undefined'){  //.....If you actually have annotations to add.....
+    //     //Draw evets on the brush panel
+    //     drawBrushAnnotations(globalAnnotations)
+    //
+    // } else{                                //....if you don't have any new annotations, remove them.....
+    //     annotationBrushPane.selectAll("rect").remove();
+    //     console.log(">>NO ANNOTATIONS");
+    // }//end if-else
 
 }//end renderBrushView()
 function selectScaledDatasets(selection){
@@ -434,7 +434,7 @@ function checkDeploymentType() {
     // let auth = getJsonFromUrl().auth;
     // var url = baseURL + "/account?auth=" + auth;
 
-    var url = "http://air.eng.utah.edu:8086/query?db=airU&epoch=ms&q=SELECT%20ID,%22PM2.5%22%20FROM%20airQuality%20WHERE%20ID=%27209148E021C4%27"
+    var url = "http://air.eng.utah.edu:8086/query?db=airU&epoch=ms&q=SELECT%20ID,%22PM2.5%22%20FROM%20airQuality%20WHERE%20ID=%27A81B6A780279%27"
 
     return new Promise((resolve, reject) => {
 
@@ -468,7 +468,7 @@ function pullFromInflux(home) {
 
     // let auth = getJsonFromUrl().auth;
     // var url = baseURL + "/data?auth=" + auth;
-    var url = "http://air.eng.utah.edu:8086/query?db=airU&epoch=ms&q=SELECT%20ID,%22PM2.5%22%20FROM%20airQuality%20WHERE%20ID=%27209148E021C4%27"
+    var url = "http://air.eng.utah.edu:8086/query?db=airU&epoch=ms&q=SELECT%20ID,%22PM2.5%22%20FROM%20airQuality%20WHERE%20ID=%27A81B6A780279%27"
 
     if(home !== undefined) {
         url += "&home_id=" + home;
@@ -592,7 +592,7 @@ function update(dataset,annotations){
     updateLegend(dataset);          // 0 ms to run
 
     //update  s
-    updateAnnotations(annotations);     // 0 - 1 ms to run
+    // updateAnnotations(annotations);     // 0 - 1 ms to run
 
     //TODO: Resize yScale on button click?
 }//end function update()
@@ -1191,9 +1191,6 @@ function sendToInflux(event,time,monitor,home){
     console.log("Time: ", time);
     console.log("Monitor: ", monitor);
     console.log("Deployment: ", home);
-
-
-
 
 
 
