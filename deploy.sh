@@ -71,14 +71,14 @@ then
   systemctl start cron
 fi
 
-# tellUser "Installing grafana..."
-# wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_4.3.1_amd64.deb
-# sudo apt-get install -y adduser libfontconfig
-# sudo dpkg -i grafana_4.3.1_amd64.deb
-# 
-# sudo apt-get update
-# sudo apt-get install grafana
-# 
+tellUser "Installing grafana..."
+wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_4.4.1_amd64.deb
+sudo apt-get install -y adduser libfontconfig
+sudo dpkg -i grafana_4.4.1_amd64.deb
+
+sudo apt-get update
+sudo apt-get install grafana
+#
 # systemctl daemon-reload
 # systemctl start grafana-server
 # systemctl status grafana-server
