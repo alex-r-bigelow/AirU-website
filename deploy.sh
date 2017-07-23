@@ -71,6 +71,7 @@ then
   systemctl start cron
 fi
 
+# need to find an if here to not always reinstalling!!!
 tellUser "Installing grafana..."
 wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_4.4.1_amd64.deb
 sudo apt-get install -y adduser libfontconfig
