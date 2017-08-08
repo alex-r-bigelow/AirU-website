@@ -89,8 +89,9 @@ def writeLoggingDataToFile(fileName, data):
 def getDualStationsWithPartner():
     try:
         purpleAirData = urllib2.urlopen("https://map.purpleair.org/json").read()
-    except urllib2.URLError:
+    except urllib2.URLError, e:
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; their server appears to be down.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
 
     purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
     purpleAirData = json.loads(purpleAirData)['results']
@@ -148,8 +149,9 @@ def getPurpleAirJSON():
 
     try:
         purpleAirData = urllib2.urlopen(purpleAirJSONUrl).read()
-    except urllib2.URLError:
+    except urllib2.URLError, e:
         sys.stderr.write('%s\t' + errorMsg_acquiringData + '\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
         return []
 
     purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
@@ -186,9 +188,9 @@ def getPurpleAirUtahStations():
             # logging.info('Not in Utah')
             continue
 
-        tmpStation = {'label': station['Label'], 'ID': station['ID'], 'THINGSPEAK_PRIMARY_ID': station['THINGSPEAK_PRIMARY_ID'], 'THINGSPEAK_PRIMARY_ID_READ_KEY': station['THINGSPEAK_PRIMARY_ID_READ_KEY'], 'parentID': station['ParentID']}
+        # tmpStation = {'label': station['Label'], 'ID': station['ID'], 'THINGSPEAK_PRIMARY_ID': station['THINGSPEAK_PRIMARY_ID'], 'THINGSPEAK_PRIMARY_ID_READ_KEY': station['THINGSPEAK_PRIMARY_ID_READ_KEY'], 'THINGSPEAK_SECONDARY_ID': station['THINGSPEAK_SECONDARY_ID'], 'THINGSPEAK_SECONDARY_ID_READ_KEY': ['THINGSPEAK_SECONDARY_ID_READ_KEY'], 'parentID': station['ParentID'], 'Lat': station['Lat'], 'Lon': station['Lon'],' Type': station['Type'], 'Version': station['Version'], 'created_at': station['created_at'], 'LastSeen': station['LastSeen']}
 
-        utahPurpleAirStations.append(tmpStation)
+        utahPurpleAirStations.append(station)
 
     # store in json file
     fileName = './poll/purpleAirUtahStations.json'
@@ -199,29 +201,30 @@ def getPurpleAirUtahStations():
 
 def getHistoricalPurpleAirData(client, startDate, endDate):
 
-    purpleAirData = getPurpleAirJSON()
+    # purpleAirData = getPurpleAirJSON()
+    utahStations = getPurpleAirUtahStations()
 
-    for station in purpleAirData:
-        # print station
-
-        # simplified bbox from:
-        # https://gist.github.com/mishari/5ecfccd219925c04ac32
-        utahBbox = {
-            'left': 36.9979667663574,
-            'right': 42.0013885498047,
-            'bottom': -114.053932189941,
-            'top': -109.041069030762
-        }
-        # lat = specifies north-south position
-        # log = specifies east-west position
-
-        if station['Lat'] is None or station['Lon'] is None:
-            # logging.info('latitude or longitude is None')
-            continue
-
-        if not((float(station['Lon']) < float(utahBbox['top'])) and (float(station['Lon']) > float(utahBbox['bottom']))) or not((float(station['Lat']) > float(utahBbox['left'])) and(float(station['Lat']) < float(utahBbox['right']))):
-            # logging.info('Not in Utah')
-            continue
+    for station in utahStations:
+        # # print station
+        #
+        # # simplified bbox from:
+        # # https://gist.github.com/mishari/5ecfccd219925c04ac32
+        # utahBbox = {
+        #     'left': 36.9979667663574,
+        #     'right': 42.0013885498047,
+        #     'bottom': -114.053932189941,
+        #     'top': -109.041069030762
+        # }
+        # # lat = specifies north-south position
+        # # log = specifies east-west position
+        #
+        # if station['Lat'] is None or station['Lon'] is None:
+        #     # logging.info('latitude or longitude is None')
+        #     continue
+        #
+        # if not((float(station['Lon']) < float(utahBbox['top'])) and (float(station['Lon']) > float(utahBbox['bottom']))) or not((float(station['Lat']) > float(utahBbox['left'])) and(float(station['Lat']) < float(utahBbox['right']))):
+        #     # logging.info('Not in Utah')
+        #     continue
 
         point = {
             'measurement': 'airQuality',
@@ -258,15 +261,14 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
             primaryPart4 = '&end='
             queryPrimaryFeed = primaryPart1 + primaryID + primaryPart2 + primaryIDReadKey + primaryPart3 + initialDate + primaryPart4 + aDay
 
-
-
             print 'primaryfeed'
             print queryPrimaryFeed
 
             try:
                 purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
-            except urllib2.URLError:
+            except urllib2.URLError, e:
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
                 continue
 
             purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
@@ -299,7 +301,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
             secondaryPart4 = '&end='
 
             querySecondaryFeed = secondaryPart1 + secondaryID + secondaryPart2 + secondaryIDReadKey + secondaryPart3 + initialDate + secondaryPart4 + aDay
-            
+
             print 'secondaryID'
             print querySecondaryFeed
 
@@ -307,8 +309,9 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             try:
                 purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
-            except urllib2.URLError:
+            except urllib2.URLError, e:
                 sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
                 # return []
                 continue
             except httplib.BadStatusLine:
@@ -489,7 +492,7 @@ if __name__ == '__main__':
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
-        'historicalPurpleAirData'
+        'purpleAirHistoricData'
     )
 
     # roughly 15 Dec to 28 Feb
