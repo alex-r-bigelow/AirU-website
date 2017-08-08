@@ -73,16 +73,19 @@ fi
 
 # need to find an if here to not always reinstalling!!!
 tellUser "Installing grafana..."
-wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_4.4.1_amd64.deb
-sudo apt-get install -y adduser libfontconfig
-sudo dpkg -i grafana_4.4.1_amd64.deb
+if [ ! /etc/grafana/grafana.ini ]
+then 
+  wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_4.4.1_amd64.deb
+  sudo apt-get install -y adduser libfontconfig
+  sudo dpkg -i grafana_4.4.1_amd64.deb
 
-sudo apt-get update
-sudo apt-get install grafana
-#
-# systemctl daemon-reload
-# systemctl start grafana-server
-# systemctl status grafana-server
+  sudo apt-get update
+  sudo apt-get install grafana
+
+  systemctl daemon-reload
+  systemctl start grafana-server
+  systemctl status grafana-server
+fi
 
 tellUser "Installing mongodb..."
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
