@@ -198,6 +198,8 @@ def getPurpleAirUtahStations():
     with open(fileName, 'w') as jsonfile:
             json.dump(utahPurpleAirStations, jsonfile, indent=4)
 
+    return utahPurpleAirStations
+
 
 def getHistoricalPurpleAirData(client, startDate, endDate):
 
