@@ -419,11 +419,11 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 # print point['fields']
 
                 # print point['tags']['ID']
-				print 'writing the point'
-				print point['time']
-				print point['tags']
-				print point['fields']
-                
+                print 'writing the point'
+                print point['time']
+                print point['tags']
+                print point['fields']
+
                 try:
                     client.write_points([point])
                 except InfluxDBClientError:
