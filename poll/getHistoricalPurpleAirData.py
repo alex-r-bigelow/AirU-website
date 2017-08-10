@@ -46,7 +46,7 @@ def getConfig(locationRun):
 
     configPath = ''
     if locationRun == 'vagrant':
-        configPath = './../config/config.json'
+        configPath = '/../config/config.json'
     elif locationRun == 'airUServer':
         configPath = '/../config/config.json'
 
@@ -205,6 +205,36 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
     # purpleAirData = getPurpleAirJSON()
     utahStations = getPurpleAirUtahStations()
+    # utahStations = [{
+#         "Uptime": "14740", 
+#         "DEVICE_LOCATIONTYPE": None, 
+#         "Stats": "{\"v\":5.45,\"v1\":5.512151064797823,\"v2\":5.492102614987235,\"v3\":6.1928332375489905,\"v4\":16.686150578813297,\"v5\":23.19637700473396,\"v6\":18.422810571120202,\"pm\":5.45,\"lastModified\":1502315091144,\"timeSinceModified\":79777}", 
+#         "AGE": 0, 
+#         "THINGSPEAK_SECONDARY_ID": "130167", 
+#         "Label": "Kimball Junction P1", 
+#         "State": None, 
+#         "Version": "2.49j", 
+#         "Hidden": "false", 
+#         "Type": "PMS5003+BME280+PUB+GROUP+04", 
+#         "LastUpdateCheck": 1502314762, 
+#         "ID": 157, 
+#         "Flag": None, 
+#         "LastSeen": 1502315091, 
+#         "Lat": "40.72681158460979", 
+#         "RSSI": "-65", 
+#         "THINGSPEAK_SECONDARY_ID_READ_KEY": "OEXR74601NGW4L4Q", 
+#         "Lon": "-111.53894305229187", 
+#         "THINGSPEAK_PRIMARY_ID": "130166", 
+#         "temp_f": "82", 
+#         "pressure": "809.59", 
+#         "DEVICE_BRIGHTNESS": "25", 
+#         "A_H": None, 
+#         "THINGSPEAK_PRIMARY_ID_READ_KEY": "NLMVAZBC59J6OT0K", 
+#         "PM2_5Value": "5.45", 
+#         "isOwner": 0, 
+#         "humidity": "27", 
+#         "ParentID": None
+#     }]
 
     for station in utahStations:
         # # print station
@@ -254,7 +284,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
         initialDate = dailyDates[0]
         for aDay in dailyDates[1:]:
-            print aDay
+            #print aDay
 
             # because we poll every 5min, and purple Air has a new value roughly every 1min 10sec, to be safe take the last 10 results
             primaryPart1 = 'https://api.thingspeak.com/channels/'
@@ -329,8 +359,8 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             diff = 0
             if len(purpleAirDataPrimaryFeed) != len(purpleAirDataSecondaryFeed):
-                print 'do not have the same length'
-                print 'purpleAirDataPrimaryFeed' + str(len(purpleAirDataPrimaryFeed)) and 'purpleAirDataSecondaryFeed' + str(len(purpleAirDataSecondaryFeed))
+                #print 'do not have the same length'
+                #print 'purpleAirDataPrimaryFeed' + str(len(purpleAirDataPrimaryFeed)) and 'purpleAirDataSecondaryFeed' + str(len(purpleAirDataSecondaryFeed))
                 diff = len(purpleAirDataPrimaryFeed) - len(purpleAirDataSecondaryFeed)
                 # print diff
 
@@ -422,8 +452,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
                 # print point['tags']['ID']
                 print 'writing the point'
-                print point['time']
-                print point['tags']
+                print point['tags']['ID']
                 print point['fields']
 
                 try:
