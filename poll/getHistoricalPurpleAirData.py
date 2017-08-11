@@ -91,7 +91,7 @@ def getDualStationsWithPartner():
         purpleAirData = urllib2.urlopen("https://map.purpleair.org/json").read()
     except urllib2.URLError, e:
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; their server appears to be down.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
 
     purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
     purpleAirData = json.loads(purpleAirData)['results']
@@ -151,7 +151,7 @@ def getPurpleAirJSON():
         purpleAirData = urllib2.urlopen(purpleAirJSONUrl).read()
     except urllib2.URLError, e:
         sys.stderr.write('%s\t' + errorMsg_acquiringData + '\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
         return []
 
     purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
@@ -300,7 +300,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
             except urllib2.URLError, e:
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
                 continue
 
             purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
@@ -343,7 +343,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
             except urllib2.URLError, e:
                 sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
                 # return []
                 continue
             except httplib.BadStatusLine:
