@@ -209,33 +209,33 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
     # purpleAirData = getPurpleAirJSON()
     utahStations = getPurpleAirUtahStations()
     # utahStations = [{
-#         "Uptime": "14740", 
-#         "DEVICE_LOCATIONTYPE": None, 
-#         "Stats": "{\"v\":5.45,\"v1\":5.512151064797823,\"v2\":5.492102614987235,\"v3\":6.1928332375489905,\"v4\":16.686150578813297,\"v5\":23.19637700473396,\"v6\":18.422810571120202,\"pm\":5.45,\"lastModified\":1502315091144,\"timeSinceModified\":79777}", 
-#         "AGE": 0, 
-#         "THINGSPEAK_SECONDARY_ID": "130167", 
-#         "Label": "Kimball Junction P1", 
-#         "State": None, 
-#         "Version": "2.49j", 
-#         "Hidden": "false", 
-#         "Type": "PMS5003+BME280+PUB+GROUP+04", 
-#         "LastUpdateCheck": 1502314762, 
-#         "ID": 157, 
-#         "Flag": None, 
-#         "LastSeen": 1502315091, 
-#         "Lat": "40.72681158460979", 
-#         "RSSI": "-65", 
-#         "THINGSPEAK_SECONDARY_ID_READ_KEY": "OEXR74601NGW4L4Q", 
-#         "Lon": "-111.53894305229187", 
-#         "THINGSPEAK_PRIMARY_ID": "130166", 
-#         "temp_f": "82", 
-#         "pressure": "809.59", 
-#         "DEVICE_BRIGHTNESS": "25", 
-#         "A_H": None, 
-#         "THINGSPEAK_PRIMARY_ID_READ_KEY": "NLMVAZBC59J6OT0K", 
-#         "PM2_5Value": "5.45", 
-#         "isOwner": 0, 
-#         "humidity": "27", 
+#         "Uptime": "14740",
+#         "DEVICE_LOCATIONTYPE": None,
+#         "Stats": "{\"v\":5.45,\"v1\":5.512151064797823,\"v2\":5.492102614987235,\"v3\":6.1928332375489905,\"v4\":16.686150578813297,\"v5\":23.19637700473396,\"v6\":18.422810571120202,\"pm\":5.45,\"lastModified\":1502315091144,\"timeSinceModified\":79777}",
+#         "AGE": 0,
+#         "THINGSPEAK_SECONDARY_ID": "130167",
+#         "Label": "Kimball Junction P1",
+#         "State": None,
+#         "Version": "2.49j",
+#         "Hidden": "false",
+#         "Type": "PMS5003+BME280+PUB+GROUP+04",
+#         "LastUpdateCheck": 1502314762,
+#         "ID": 157,
+#         "Flag": None,
+#         "LastSeen": 1502315091,
+#         "Lat": "40.72681158460979",
+#         "RSSI": "-65",
+#         "THINGSPEAK_SECONDARY_ID_READ_KEY": "OEXR74601NGW4L4Q",
+#         "Lon": "-111.53894305229187",
+#         "THINGSPEAK_PRIMARY_ID": "130166",
+#         "temp_f": "82",
+#         "pressure": "809.59",
+#         "DEVICE_BRIGHTNESS": "25",
+#         "A_H": None,
+#         "THINGSPEAK_PRIMARY_ID_READ_KEY": "NLMVAZBC59J6OT0K",
+#         "PM2_5Value": "5.45",
+#         "isOwner": 0,
+#         "humidity": "27",
 #         "ParentID": None
 #     }]
 
@@ -306,8 +306,8 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
                 continue
             except httplib.BadStatusLine as error:
-            	sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
-            	continue
+                sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
+                continue
 
             purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
             purpleAirDataPrimaryChannel = json.loads(purpleAirDataPrimary)['channel']
