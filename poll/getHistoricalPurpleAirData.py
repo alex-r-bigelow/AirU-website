@@ -155,7 +155,7 @@ def getPurpleAirJSON():
         return []
     except httplib.BadStatusLine as error:
         sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
-        continue
+        return []
 
     purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
     purpleAirData = json.loads(purpleAirData)['results']
