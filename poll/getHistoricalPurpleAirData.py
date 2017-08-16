@@ -305,8 +305,8 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
                 sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
                 continue
-            except httplib.BadStatusLine as error
-            	sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.line))
+            except httplib.BadStatusLine as error:
+            	sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
             	continue
 
             purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
