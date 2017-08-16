@@ -149,10 +149,13 @@ def getPurpleAirJSON():
 
     try:
         purpleAirData = urllib2.urlopen(purpleAirJSONUrl).read()
-    except urllib2.URLError, e:
+    except urllib2.URLError as error:
         sys.stderr.write('%s\t' + errorMsg_acquiringData + '\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
         return []
+    except httplib.BadStatusLine as error:
+        sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
+        continue
 
     purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
     purpleAirData = json.loads(purpleAirData)['results']
@@ -298,10 +301,13 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             try:
                 purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
-            except urllib2.URLError, e:
+            except urllib2.URLError as error:
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
                 continue
+            except httplib.BadStatusLine as error
+            	sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.line))
+            	continue
 
             purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
             purpleAirDataPrimaryChannel = json.loads(purpleAirDataPrimary)['channel']
@@ -341,13 +347,13 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             try:
                 purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
-            except urllib2.URLError, e:
+            except urllib2.URLError as error:
                 sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
-                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
                 # return []
                 continue
-            except httplib.BadStatusLine:
-                sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, queryPrimaryFeed))
+            except httplib.BadStatusLine as error:
+                sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
                 continue
 
             purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
