@@ -240,26 +240,6 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 #     }]
 
     for station in utahStations:
-        # # print station
-        #
-        # # simplified bbox from:
-        # # https://gist.github.com/mishari/5ecfccd219925c04ac32
-        # utahBbox = {
-        #     'left': 36.9979667663574,
-        #     'right': 42.0013885498047,
-        #     'bottom': -114.053932189941,
-        #     'top': -109.041069030762
-        # }
-        # # lat = specifies north-south position
-        # # log = specifies east-west position
-        #
-        # if station['Lat'] is None or station['Lon'] is None:
-        #     # logging.info('latitude or longitude is None')
-        #     continue
-        #
-        # if not((float(station['Lon']) < float(utahBbox['top'])) and (float(station['Lon']) > float(utahBbox['bottom']))) or not((float(station['Lat']) > float(utahBbox['left'])) and(float(station['Lat']) < float(utahBbox['right']))):
-        #     # logging.info('Not in Utah')
-        #     continue
 
         point = {
             'measurement': 'airQuality',
@@ -278,10 +258,6 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
             # logging.info('primaryID or primaryIDReadKey is None')
             continue
 
-        # transform to datetime
-        # start = datetime.strptime(startDate, '%Y-%m-%d%%00%H:%M:%S')
-        # end = datetime.strptime(endDate, '%Y-%m-%d%%00%H:%M:%S')
-
         dailyDates = generateDailyDates(startDate, endDate, timedelta(days=1))
         # print dailyDates
 
@@ -296,8 +272,8 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
             primaryPart4 = '&end='
             queryPrimaryFeed = primaryPart1 + primaryID + primaryPart2 + primaryIDReadKey + primaryPart3 + initialDate + primaryPart4 + aDay
 
-            print 'primaryfeed'
-            print queryPrimaryFeed
+            #print 'primaryfeed'
+            #print queryPrimaryFeed
 
             try:
                 purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
@@ -340,8 +316,8 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             querySecondaryFeed = secondaryPart1 + secondaryID + secondaryPart2 + secondaryIDReadKey + secondaryPart3 + initialDate + secondaryPart4 + aDay
 
-            print 'secondaryID'
-            print querySecondaryFeed
+            # print 'secondaryID'
+            # print querySecondaryFeed
 
             initialDate = aDay
 
@@ -350,7 +326,6 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
             except urllib2.URLError as error:
                 sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
                 sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
-                # return []
                 continue
             except httplib.BadStatusLine as error:
                 sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
@@ -457,9 +432,9 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 # print point['fields']
 
                 # print point['tags']['ID']
-                print 'writing the point'
-                print point['tags']['ID']
-                print point['fields']
+                # print 'writing the point'
+                # print point['tags']['ID']
+                # print point['fields']
 
                 try:
                     client.write_points([point])
@@ -473,12 +448,6 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 def storeDualSensorDataInCSV(client, startDate, endDate):
 
     filename = '/home/pgoffin/winter-dual-sensor-pm-data.csv'
-
-    # transform to datetime
-    # start = datetime.strptime(startDate, '%Y-%m-%d%%00%H:%M:%S')
-    # end = datetime.strptime(endDate, '%Y-%m-%d%%00%H:%M:%S')
-
-    # print start + ' ' + end
 
     # writing header
     writeLoggingDataToFile(filename, [
@@ -514,7 +483,6 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
 
             initialDate = anEndDate
 
-        print 'DONE'
 
 # usage python getHistoricalPurpleAirData.py vagrant/airUServer populateDB/storeDualSensorsInFile/getUtahPA 2016-12-15T00:00:00Z 2016-12-22T00:00:00Z
 # vagrant/airUServer is found in sys.argv[1]
