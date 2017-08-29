@@ -2,106 +2,126 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Grafana Clone</title>
-    <!-- <title><%= (typeof title != "undefined" ? title : "") %></title> -->
-    <!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
-    <!--CSS Includes-->
-    <link rel="stylesheet" type="text/css" href="CSS/mainPage.css">
-    <!--load library for a variety of unicode favicons-->
-    <link rel="stylesheet" href="FontAwesome/css/font-awesome.min.css">
-    <!--Load D3-->
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-
+    <title>Map</title>
+    <link rel="stylesheet" href="./css/map.css"/>
+    <link rel="stylesheet" href="./css/leaflet-sidebar.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin=""></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-easybutton@2.0.0/src/easy-button.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- <script src="https://unpkg.com/leaflet-easybutton@2.0.0/src/easy-button.js"></script> -->
+    <script src="./js/leaflet-sidebar.min.js"></script>
   </head>
   <body>
-    <!-- <h1><%= (typeof title != "undefined" ? title : "") %></h1>
-    <p>Welcome to <%= (typeof title != "undefined" ? title : "") %></p> -->
+      <body>
+  		<div id="sidebar" class="sidebar collapsed">
+  			<!-- Nav tabs -->
+  			<div class="sidebar-tabs">
+  				<ul role="tablist">
+  					<li><a href="#Q1" role="tab">Q1</a></li>
+  					<li><a href="#Q2" role="tab">Q2</a></li>
+  					<li><a href="#Q3" role="tab">Q3</i></a></li>
+  					<!-- <li class="disabled"><a href="#messages" role="tab"><i class="fa fa-envelope"></i></a></li> -->
+  					<!-- <li><a href="https://github.com/Turbo87/sidebar-v2" role="tab" target="_blank"><i class="fa fa-github"></i></a></li> -->
+  				</ul>
 
-    <div id="clockDisplay">
-        <p id="clockTime"></p>
-        <p id="writtenTime"></p>
-    </div>
+  				<ul role="tablist">
+  					<li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
+  				</ul>
+  			</div>
 
-    <div id="container">
-        <div id="btnDiv">
-            <button type="button" class="sbtn" value = "3" id="b3h" >3 h</button>
-            <button type="button" class="sbtn" value = "6" id="b6h" >6 h</button>
-            <button type="button" class="sbtn" value = "12" id="b12h" >12 h</button>
-            <button type="button" class="sbtn" value = "24" id="b24h" >24 h</button>
-            <button type="button" class="sbtn" value = "48" id="b48h" >2 d</button>
-            <button type="button" class="sbtn" value = "168" id="b168h" >1 w</button>
-        </div>
-        <div id="scrubContainer">
-            <svg width="770" height="480"></svg>
-        </div>
+  			<!-- Tab panes -->
+  			<div class="sidebar-content">
+  				<div class="sidebar-pane" id="Q1">
+  					<h1 class="sidebar-header">
+  						Why not use EPA classification color map?
+  						<span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+  					</h1>
 
-        <div class="legend"></div>
+  					<p>This would be a more explanative piece that explains why we are not using the EPA classification color map.</p>
+  				</div>
 
-    </div>
+  				<div class="sidebar-pane" id="Q2">
+  					<h1 class="sidebar-header">
+  						Influence of elevation on air quality?
+  						<span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+  					</h1>
 
-    <p id="dateRange"></p>
+  					<p>
+  						<ul>
+  							<li>See landmarks (markers); see current location, which is a selected or searched location.</li>
+  							<li>Algorithm takes current location and fits an approximately east-west line through the current location and landmarks</li>
+  						</ul>
+  					</p>
+  				</div>
 
-    <!-- <div id="dataSource" style="display: none">
-        <select id="deploymentID" onchange="getDatasets()">
-            <option value="deployment_001"> Kristen - Deployment 001</option>
-            <option value="deployment_002"> Scott - Deployment 002</option>
-            <option value="deployment_003"> The Hales - Deployment 003</option>
-            <option value="deployment_005"> Kathy - Deployment 005</option>
-            <option value="deployment_008"> Liz - Deployment 008</option>
-            <option value="deployment_009"> Deployment 009</option>
-            <option value="deployment_011"> Neal - Deployment 011</option>
-            <option value="deployment_015"> Phil - Deployment 015</option>
-            <option selected="selected" value="deployment_016"> Miriah - Deployment 016</option>
-            <option value="deployment_017"> Phil Office - Deployment 017</option>
-        </select> -->
+  				<div class="sidebar-pane" id="Q3">
+  					<h1 class="sidebar-header">
+  						Compare with bad air quality days?
+  						<span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+  					</h1>
 
-        <!-- <select id="scaling" onchange="setScale()">
-            <option value="log"> Logarithmic</option>
-            <option selected="selected" value="linear">Linear Scaling</option>
-        </select> -->
+  					<p>
+  						This view is all about comparing to bad AQ days.
+  						<ul>
+  							<li>Current location where same location for bad air days;</li>
+  							<li>landmarks with current AQ, compared to pas bad air days</li>
+  						</ul>
+  					</p>
+  				</div>
 
-        <!--<select id="aggDropdown" onchange="getDatasets()">-->
-            <!--<option value="full"> Full Dataset</option>-->
-            <!--<option selected="selected" value="downsampled">Downsampled Dataset</option>-->
-        <!--</select>-->
+  				<!-- <div class="sidebar-pane" id="profile">
+  					<h1 class="sidebar-header">Profile<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+  				</div>
 
-    </div>
+  				<div class="sidebar-pane" id="messages">
+  					<h1 class="sidebar-header">Messages<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+  				</div>
 
-    <!-- The Modal Window -->
-    <div id="myModal" class="modal">
+  				<div class="sidebar-pane" id="settings">
+  					<h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+  				</div> -->
+  			</div>
+  		</div>
 
-        <!-- Modal content -->
-        <div class="modal-content">
-            <span class="close"></span>
-            <div id="modalHeader">
-                <h4>Annotate an Event</h4>
-            </div>
+  		<!-- the map -->
+  		<div id='slc'></div>
 
-            <p id="modalDescriptionText">    Leave a note for the following Time: </p>
+  		<script>
 
-            <div id="modalTimeDisplay">
-                <p id="clickedTime"></p>
-            </div>
+  			var accessToken = 'pk.eyJ1Ijoib3NjYXJpbnNsYyIsImEiOiJjajZ3bG5kbnUxN2h3Mnd1aDdlOTJ6ZnUzIn0.fLYowxdcPCmZSLt51mG8tw';
+  			var slcPosition = [40.758701, -111.876183];
+  			var homeMarker = [40.779821, -111.877877];
+  			var slcMap = L.map('slc', {
+  				center: slcPosition,
+  				zoom: 13,
+  				trackResize: true
+  			});
 
-            <textarea class="textArea"></textarea>
 
-            <div id="modalSubmitButton">
-                <input type="submit" class="modalSubmit">
-            </div>
+  			L.tileLayer('http://api.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+  				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+  				maxZoom: 18,
+  				id: 'mapbox.light',
+  				accessToken: accessToken
+  			}).addTo(slcMap);
 
-        </div>
-    </div>
+  			var marker = L.marker(homeMarker).addTo(slcMap);
+  			marker.bindPopup("<b>This is my home</b><br>What could I show here.");
 
-    <!-- The Loading screen -->
-    <div id="loadingModal" class=modal>
-        <div id="img-container">
-                <img id="loadingGif">
-        </div>
-    </div>
 
-    <!--Additional Code-->
+  			// L.easyButton({
+  			// 	states: [{
+  			// 		icon: '<span class="star">Why color map not using EPA classifcation color map?</span>',
+  			// 		onClick: function(){ alert('you just clicked the html entity \&starf;'); },
+  			// 		position: 'bottomright',
+  			// 	}]
+  			// }).addTo(slcMap);
 
-    <script src="js/highlightAndScrub.js"></script>
-    <script src="js/mainPage.js"></script>
+  			var sidebar = L.control.sidebar('sidebar').addTo(slcMap);
+
+  		</script>
   </body>
 </html>

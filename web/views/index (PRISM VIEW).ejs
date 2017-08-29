@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Grafana Clone</title>
+    <!-- <title><%= (typeof title != "undefined" ? title : "") %></title> -->
+    <!-- <link rel='stylesheet' href='/stylesheets/style.css' /> -->
+    <!--CSS Includes-->
+    <link rel="stylesheet" type="text/css" href="css/mainPage.css">
+    <!--load library for a variety of unicode favicons-->
+    <link rel="stylesheet" href="FontAwesome/css/font-awesome.min.css">
+    <!--Load D3-->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+  </head>
+  <body>
+    <!-- <h1><%= (typeof title != "undefined" ? title : "") %></h1>
+    <p>Welcome to <%= (typeof title != "undefined" ? title : "") %></p> -->
+
+    <div id="clockDisplay">
+        <p id="clockTime"></p>
+        <p id="writtenTime"></p>
+    </div>
+
+    <div id="container">
+        <div id="btnDiv">
+            <button type="button" class="sbtn" value = "3" id="b3h" >3 h</button>
+            <button type="button" class="sbtn" value = "6" id="b6h" >6 h</button>
+            <button type="button" class="sbtn" value = "12" id="b12h" >12 h</button>
+            <button type="button" class="sbtn" value = "24" id="b24h" >24 h</button>
+            <button type="button" class="sbtn" value = "48" id="b48h" >2 d</button>
+            <button type="button" class="sbtn" value = "168" id="b168h" >1 w</button>
+        </div>
+        <div id="scrubContainer">
+            <svg width="770" height="480"></svg>
+        </div>
+
+        <div class="legend"></div>
+
+    </div>
+
+    <p id="dateRange"></p>
+
+    <!-- <div id="dataSource" style="display: none">
+        <select id="deploymentID" onchange="getDatasets()">
+            <option value="deployment_001"> Kristen - Deployment 001</option>
+            <option value="deployment_002"> Scott - Deployment 002</option>
+            <option value="deployment_003"> The Hales - Deployment 003</option>
+            <option value="deployment_005"> Kathy - Deployment 005</option>
+            <option value="deployment_008"> Liz - Deployment 008</option>
+            <option value="deployment_009"> Deployment 009</option>
+            <option value="deployment_011"> Neal - Deployment 011</option>
+            <option value="deployment_015"> Phil - Deployment 015</option>
+            <option selected="selected" value="deployment_016"> Miriah - Deployment 016</option>
+            <option value="deployment_017"> Phil Office - Deployment 017</option>
+        </select> -->
+
+        <!-- <select id="scaling" onchange="setScale()">
+            <option value="log"> Logarithmic</option>
+            <option selected="selected" value="linear">Linear Scaling</option>
+        </select> -->
+
+        <!--<select id="aggDropdown" onchange="getDatasets()">-->
+            <!--<option value="full"> Full Dataset</option>-->
+            <!--<option selected="selected" value="downsampled">Downsampled Dataset</option>-->
+        <!--</select>-->
+
+    </div>
+
+    <!-- The Modal Window -->
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close"></span>
+            <div id="modalHeader">
+                <h4>Annotate an Event</h4>
+            </div>
+
+            <p id="modalDescriptionText">    Leave a note for the following Time: </p>
+
+            <div id="modalTimeDisplay">
+                <p id="clickedTime"></p>
+            </div>
+
+            <textarea class="textArea"></textarea>
+
+            <div id="modalSubmitButton">
+                <input type="submit" class="modalSubmit">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- The Loading screen -->
+    <div id="loadingModal" class=modal>
+        <div id="img-container">
+                <img id="loadingGif">
+        </div>
+    </div>
+
+    <!--Additional Code-->
+
+    <script src="js/highlightAndScrub.js"></script>
+    <script src="js/mainPage.js"></script>
+  </body>
+</html>
