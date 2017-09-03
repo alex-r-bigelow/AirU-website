@@ -11,7 +11,7 @@ router.get('/uploader', function(req, res, next) {
 });
 
 
-app.post('/upload', function(req, res){
+router.post('/upload', function(req, res){
 
   // create an incoming form object
   var form = new formidable.IncomingForm();
