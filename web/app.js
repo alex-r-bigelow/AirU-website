@@ -6,8 +6,12 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+var formidable = require('formidable');
+var fs = require('fs');
+
 var index = require('./routes/index');
 var sensors = require('./routes/sensors');
+var uploader = require('./routes/uploader');
 
 var app = express();
 
@@ -43,6 +47,7 @@ app.use(function(req, res, next) {
 
 app.use('/', index);
 app.use('/sensors', sensors);
+app.use('/upload', uploader);
 
 // var Category = app.resource = restful.model('category', mongoose.Schema({
 //   cat_name: String,
