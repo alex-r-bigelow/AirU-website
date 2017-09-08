@@ -1,10 +1,11 @@
 import csv
-import httplib
+# import httplib
 import json
 # import logging
 import pytz
 import sys
-import urllib2
+# import urllib2
+import requests
 
 from datetime import datetime
 from datetime import timedelta
@@ -46,7 +47,7 @@ def getConfig(locationRun):
 
     configPath = ''
     if locationRun == 'vagrant':
-        configPath = '/../config/config.json'
+        configPath = './../config/config.json'
     elif locationRun == 'airUServer':
         configPath = '/../config/config.json'
 
@@ -87,14 +88,36 @@ def writeLoggingDataToFile(fileName, data):
 
 
 def getDualStationsWithPartner():
-    try:
-        purpleAirData = urllib2.urlopen("https://map.purpleair.org/json").read()
-    except urllib2.URLError, e:
-        sys.stderr.write('%s\tProblem acquiring PurpleAir data; their server appears to be down.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
+    # try:
+    #     purpleAirData = urllib2.urlopen("https://map.purpleair.org/json").read()
+    # except urllib2.URLError, e:
+    #     sys.stderr.write('%s\tProblem acquiring PurpleAir data; their server appears to be down.\n' % TIMESTAMP)
+    #     sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+    #
+    # purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
+    # purpleAirData = json.loads(purpleAirData)['results']
 
-    purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
-    purpleAirData = json.loads(purpleAirData)['results']
+    try:
+        purpleAirData = requests.get("https://map.purpleair.org/json")
+        purpleAirData.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+    except requests.exceptions.Timeout as e:
+        # Maybe set up for a retry, or continue in a retry loop
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+    except requests.exceptions.TooManyRedirects as e:
+        # Tell the user their URL was bad and try a different one
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+    except requests.exceptions.RequestException as e:
+        # catastrophic error. bail.
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.exit(1)
+
+    purpleAirData = purpleAirData.json()['results']
 
     noParentStations = []
 
@@ -145,20 +168,39 @@ def getDualStationsWithPartner():
 
 def getPurpleAirJSON():
     purpleAirJSONUrl = "https://map.purpleair.org/json"
-    errorMsg_acquiringData = 'Problem acquiring PurpleAir data; their server appears to be down.'
+    # errorMsg_acquiringData = 'Problem acquiring PurpleAir data; their server appears to be down.'
+
+    # try:
+    #     purpleAirData = urllib2.urlopen(purpleAirJSONUrl).read()
+    # except urllib2.URLError, e:
+    #     sys.stderr.write('%s\t' + errorMsg_acquiringData + '\n' % TIMESTAMP)
+    #     sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+    #     return []
+
+    # purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
+    # purpleAirData = json.loads(purpleAirData)['results']
 
     try:
-        purpleAirData = urllib2.urlopen(purpleAirJSONUrl).read()
-    except urllib2.URLError as error:
-        sys.stderr.write('%s\t' + errorMsg_acquiringData + '\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
-        return []
-    except httplib.BadStatusLine as error:
-        sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
+        purpleAirData = requests.get(purpleAirJSONUrl)
+        purpleAirData.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+    except requests.exceptions.Timeout as e:
+        # Maybe set up for a retry, or continue in a retry loop
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+    except requests.exceptions.TooManyRedirects as e:
+        # Tell the user their URL was bad and try a different one
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+    except requests.exceptions.RequestException as e:
+        # catastrophic error. bail.
+        sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
+        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
         return []
 
-    purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
-    purpleAirData = json.loads(purpleAirData)['results']
+    purpleAirData = purpleAirData.json()['results']
 
     return purpleAirData
 
@@ -208,38 +250,28 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
     # purpleAirData = getPurpleAirJSON()
     utahStations = getPurpleAirUtahStations()
-    # utahStations = [{
-#         "Uptime": "14740",
-#         "DEVICE_LOCATIONTYPE": None,
-#         "Stats": "{\"v\":5.45,\"v1\":5.512151064797823,\"v2\":5.492102614987235,\"v3\":6.1928332375489905,\"v4\":16.686150578813297,\"v5\":23.19637700473396,\"v6\":18.422810571120202,\"pm\":5.45,\"lastModified\":1502315091144,\"timeSinceModified\":79777}",
-#         "AGE": 0,
-#         "THINGSPEAK_SECONDARY_ID": "130167",
-#         "Label": "Kimball Junction P1",
-#         "State": None,
-#         "Version": "2.49j",
-#         "Hidden": "false",
-#         "Type": "PMS5003+BME280+PUB+GROUP+04",
-#         "LastUpdateCheck": 1502314762,
-#         "ID": 157,
-#         "Flag": None,
-#         "LastSeen": 1502315091,
-#         "Lat": "40.72681158460979",
-#         "RSSI": "-65",
-#         "THINGSPEAK_SECONDARY_ID_READ_KEY": "OEXR74601NGW4L4Q",
-#         "Lon": "-111.53894305229187",
-#         "THINGSPEAK_PRIMARY_ID": "130166",
-#         "temp_f": "82",
-#         "pressure": "809.59",
-#         "DEVICE_BRIGHTNESS": "25",
-#         "A_H": None,
-#         "THINGSPEAK_PRIMARY_ID_READ_KEY": "NLMVAZBC59J6OT0K",
-#         "PM2_5Value": "5.45",
-#         "isOwner": 0,
-#         "humidity": "27",
-#         "ParentID": None
-#     }]
 
     for station in utahStations:
+        # # print station
+        #
+        # # simplified bbox from:
+        # # https://gist.github.com/mishari/5ecfccd219925c04ac32
+        # utahBbox = {
+        #     'left': 36.9979667663574,
+        #     'right': 42.0013885498047,
+        #     'bottom': -114.053932189941,
+        #     'top': -109.041069030762
+        # }
+        # # lat = specifies north-south position
+        # # log = specifies east-west position
+        #
+        # if station['Lat'] is None or station['Lon'] is None:
+        #     # logging.info('latitude or longitude is None')
+        #     continue
+        #
+        # if not((float(station['Lon']) < float(utahBbox['top'])) and (float(station['Lon']) > float(utahBbox['bottom']))) or not((float(station['Lat']) > float(utahBbox['left'])) and(float(station['Lat']) < float(utahBbox['right']))):
+        #     # logging.info('Not in Utah')
+        #     continue
 
         point = {
             'measurement': 'airQuality',
@@ -258,12 +290,16 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
             # logging.info('primaryID or primaryIDReadKey is None')
             continue
 
+        # transform to datetime
+        # start = datetime.strptime(startDate, '%Y-%m-%d%%00%H:%M:%S')
+        # end = datetime.strptime(endDate, '%Y-%m-%d%%00%H:%M:%S')
+
         dailyDates = generateDailyDates(startDate, endDate, timedelta(days=1))
         # print dailyDates
 
         initialDate = dailyDates[0]
         for aDay in dailyDates[1:]:
-            #print aDay
+            print aDay
 
             # because we poll every 5min, and purple Air has a new value roughly every 1min 10sec, to be safe take the last 10 results
             primaryPart1 = 'https://api.thingspeak.com/channels/'
@@ -272,22 +308,42 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
             primaryPart4 = '&end='
             queryPrimaryFeed = primaryPart1 + primaryID + primaryPart2 + primaryIDReadKey + primaryPart3 + initialDate + primaryPart4 + aDay
 
-            #print 'primaryfeed'
-            #print queryPrimaryFeed
+            print 'primaryfeed'
+            print queryPrimaryFeed
+
+            # try:
+            #     purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
+            # except urllib2.URLError, e:
+            #     sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
+            #     sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+            #     continue
 
             try:
-                purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
-            except urllib2.URLError as error:
-                sys.stderr.write('%s\tProblem acquiring PurpleAir data from thingspeak; their server appears to be down.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
-                continue
-            except httplib.BadStatusLine as error:
-                sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
+                purpleAirDataPrimary = requests.get(queryPrimaryFeed)
+                purpleAirDataPrimary.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+            except requests.exceptions.Timeout as e:
+                # Maybe set up for a retry, or continue in a retry loop
+                sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+            except requests.exceptions.TooManyRedirects as e:
+                # Tell the user their URL was bad and try a different one
+                sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+            except requests.exceptions.RequestException as e:
+                # catastrophic error. bail.
+                sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
                 continue
 
-            purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
-            purpleAirDataPrimaryChannel = json.loads(purpleAirDataPrimary)['channel']
-            purpleAirDataPrimaryFeed = json.loads(purpleAirDataPrimary)['feeds']
+            purpleAirDataPrimaryChannel = purpleAirDataPrimary.json()['channel']
+            purpleAirDataPrimaryFeed = purpleAirDataPrimary.json()['feeds']
+
+            # purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
+            # purpleAirDataPrimaryChannel = json.loads(purpleAirDataPrimary)['channel']
+            # purpleAirDataPrimaryFeed = json.loads(purpleAirDataPrimary)['feeds']
             # print 'purpleAirDataPrimaryFeed'
             # print purpleAirDataPrimaryFeed
 
@@ -299,7 +355,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 pass
 
             point['tags']['Start'] = start
-            #print start
+            # print start
 
             # getting thingspeak secondary feed data: PM1 and PM10
             secondaryID = station['THINGSPEAK_SECONDARY_ID']
@@ -316,23 +372,46 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             querySecondaryFeed = secondaryPart1 + secondaryID + secondaryPart2 + secondaryIDReadKey + secondaryPart3 + initialDate + secondaryPart4 + aDay
 
-            # print 'secondaryID'
-            # print querySecondaryFeed
+            print 'secondaryID'
+            print querySecondaryFeed
 
             initialDate = aDay
 
+            # try:
+            #     purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
+            # except urllib2.URLError, e:
+            #     sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
+            #     sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+            #     # return []
+            #     continue
+            # except httplib.BadStatusLine:
+            #     sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, queryPrimaryFeed))
+            #     continue
+
             try:
-                purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
-            except urllib2.URLError as error:
-                sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
-                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, error.reason))
-                continue
-            except httplib.BadStatusLine as error:
-                sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, error.line))
+                purpleAirDataSecondary = requests.get(querySecondaryFeed)
+                purpleAirDataSecondary.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+            except requests.exceptions.Timeout as e:
+                # Maybe set up for a retry, or continue in a retry loop
+                sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+            except requests.exceptions.TooManyRedirects as e:
+                # Tell the user their URL was bad and try a different one
+                sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+            except requests.exceptions.RequestException as e:
+                # catastrophic error. bail.
+                sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
+                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
                 continue
 
-            purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
-            purpleAirDataSecondaryFeed = json.loads(purpleAirDataSecondary)['feeds']
+            purpleAirDataSecondaryFeed = purpleAirDataSecondary.json()['feeds']
+
+            # purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
+            # purpleAirDataSecondaryFeed = json.loads(purpleAirDataSecondary)['feeds']
             # print 'purpleAirDataSecondaryFeed'
             # print len(purpleAirDataSecondaryFeed)
             # print 'purpleAirDataPrimaryFeed'
@@ -340,8 +419,8 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             diff = 0
             if len(purpleAirDataPrimaryFeed) != len(purpleAirDataSecondaryFeed):
-                #print 'do not have the same length'
-                #print 'purpleAirDataPrimaryFeed' + str(len(purpleAirDataPrimaryFeed)) and 'purpleAirDataSecondaryFeed' + str(len(purpleAirDataSecondaryFeed))
+                print 'do not have the same length'
+                print 'purpleAirDataPrimaryFeed' + str(len(purpleAirDataPrimaryFeed)) and 'purpleAirDataSecondaryFeed' + str(len(purpleAirDataSecondaryFeed))
                 diff = len(purpleAirDataPrimaryFeed) - len(purpleAirDataSecondaryFeed)
                 # print diff
 
@@ -432,9 +511,10 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 # print point['fields']
 
                 # print point['tags']['ID']
-                # print 'writing the point'
-                # print point['tags']['ID']
-                # print point['fields']
+                print 'writing the point'
+                print point['time']
+                print point['tags']
+                print point['fields']
 
                 try:
                     client.write_points([point])
@@ -448,6 +528,12 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 def storeDualSensorDataInCSV(client, startDate, endDate):
 
     filename = '/home/pgoffin/winter-dual-sensor-pm-data.csv'
+
+    # transform to datetime
+    # start = datetime.strptime(startDate, '%Y-%m-%d%%00%H:%M:%S')
+    # end = datetime.strptime(endDate, '%Y-%m-%d%%00%H:%M:%S')
+
+    # print start + ' ' + end
 
     # writing header
     writeLoggingDataToFile(filename, [
@@ -469,10 +555,10 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
         print stationID
 
         for anEndDate in hourlyDates:
-            #print initialDate
-            #print anEndDate
+            # print initialDate
+            # print anEndDate
             # print 'SELECT * FROM airQuality WHERE Source = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
-        #         result = client.query('SELECT * FROM airQuality WHERE ID=\'84\' AND time >= \'' + initialDate + '\' AND time <= \'' + anEndDate + '\';')
+            # result = client.query('SELECT * FROM airQuality WHERE ID=\'84\' AND time >= \'' + initialDate + '\' AND time <= \'' + anEndDate + '\';')
             result = client.query('SELECT * FROM airQuality WHERE ID = \'' + str(stationID) + '\' AND time >= \'' + initialDate + '\' AND time <= \'' + anEndDate + '\';')
 
             result = list(result.get_points())
@@ -482,6 +568,8 @@ def storeDualSensorDataInCSV(client, startDate, endDate):
                 writeLoggingDataToFile(filename, [row['time'], row['ID'], station['parentID'], row['Latitude'], row['Longitude'], row['pm2.5 (ug/m^3)']])
 
             initialDate = anEndDate
+
+        print 'DONE'
 
 
 # usage python getHistoricalPurpleAirData.py vagrant/airUServer populateDB/storeDualSensorsInFile/getUtahPA 2016-12-15T00:00:00Z 2016-12-22T00:00:00Z
