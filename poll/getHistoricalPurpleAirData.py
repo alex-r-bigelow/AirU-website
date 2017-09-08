@@ -102,19 +102,19 @@ def getDualStationsWithPartner():
         purpleAirData.raise_for_status()
     except requests.exceptions.HTTPError as e:
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
     except requests.exceptions.Timeout as e:
         # Maybe set up for a retry, or continue in a retry loop
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
     except requests.exceptions.TooManyRedirects as e:
         # Tell the user their URL was bad and try a different one
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
     except requests.exceptions.RequestException as e:
         # catastrophic error. bail.
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
         sys.exit(1)
 
     purpleAirData = purpleAirData.json()['results']
@@ -184,20 +184,27 @@ def getPurpleAirJSON():
         purpleAirData = requests.get(purpleAirJSONUrl)
         purpleAirData.raise_for_status()
     except requests.exceptions.HTTPError as e:
+        print purpleAirJSONUrl
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
+        return []
     except requests.exceptions.Timeout as e:
+        print purpleAirJSONUrl
         # Maybe set up for a retry, or continue in a retry loop
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
+        return []
     except requests.exceptions.TooManyRedirects as e:
+        print purpleAirJSONUrl
         # Tell the user their URL was bad and try a different one
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
+        return []
     except requests.exceptions.RequestException as e:
+        print purpleAirJSONUrl
         # catastrophic error. bail.
         sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
-        sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+        sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
         return []
 
     purpleAirData = purpleAirData.json()['results']
@@ -299,7 +306,7 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
         initialDate = dailyDates[0]
         for aDay in dailyDates[1:]:
-            print aDay
+            # print aDay
 
             # because we poll every 5min, and purple Air has a new value roughly every 1min 10sec, to be safe take the last 10 results
             primaryPart1 = 'https://api.thingspeak.com/channels/'
@@ -308,8 +315,8 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
             primaryPart4 = '&end='
             queryPrimaryFeed = primaryPart1 + primaryID + primaryPart2 + primaryIDReadKey + primaryPart3 + initialDate + primaryPart4 + aDay
 
-            print 'primaryfeed'
-            print queryPrimaryFeed
+            # print 'primaryfeed'
+            # print queryPrimaryFeed
 
             # try:
             #     purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
@@ -322,20 +329,28 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 purpleAirDataPrimary = requests.get(queryPrimaryFeed)
                 purpleAirDataPrimary.raise_for_status()
             except requests.exceptions.HTTPError as e:
+                print aDay
+                print queryPrimaryFeed
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
             except requests.exceptions.Timeout as e:
+                print aDay
+                print queryPrimaryFeed
                 # Maybe set up for a retry, or continue in a retry loop
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
             except requests.exceptions.TooManyRedirects as e:
+                print aDay
+                print queryPrimaryFeed
                 # Tell the user their URL was bad and try a different one
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
             except requests.exceptions.RequestException as e:
+                print aDay
+                print queryPrimaryFeed
                 # catastrophic error. bail.
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
                 continue
 
             purpleAirDataPrimaryChannel = purpleAirDataPrimary.json()['channel']
@@ -372,8 +387,8 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
 
             querySecondaryFeed = secondaryPart1 + secondaryID + secondaryPart2 + secondaryIDReadKey + secondaryPart3 + initialDate + secondaryPart4 + aDay
 
-            print 'secondaryID'
-            print querySecondaryFeed
+            # print 'secondaryID'
+            # print querySecondaryFeed
 
             initialDate = aDay
 
@@ -392,20 +407,28 @@ def getHistoricalPurpleAirData(client, startDate, endDate):
                 purpleAirDataSecondary = requests.get(querySecondaryFeed)
                 purpleAirDataSecondary.raise_for_status()
             except requests.exceptions.HTTPError as e:
+                print aDay
+                print querySecondaryFeed
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
             except requests.exceptions.Timeout as e:
+                print aDay
+                print querySecondaryFeed
                 # Maybe set up for a retry, or continue in a retry loop
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
             except requests.exceptions.TooManyRedirects as e:
+                print aDay
+                print querySecondaryFeed
                 # Tell the user their URL was bad and try a different one
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
             except requests.exceptions.RequestException as e:
+                print aDay
+                print querySecondaryFeed
                 # catastrophic error. bail.
                 sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
-                sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
+                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
                 continue
 
             purpleAirDataSecondaryFeed = purpleAirDataSecondary.json()['feeds']
