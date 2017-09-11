@@ -581,7 +581,9 @@ if __name__ == '__main__':
         8086,
         config['influxdbUsername'],
         config['influxdbPassword'],
-        'purpleAirHistoricData'
+        'purpleAirHistoricData',
+        ssl=True,
+        verify_ssl=True
     )
 
     # roughly 15 Dec to 28 Feb
