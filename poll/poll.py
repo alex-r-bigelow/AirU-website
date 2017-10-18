@@ -1,10 +1,8 @@
-# import httplib
 import json
 # import logging
 import pytz
 import requests
 import sys
-# import urllib2
 
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -81,7 +79,6 @@ PURPLE_AIR_FIELDS_PRI_FEED = {
     'pm2.5 (ug/m^3)': 'field8',     # 'PM2.5 (CF=1)',
 }
 
-
 PURPLE_AIR_FIELDS_SEC_FEED = {
     'pm1.0 (ug/m^3)': 'field7',     # 'PM1.0 (CF=1)',
     'pm10.0 (ug/m^3)': 'field8',    # 'PM10.0 (CF=1)',
@@ -96,7 +93,6 @@ PURPLE_AIR_TAGS = {
     # 'Altitude (m)': 'elevation'
     'Start': 'created_at'
 }
-
 
 DAQ_FIELDS = {
     # 'Pressure (Pa)': 'pressure',
@@ -118,7 +114,6 @@ DAQ_TAGS = {
     'Altitude (m)': 'elevation'
     # 'Start': 'created_at'
 }
-
 
 MESOWEST_FIELDS = {
     'Pressure (Pa)': 'pressure_set_1',
@@ -151,28 +146,17 @@ def uploadPurpleAirData(client):
         purpleAirData = requests.get("https://map.purpleair.org/json")
         purpleAirData.raise_for_status()
     except requests.exceptions.HTTPError as e:
-        # statusCode = e.response.status_code
-        # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json); HTTP error, status code: %s.\n' % (TIMESTAMP, statusCode))
         sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.Timeout as e:
-        # Maybe set up for a retry, or continue in a retry loop
-        # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json); timeout error.\n' % TIMESTAMP)
         sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.TooManyRedirects as e:
-        # Tell the user their URL was bad and try a different one
-        # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json); URL was bad.\n' % TIMESTAMP)
         sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.RequestException as e:
-        # catastrophic error. bail.
-        # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json); catastrophic error.\n' % TIMESTAMP)
         sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
-
-    # purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
-    # purpleAirData = json.loads(purpleAirData)['results']
 
     purpleAirData = purpleAirData.json()['results']
 
@@ -224,51 +208,24 @@ def uploadPurpleAirData(client):
         primaryPart2 = '/feed.json?results=10&api_key='
         queryPrimaryFeed = primaryPart1 + primaryID + primaryPart2 + primaryIDReadKey
 
-        # try:
-        #     purpleAirDataPrimary = urllib2.urlopen(queryPrimaryFeed).read()
-        # except urllib2.URLError:
-        #     sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, primaryID, primaryIDReadKey))
-        #     # return []
-        #     continue
-        # except httplib.BadStatusLine:
-        #     sys.stderr.write('%s\tBadStatusLine\t%s' % (TIMESTAMP, queryPrimaryFeed))
-        #     continue
-
         try:
             purpleAirDataPrimary = requests.get(queryPrimaryFeed)
             purpleAirDataPrimary.raise_for_status()
-            # print('secondID')
-            # print(theID)
         except requests.exceptions.HTTPError as e:
-            # statusCode = e.response.status_code
-            # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s; HTTP error, status code: %s.\n' % (TIMESTAMP, primaryID, primaryIDReadKey, statusCode))
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
             continue
         except requests.exceptions.Timeout as e:
-            # Maybe set up for a retry, or continue in a retry loop
-            # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s; timeout error.\n' % (TIMESTAMP, primaryID, primaryIDReadKey))
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
             continue
         except requests.exceptions.TooManyRedirects as e:
-            # Tell the user their URL was bad and try a different one
-            # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s; URL was bad.\n' % (TIMESTAMP, primaryID, primaryIDReadKey))
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
             continue
         except requests.exceptions.RequestException as e:
-            # catastrophic error. bail.
-            # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the primary feed. The problematic ID is %s and the key is %s; catastrophic error.\n' % (TIMESTAMP, primaryID, primaryIDReadKey))
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
             continue
 
-        # purpleAirDataPrimary = unicode(purpleAirDataPrimary, 'ISO-8859-1')
-
         purpleAirDataPrimaryChannel = purpleAirDataPrimary.json()['channel']
         purpleAirDataPrimaryFeed = purpleAirDataPrimary.json()['feeds']
-
-        # purpleAirDataPrimaryChannel = json.loads(purpleAirDataPrimary)['channel']
-        # purpleAirDataPrimaryFeed = json.loads(purpleAirDataPrimary)['feeds']
-        # print 'purpleAirDataPrimaryFeed'
-        # print purpleAirDataPrimaryFeed
 
         try:
             start = datetime.strptime(purpleAirDataPrimaryChannel['created_at'], '%Y-%m-%dT%H:%M:%SZ')
@@ -292,54 +249,26 @@ def uploadPurpleAirData(client):
 
         querySecondaryFeed = secondaryPart1 + secondaryID + secondaryPart2 + secondaryIDReadKey
 
-        # try:
-        #     purpleAirDataSecondary = urllib2.urlopen(querySecondaryFeed).read()
-        # except urllib2.URLError:
-        #     sys.stderr.write('%s\tURLError\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
-        #     # return []
-        #     continue
-        # except httplib.BadStatusLine:
-        #     sys.stderr.write('%s\tBadStatusLine\t%s\n' % (TIMESTAMP, queryPrimaryFeed))
-        #     continue
-
         try:
             purpleAirDataSecondary = requests.get(querySecondaryFeed)
             purpleAirDataSecondary.raise_for_status()
-            # theID = str(station.get('ID'))
         except requests.exceptions.HTTPError as e:
-            # statusCode = e.response.status_code
-            # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s; HTTP error, status code: %s.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey, statusCode))
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
             continue
         except requests.exceptions.Timeout as e:
-            # Maybe set up for a retry, or continue in a retry loop
-            # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s; timeout error.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
             continue
         except requests.exceptions.TooManyRedirects as e:
-            # Tell the user their URL was bad and try a different one
-            # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s; URL was bad.\n' % (TIMESTAMP, secondaryID, secondaryIDReadKey))
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
             continue
         except requests.exceptions.RequestException as e:
-            # catastrophic error. bail.
-            # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the secondary feed; their server appears to be down. The problematic ID is %s and the key is %s; catastrophic error.\n' % (TIMESTAMP, primaryID, secondaryIDReadKey))
             sys.stderr.write('%s\tProblem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
             continue
-
-        # purpleAirDataSecondary = unicode(purpleAirDataSecondary, 'ISO-8859-1')
-        # # purpleAirDataSecondaryChannel = json.loads(purpleAirDataSecondary)['channel']
-        # purpleAirDataSecondaryFeed = json.loads(purpleAirDataSecondary)['feeds']
-        # # print 'purpleAirDataSecondaryFeed'
-        # # print purpleAirDataSecondaryFeed
 
         purpleAirDataSecondaryFeed = purpleAirDataSecondary.json()['feeds']
 
         # go through the primary feed data
         for idx, aMeasurement in enumerate(purpleAirDataPrimaryFeed):
-            # print 'aMeasurement'
-            # print aMeasurement
-
             point['fields'] = {}
 
             try:
@@ -357,13 +286,6 @@ def uploadPurpleAirData(client):
             for standardKey, purpleKey in PURPLE_AIR_FIELDS_PRI_FEED.iteritems():
                 if purpleKey in aMeasurement.keys():
                     point['fields'][standardKey] = aMeasurement[purpleKey]
-
-            # the measurements between primary feed and secondary feed are of by aroud 5 sec
-            # try:
-            #     timeSecondary = datetime.strptime(purpleAirDataSecondaryFeed[idx]['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-            # except ValueError:
-            #     # don't include the point if we can't parse the timestamp
-            #     continue
 
             # go through the second feed's fields
             for standardKey, purpleKey in PURPLE_AIR_FIELDS_SEC_FEED.iteritems():
@@ -403,21 +325,9 @@ def uploadPurpleAirData(client):
                 if pytz.utc.localize(point['time']) <= lastPointLocalized:
                     continue
 
-            # Convert all the fields to floats
-            # for standardKey, purpleKey in PURPLE_AIR_FIELDS.iteritems():
-            #     purpleFieldValue = point['fields'].get(standardKey)
-            #     if purpleFieldValue is not None:
-            #         try:
-            #             point['fields'][standardKey] = float(purpleFieldValue)
-            #             print 'some points'
-            #             print point['fields'][standardKey]
-            #         except (ValueError, TypeError):
-            #             pass    # just leave bad / missing values blank
             for key, value in point['fields'].iteritems():
                 try:
                     point['fields'][key] = float(value)
-                    # print 'some points'
-                    # print point['fields'][key]
                 except (ValueError, TypeError):
                     pass    # just leave bad /
 
@@ -426,21 +336,16 @@ def uploadPurpleAirData(client):
             if tempVal is not None:
                 point['fields']['Temp (*C)'] = (tempVal - 32) * 5 / 9
 
-            # print point['time']
-            # print point['tags']
-            # print point['fields']
-
             try:
                 client.write_points([point])
             except InfluxDBClientError as e:
-                # print point['time']
-                # print point['tags']
-                # print point['fields']
                 sys.stderr.write('%s\tInfluxDBClientError\tWriting Purple Air data to influxdb lead to a write error.\n' % TIMESTAMP)
                 sys.stderr.write('%s\tpoint[time]%s\n' % (TIMESTAMP, str(point['time'])))
                 sys.stderr.write('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
                 sys.stderr.write('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
                 sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e))
+            else:
+                sys.stdout.write('%s\tPURPLE AIR Polling successful.\n' % TIMESTAMP)
 
 
 def uploadDAQAirData(client):
@@ -448,37 +353,23 @@ def uploadDAQAirData(client):
     local = pytz.timezone('MST')
 
     for daqSites in DAQ_SITES:
-        # try:
-        #     daqData = urllib2.urlopen(daqSites['dataFeed']).read()
-        # except urllib2.URLError:
-        #     sys.stderr.write('%s\tURLError\tProblem acquiring DAQ data; their server appears to be down.\n' % TIMESTAMP)
-        #     continue
 
         try:
             daqData = requests.get(daqSites['dataFeed'])
             daqData.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            # statusCode = e.response.status_code
-            # sys.stderr.write('%s\tProblem acquiring DAQ data; their server appears to be down; HTTP error, status code: %s.\n' % (TIMESTAMP, statusCode))
             sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
             continue
         except requests.exceptions.Timeout as e:
-            # Maybe set up for a retry, or continue in a retry loop
-            # sys.stderr.write('%s\tProblem acquiring DAQ data; their server appears to be down; timeout error.\n' % TIMESTAMP)
             sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
             continue
         except requests.exceptions.TooManyRedirects as e:
-            # Tell the user their URL was bad and try a different one
-            # sys.stderr.write('%s\tProblem acquiring DAQ data; their server appears to be down; URL was bad.\n' % TIMESTAMP)
             sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
             continue
         except requests.exceptions.RequestException as e:
-            # catastrophic error. bail.
-            # sys.stderr.write('%s\tProblem acquiring DAQ data; their server appears to be down; catastrophic error.\n' % TIMESTAMP)
             sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
             continue
 
-        # daqData = unicode(daqData, 'ISO-8859-1')
         daqData = daqData.content
         soup = BeautifulSoup(daqData, "html5lib")
 
@@ -512,10 +403,6 @@ def uploadDAQAirData(client):
                     point['tags'][standardKey] = daqTag
 
             # print point['tags']
-
-            # Convert all the fields to floats
-            # print 'MEASUREMENT'
-            # print measurement
 
             # check if there is a pm value
             if measurement.find('pm25'):
@@ -578,10 +465,6 @@ def uploadDAQAirData(client):
             if tmpField is not None:
                 point['fields']['Temp (*C)'] = (tmpField - 32) * 5 / 9
 
-            # print point['time']
-            # print point['tags']
-            # print point['fields']
-
             try:
                 client.write_points([point])
             except InfluxDBClientError as e:
@@ -590,17 +473,14 @@ def uploadDAQAirData(client):
                 sys.stderr.write('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
                 sys.stderr.write('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
                 sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e))
+            else:
+                sys.stdout.write('%s\tDAQ Polling successful.\n' % TIMESTAMP)
 
 
 def uploadMesowestData(client):
 
     # the recent argument is in minutes
     mesowestURL = 'http://api.mesowest.net/v2/stations/timeseries?recent=15&token=demotoken&stid=mtmet,wbb,NAA,MSI01,UFD10,UFD11&vars=wind_speed,air_temp,solar_radiation,wind_gust,relative_humidity,wind_direction,pressure,ozone_concentration,altimeter,PM_25_concentration,sensor_error_code,clear_sky_solar_radiation,internal_relative_humidity,air_flow_temperature'
-
-    # try:
-    #     mesowestData = urllib2.urlopen(mesowestURL).read()
-    # except urllib2.URLError:
-    #     sys.stderr.write('%s\tURLError\tProblem acquiring Mesowest data; their server appears to be down.\n' % TIMESTAMP)
 
     try:
         mesowestData = requests.get(mesowestURL)
@@ -621,9 +501,6 @@ def uploadMesowestData(client):
         # catastrophic error. bail.
         sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
         return []
-
-    # mesowestData = unicode(mesowestData, 'ISO-8859-1')
-    # mesowestData = json.loads(mesowestData)['STATION']
 
     mesowestData = mesowestData.json()['STATION']
 
@@ -646,14 +523,11 @@ def uploadMesowestData(client):
         # however we might only be interested in the day
         # get the 'Start' information
         mesowestStartTag = MESOWEST_TAGS['Start']
-        # print 'CHECK CHECK'
         # print mesowestStartTag
+
         try:
-            # print 'WHAT WHAT'
-            # print aMesowestStation[mesowestStartTag]['start']
             point['tags']['Start'] = datetime.strptime(aMesowestStation[mesowestStartTag]['start'], '%Y-%m-%dT%H:%M:%SZ')
         except ValueError:
-            # print aMesowestStation[mesowestStartTag]['start']
             pass
 
         # print point['tags']['Start']
@@ -737,14 +611,13 @@ def uploadMesowestData(client):
                 try:
                     client.write_points([point])
                 except InfluxDBClientError as e:
-                    # print point['time']
-                    # print point['tags']
-                    # print point['fields']
                     sys.stderr.write('%s\tInfluxDBClientError\tWriting mesowest data to influxdb lead to a write error.\n' % TIMESTAMP)
                     sys.stderr.write('%s\tpoint[time]%s\n' % (TIMESTAMP, str(point['time'])))
                     sys.stderr.write('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
                     sys.stderr.write('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
                     sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e))
+                else:
+                    sys.stdout.write('%s\tMesowest Polling successful.\n' % TIMESTAMP)
 
 
 if __name__ == '__main__':
