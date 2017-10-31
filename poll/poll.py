@@ -628,8 +628,8 @@ if __name__ == '__main__':
     client = InfluxDBClient(
         'air.eng.utah.edu',
         8086,
-        config['influxdbUsername'],
-        config['influxdbPassword'],
+        config['pollingUsername'],
+        config['pollingPassword'],
         'defaultdb',
         ssl=True,
         verify_ssl=True
