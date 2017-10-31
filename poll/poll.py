@@ -141,6 +141,7 @@ MESOWEST_TAGS = {
 }
 
 
+# new values are generated every 8sec by purple air
 def uploadPurpleAirData(client):
     try:
         purpleAirData = requests.get("https://map.purpleair.org/json")
@@ -348,6 +349,7 @@ def uploadPurpleAirData(client):
                 sys.stdout.write('%s\tPURPLE AIR Polling successful.\n' % TIMESTAMP)
 
 
+# new values are generated every 1h by DAQ
 def uploadDAQAirData(client):
 
     local = pytz.timezone('MST')
@@ -477,6 +479,7 @@ def uploadDAQAirData(client):
                 sys.stdout.write('%s\tDAQ Polling successful.\n' % TIMESTAMP)
 
 
+# new values are generated every 60sec by mesowest
 def uploadMesowestData(client):
 
     # the recent argument is in minutes
