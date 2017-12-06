@@ -228,6 +228,9 @@ def uploadPurpleAirData(client):
         purpleAirDataPrimaryChannel = purpleAirDataPrimary.json()['channel']
         purpleAirDataPrimaryFeed = purpleAirDataPrimary.json()['feeds']
 
+        if not purpleAirDataPrimaryFeed:
+            continue
+
         try:
             start = datetime.strptime(purpleAirDataPrimaryChannel['created_at'], '%Y-%m-%dT%H:%M:%SZ')
         except ValueError:
@@ -267,6 +270,8 @@ def uploadPurpleAirData(client):
             continue
 
         purpleAirDataSecondaryFeed = purpleAirDataSecondary.json()['feeds']
+        if not purpleAirDataSecondaryFeed:
+            continue
 
         # go through the primary feed data
         for idx, aMeasurement in enumerate(purpleAirDataPrimaryFeed):
