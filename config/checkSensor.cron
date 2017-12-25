@@ -1,0 +1,5 @@
+# run polling script every 5 minutes
+*/5 * * * *   poller  python $WORKING_DIR/poll/checkForNewSensors.py
+
+# run script after system (re)boot
+@reboot       poller  python $WORKING_DIR/poll/checkForNewSensors.py
