@@ -58,6 +58,7 @@ def checkForNewSensors(influxClient, mongoClient):
         logger.info(foundID)
         if foundID is None:
             db.liveSensors.insert_one(aSensor)
+            logger.info('sensor %s added', anID['ID'])
 
 
 if __name__ == '__main__':
