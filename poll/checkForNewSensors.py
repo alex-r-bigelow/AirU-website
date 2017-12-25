@@ -32,17 +32,19 @@ def checkForNewSensors(influxClient, mongoClient):
     now = datetime.now()
     min10Ago = now - timedelta(minutes=10)
     min10AgoStr = min10Ago.strftime('%Y-%m-%dT%H:%M:%SZ')
+    logger.info('min10AgoStr')
 
     queryInflux = "SELECT ID, LAST(\"pm2.5 (ug/m^3)\") AS pm25 " \
                   "FROM pm25 WHERE time >= '" + min10AgoStr + "' " \
                   "GROUP BY ID" \
 
+    logger.info(queryInflux)
     dataLatestPMPerID = influxClient.query(queryInflux, epoch='ms')
     dataLatestPMPerID = dataLatestPMPerID.raw
 
-    print(dataLatestPMPerID['series'][0])
+    print(dataLatestPMPerID)
 
-    db = mongoClient.runningAirUSensor
+    db = mongoClient.airudb
     allLiveSensors = db.sensors.find()
     print(allLiveSensors)
 
