@@ -53,6 +53,11 @@ def checkForNewSensors(influxClient, mongoClient):
 
     for anID in dataSeries:
         logger.info(anID)
+
+        theID = anID['ID']
+        idWithColon = ":".join([theID[i:i+2] for i in range(0, len(theID), 2)])
+        logger.info(idWithColon)
+
         aSensor = {"macAddress": anID['ID'],
                    "createdAt": now}
 
