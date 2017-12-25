@@ -34,7 +34,7 @@ def checkForNewSensors(influxClient, mongoClient):
     min10AgoStr = min10Ago.strftime('%Y-%m-%dT%H:%M:%SZ')
     logger.info('min10AgoStr')
 
-    queryInflux = "SELECT ID, LAST(\"pm2.5 (ug/m^3)\") AS pm25 " \
+    queryInflux = "SELECT ID, LAST(\"PM2.5\") AS pm25 " \
                   "FROM pm25 WHERE time >= '" + min10AgoStr + "' " \
                   "GROUP BY ID" \
 
@@ -42,19 +42,20 @@ def checkForNewSensors(influxClient, mongoClient):
     dataLatestPMPerID = influxClient.query(queryInflux, epoch='ms')
     dataLatestPMPerID = dataLatestPMPerID.raw
 
-    print(dataLatestPMPerID)
+    dataSeries = list(map(lambda x: dict(zip(x['columns'], x['values'][0])), data['series']))
+    logger.info(dataSeries)
 
     db = mongoClient.airudb
     allLiveSensors = db.sensors.find()
-    print(allLiveSensors)
+    logger.info(allLiveSensors)
 
     for anID in dataLatestPMPerID:
-
+        logger.info(anID)
         aSensor = {"macAddress": anID,
                    "createdAt": now}
 
         foundID = db.liveSensors.find_one({'ID': anID})
-
+        logger.info(foundID)
         if foundID is None:
             db.liveSensors.insert_one(aSensor)
 
