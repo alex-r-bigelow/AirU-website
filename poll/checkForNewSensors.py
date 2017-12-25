@@ -19,7 +19,7 @@ logger.addHandler(logHandler)
 
 
 def getConfig():
-    with open(sys.path[0] + '/../instance/config.py', 'r') as configfile:
+    with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
     logger.info('ConfigError\tProblem reading config file.')
     sys.exit(1)
@@ -30,7 +30,7 @@ def checkForNewSensors(influxClient, mongoClient):
     logger.info('checking for new sensor.')
 
     now = datetime.now()
-    min10Ago = now - timedelta(minute=10)
+    min10Ago = now - timedelta(minutes=10)
     min10AgoStr = min10Ago.strftime('%Y-%m-%dT%H:%M:%SZ')
 
     queryInflux = "SELECT ID, LAST(\"pm2.5 (ug/m^3)\") AS pm25 " \
