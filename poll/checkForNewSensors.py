@@ -48,6 +48,8 @@ def checkForNewSensors(influxClient, mongoClient):
     db = mongoClient.airudb
     # allLiveSensors = db.liveSensors.find()
     # logger.info(allLiveSensors)
+
+    # get the schools
     allSchools = [school['macAddress'] for school in db.schools.find()]
     logger.info(allSchools)
 
@@ -58,14 +60,18 @@ def checkForNewSensors(influxClient, mongoClient):
         idWithColon = ":".join([theID[i:i+2] for i in range(0, len(theID), 2)])
         logger.info(idWithColon)
 
-        aSensor = {"macAddress": anID['ID'],
-                   "createdAt": now}
+        if idWithColon not in allSchools:
+            logger.info('ID %s is not a school', idWithColon)
+            aSensor = {"macAddress": idWithColon,
+                       "createdAt": now}
 
-        foundID = db.liveSensors.find_one({'macAddress': anID['ID']})
-        logger.info(foundID)
-        if foundID is None:
-            db.liveSensors.insert_one(aSensor)
-            logger.info('sensor %s added', anID['ID'])
+            foundID = db.liveSensors.find_one({'macAddress': idWithColon})
+            logger.info(foundID)
+            if foundID is None:
+                db.liveSensors.insert_one(aSensor)
+                logger.info('sensor %s added', idWithColon)
+        else:
+            logger.info('ID %s is a school', idWithColon)
 
 
 if __name__ == '__main__':
