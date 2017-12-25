@@ -46,18 +46,18 @@ def checkForNewSensors(influxClient, mongoClient):
     logger.info(dataSeries)
 
     db = mongoClient.airudb
-    # allLiveSensors = db.sensors.find()
-    # logger.info(allLiveSensors)
+    allLiveSensors = db.liveSensors.find()
+    logger.info(allLiveSensors)
 
     for anID in dataSeries:
         logger.info(anID)
         aSensor = {"macAddress": anID['ID'],
                    "createdAt": now}
 
-        foundID = db.liveSensors.find_one({'ID': anID['ID']})
-        logger.info(foundID)
-        if foundID is None:
-            db.liveSensors.insert_one(aSensor)
+        # foundID = db.liveSensors.find_one({'ID': anID['ID']})
+        # logger.info(foundID)
+        # if foundID is None:
+        db.liveSensors.insert_one(aSensor)
 
 
 if __name__ == '__main__':
