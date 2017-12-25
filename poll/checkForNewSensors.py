@@ -32,7 +32,7 @@ def checkForNewSensors(influxClient, mongoClient):
     now = datetime.now()
     min10Ago = now - timedelta(minutes=10)
     min10AgoStr = min10Ago.strftime('%Y-%m-%dT%H:%M:%SZ')
-    logger.info('min10AgoStr')
+    logger.info(min10AgoStr)
 
     queryInflux = "SELECT ID, LAST(\"PM2.5\") AS pm25 " \
                   "FROM pm25 WHERE time >= '" + min10AgoStr + "' " \
@@ -51,10 +51,10 @@ def checkForNewSensors(influxClient, mongoClient):
 
     for anID in dataSeries:
         logger.info(anID)
-        aSensor = {"macAddress": anID,
+        aSensor = {"macAddress": anID['ID'],
                    "createdAt": now}
 
-        foundID = db.liveSensors.find_one({'ID': anID})
+        foundID = db.liveSensors.find_one({'ID': anID['ID']})
         logger.info(foundID)
         if foundID is None:
             db.liveSensors.insert_one(aSensor)
