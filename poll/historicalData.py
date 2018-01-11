@@ -56,12 +56,12 @@ def getHistoricalDataAirU(client, filename, sensorID, startDate, endDate):
     writeLoggingDataToFile(filename, [
         'time',
         'ID',
-        'pm2.5 (ug/m^3)'
+        'PM2.5'
     ])
 
     for row in result:
 
-        writeLoggingDataToFile(filename, [row['time'], row['ID'], row['pm2.5 (ug/m^3)']])
+        writeLoggingDataToFile(filename, [row['time'], row['ID'], row['PM2.5']])
 
 
 # usage python historicalData.py ID 2016-12-15T00:00:00Z 2016-12-22T00:00:00Z
