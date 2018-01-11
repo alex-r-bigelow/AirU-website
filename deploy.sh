@@ -33,7 +33,7 @@ tellUser "Setting Up InfluxDB..."
 if [ ! -L /etc/influxdb/influxdb.conf ]
 then
   tellUser "First time admin account setup..."
-  apt-get install -y jq
+  apt-get install -y jq=1.5+dfsg-1.3
   INFLUXDBUSERNAME=`cat $WORKING_DIR/config/config.json | jq -r '.influxdbUsername'`
   INFLUXDBPASSWORD=`cat $WORKING_DIR/config/config.json | jq -r '.influxdbPassword'`
   cat $WORKING_DIR/config/dbSetup.influxql > temp.influxql

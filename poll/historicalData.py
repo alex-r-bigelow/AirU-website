@@ -60,8 +60,9 @@ def getHistoricalDataAirU(client, filename, sensorID, startDate, endDate):
     ])
 
     for row in result:
-
         writeLoggingDataToFile(filename, [row['time'], row['ID'], row['PM2.5']])
+
+    logger.info('writing file is done')
 
 
 # usage python historicalData.py ID 2016-12-15T00:00:00Z 2016-12-22T00:00:00Z
@@ -78,9 +79,15 @@ if __name__ == '__main__':
         verify_ssl=True
     )
 
-    filename = '/home/pgoffin/historicalData.csv'
-
     sensorID = sys.argv[1]
     startDate = sys.argv[2]
     endDate = sys.argv[3]
+
+    filename = '/home/pgoffin/historicalData-{}-{}-{}.csv'.format(sensorID, startDate.split('T')[0], endDate.split('T')[0])
+
+    logger.info('sensor ID is %s', sensorID)
+    logger.info('start date is %s', startDate)
+    logger.info('end date is %s', endDate)
+    logger.info('file name is %s', filename)
+
     getHistoricalDataAirU(influxClient, filename, sensorID, startDate, endDate)
