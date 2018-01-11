@@ -8,7 +8,7 @@ import sys
 # import time
 
 # from datetime import datetime
-# from datetime import timedelta
+from datetime import timedelta
 # from influxdb.exceptions import InfluxDBClientError
 from influxdb import InfluxDBClient
 
@@ -38,19 +38,24 @@ def writeLoggingDataToFile(fileName, data):
         writer.writerow(data)
 
 
+def generateDayDates(start, end, delta):
+
+    result = []
+    start += delta
+    while start < end:
+        result.append(start.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        start += delta
+
+    return result
+
+
 def getHistoricalDataAirU(client, filename, sensorID, startDate, endDate):
 
     logger.info('querying historical data')
 
-    queryAirU = "SELECT * FROM pm25 " \
-                "WHERE ID = '" + sensorID + "' " \
-                "AND time >= '" + startDate + "' AND time <= '" + endDate + "' "
-
-    logger.info(queryAirU)
-
-    dataAirU = client.query(queryAirU, epoch=None)
-    # dataAirU = dataAirU.raw
-    result = list(dataAirU.get_points())
+    hourlyDates = generateDayDates(startDate, endDate, timedelta(days=1))
+    startDate = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
+    logger.info(startDate)
 
     # writing header
     writeLoggingDataToFile(filename, [
@@ -59,8 +64,23 @@ def getHistoricalDataAirU(client, filename, sensorID, startDate, endDate):
         'PM2.5'
     ])
 
-    for row in result:
-        writeLoggingDataToFile(filename, [row['time'], row['ID'], row['PM2.5']])
+    for anEndDate in hourlyDates:
+        logger.info(anEndDate)
+
+        queryAirU = "SELECT * FROM pm25 " \
+                    "WHERE ID = '" + sensorID + "' " \
+                    "AND time >= '" + startDate + "' AND time <= '" + endDate + "' "
+
+        logger.info(queryAirU)
+
+        dataAirU = client.query(queryAirU, epoch=None)
+        # dataAirU = dataAirU.raw
+        result = list(dataAirU.get_points())
+
+        for row in result:
+            writeLoggingDataToFile(filename, [row['time'], row['ID'], row['PM2.5']])
+
+        startDate = anEndDate
 
     logger.info('writing file is done')
 
