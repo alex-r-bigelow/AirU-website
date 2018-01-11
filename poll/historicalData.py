@@ -7,7 +7,7 @@ import sys
 # import requests
 # import time
 
-# from datetime import datetime
+from datetime import datetime
 from datetime import timedelta
 # from influxdb.exceptions import InfluxDBClientError
 from influxdb import InfluxDBClient
@@ -53,9 +53,13 @@ def getHistoricalDataAirU(client, filename, sensorID, startDate, endDate):
 
     logger.info('querying historical data')
 
-    hourlyDates = generateDayDates(startDate, endDate, timedelta(days=1))
-    startDate = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
-    logger.info(startDate)
+    startDate = datetime.strptime(startDate, '%Y-%m-%dT%H:%M:%SZ')
+    endDate = datetime.strptime(endDate, '%Y-%m-%dT%H:%M:%SZ')
+
+    dayDates = generateDayDates(startDate, endDate, timedelta(days=1))
+    logger.info(dayDates)
+    start = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
+    logger.info(start)
 
     # writing header
     writeLoggingDataToFile(filename, [
@@ -64,12 +68,12 @@ def getHistoricalDataAirU(client, filename, sensorID, startDate, endDate):
         'PM2.5'
     ])
 
-    for anEndDate in hourlyDates:
-        logger.info(anEndDate)
+    for end in dayDates:
+        logger.info(end)
 
         queryAirU = "SELECT * FROM pm25 " \
                     "WHERE ID = '" + sensorID + "' " \
-                    "AND time >= '" + startDate + "' AND time <= '" + endDate + "' "
+                    "AND time >= '" + start + "' AND time <= '" + end + "' "
 
         logger.info(queryAirU)
 
@@ -80,7 +84,7 @@ def getHistoricalDataAirU(client, filename, sensorID, startDate, endDate):
         for row in result:
             writeLoggingDataToFile(filename, [row['time'], row['ID'], row['PM2.5']])
 
-        startDate = anEndDate
+        start = end
 
     logger.info('writing file is done')
 
