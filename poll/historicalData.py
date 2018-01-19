@@ -1,21 +1,17 @@
 import csv
-import json
 import logging
 import logging.handlers as handlers
 import os
-# import pytz
 import requests
 import sys
-# import requests
-# import time
 
 from datetime import datetime
 from datetime import timedelta
-# from influxdb.exceptions import InfluxDBClientError
-from influxdb import InfluxDBClient
+
 
 TIMESTAMP = datetime.now().isoformat()
 
+# setting up logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -27,17 +23,8 @@ logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
 
 
-def getConfig():
-    # print(os.path.dirname(os.path.realpath(__file__)))
-    # os.path.join(os.path.dirname(filename),
-    #                              os.path.basename(filename))
-    with open(sys.path[0] + '/../config/config.json', 'r') as jsonConfigfile:
-        return json.load(jsonConfigfile)
-    logger.info('ConfigError\tProblem reading config file.')
-    sys.exit(1)
-
-
 def writeLoggingDataToFile(fileName, data):
+    """ Writes data, usually a row worth of data, to the csv file fileName """
 
     with open(fileName, 'ab') as csvFile:
         writer = csv.writer(csvFile, delimiter=',', quoting=csv.QUOTE_ALL)
@@ -45,6 +32,7 @@ def writeLoggingDataToFile(fileName, data):
 
 
 def generateDayDates(start, end, delta):
+    """ Returns the days between start and end, excluding start but including end as a list """
 
     result = []
     start += delta
@@ -56,13 +44,17 @@ def generateDayDates(start, end, delta):
     return result
 
 
-def getHistoricalDataAirU(client, filename, sensorID, theSensorSource, startDate, endDate):
+# time on the db is UTC (MST + 7h)
+def getHistoricalDataAirU(dataType, filename, sensorID, theSensorSource, startDate, endDate):
+    """ Queries the API and writes to the csv file """
 
     logger.info('querying historical data')
 
     startDate = datetime.strptime(startDate, '%Y-%m-%dT%H:%M:%SZ')
     endDate = datetime.strptime(endDate, '%Y-%m-%dT%H:%M:%SZ')
 
+    # Asking influx for more than 1000 data points will always only result in 1000 data points therefore
+    # break the queries up
     dayDates = generateDayDates(startDate, endDate, timedelta(days=1))
     logger.info(dayDates)
     start = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -78,53 +70,41 @@ def getHistoricalDataAirU(client, filename, sensorID, theSensorSource, startDate
     for end in dayDates:
         logger.info(end)
 
-
-        # baseURL = 'http://air.eng.utah.edu/dbapi/api/rawDataFrom?id='
-        # sensorSource = '&sensorSource='
-        # theStart = '&start='
-        # theEnd = '&end='
-        # what = '&show=pm25'
-        # theURL = '{}{}{}{}{}{}{}{}{}'.format(baseURL, sensorID, sensorSource, theSensorSource, theStart, start, theEnd, end, what)
-
-        # processedDataFrom?id=1010&start=2017-10-01T00:00:00Z&end=2017-10-02T00:00:00Z&function=mean&functionArg=pm25&timeInterval=30m
-        baseURL = 'http://air.eng.utah.edu/dbapi/api/processedDataFrom?id='
+        theURL = ''
         sensorSource = '&sensorSource='
         theStart = '&start='
         theEnd = '&end='
-        theFunction = '&function=mean'
-        theFunctionArg = '&functionArg=pm25'
-        theTimeInterval = '&timeInterval=60m'
-        theURL = '{}{}{}{}{}{}{}{}{}{}{}'.format(baseURL, sensorID, sensorSource, theSensorSource, theStart, start, theEnd, end, theFunction, theFunctionArg, theTimeInterval)
+        if dataType == 'raw':
+            baseURL = 'http://air.eng.utah.edu/dbapi/api/rawDataFrom?id='
+
+            what = '&show=pm25'
+            theURL = '{}{}{}{}{}{}{}{}{}'.format(baseURL, sensorID, sensorSource, theSensorSource, theStart, start, theEnd, end, what)
+
+        else:
+            baseURL = 'http://air.eng.utah.edu/dbapi/api/processedDataFrom?id='
+
+            theFunction = '&function=mean'
+            theFunctionArg = '&functionArg=pm25'
+            theTimeInterval = '&timeInterval=60m'
+            theURL = '{}{}{}{}{}{}{}{}{}{}{}'.format(baseURL, sensorID, sensorSource, theSensorSource, theStart, start, theEnd, end, theFunction, theFunctionArg, theTimeInterval)
 
         logger.info(theURL)
-
-        # /api/rawDataFrom?id=1010&start=2017-10-01T00:00:00Z&end=2017-10-02T00:00:00Z&show=pm25,pm1
 
         try:
             historicalData = requests.get(theURL)
             historicalData.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            sys.stderr.write('%s\tProblem acquiring historic data data;\t%s.\n' % (TIMESTAMP, e))
+            sys.stderr.write('%s\tProblem acquiring historical data;\t%s.\n' % (TIMESTAMP, e))
             return []
         except requests.exceptions.Timeout as e:
-            sys.stderr.write('%s\tProblem acquiring historic data;\t%s.\n' % (TIMESTAMP, e))
+            sys.stderr.write('%s\tProblem acquiring historical data;\t%s.\n' % (TIMESTAMP, e))
             return []
         except requests.exceptions.TooManyRedirects as e:
-            sys.stderr.write('%s\tProblem acquiring historic data;\t%s.\n' % (TIMESTAMP, e))
+            sys.stderr.write('%s\tProblem acquiring historical data;\t%s.\n' % (TIMESTAMP, e))
             return []
         except requests.exceptions.RequestException as e:
-            sys.stderr.write('%s\tProblem acquiring ;\t%s.\n' % (TIMESTAMP, e))
+            sys.stderr.write('%s\tProblem acquiring historical;\t%s.\n' % (TIMESTAMP, e))
             return []
-
-        # queryAirU = "SELECT * FROM pm25 " \
-        #             "WHERE ID = '" + sensorID + "' " \
-        #             "AND time >= '" + start + "' AND time <= '" + end + "' "
-        #
-        # logger.info(queryAirU)
-        #
-        # dataAirU = client.query(queryAirU, epoch=None)
-        # # dataAirU = dataAirU.raw
-        # result = list(dataAirU.get_points())
 
         jsonData = historicalData.json()['data']
         jsonTags = historicalData.json()['tags']
@@ -138,27 +118,18 @@ def getHistoricalDataAirU(client, filename, sensorID, theSensorSource, startDate
     logger.info('writing file is done')
 
 
-# usage python historicalData.py ID sensorSource 2016-12-15T00:00:00Z 2016-12-22T00:00:00Z
-# python historicalData.py 99 Purple\ Air 2017-12-15T00:00:00Z 2017-12-17T00:00:00Z
+# usage: python historicalData.py ID rawORprocessed sensorSource start end
+# example: python historicalData.py 99 raw Purple\ Air 2017-12-15T00:00:00Z 2017-12-17T00:00:00Z
+# example: python historicalData.py 99 processed airu 2017-12-15T00:00:00Z 2017-12-17T00:00:00Z
 if __name__ == '__main__':
-    config = getConfig()
-
-    influxClient = InfluxDBClient(
-        host='air.eng.utah.edu',
-        port=8086,
-        username=config['airUUsername'],
-        password=config['airUPassword'],
-        database=config['airuDB'],
-        ssl=True,
-        verify_ssl=True
-    )
 
     sensorID = sys.argv[1]
-    sensorSource = sys.argv[2]
-    startDate = sys.argv[3]
-    endDate = sys.argv[4]
+    dataType = sys.argv[2]
+    sensorSource = sys.argv[3]
+    startDate = sys.argv[4]
+    endDate = sys.argv[5]
 
-    filename = 'historicalData-{}-{}-{}.csv'.format(sensorID, startDate.split('T')[0], endDate.split('T')[0])
+    filename = 'historicalData-{}-{}-{}-{}.csv'.format(dataType, sensorID, startDate.split('T')[0], endDate.split('T')[0])
 
     # remove the file if it already exists
     try:
@@ -173,4 +144,6 @@ if __name__ == '__main__':
     logger.info('end date is %s', endDate)
     logger.info('file name is %s', filename)
 
-    getHistoricalDataAirU(influxClient, filename, sensorID, sensorSource, startDate, endDate)
+    getHistoricalDataAirU(dataType, filename, sensorID, sensorSource, startDate, endDate)
+
+    logger.info('data quering is done')
