@@ -140,7 +140,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         # last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
         #                         config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\' AND time >= now()-' + str(timeFrame) + 's;')
         last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
-                                config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\')
+                                config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
         if len(last) == 0:
             print('never pushed data', anID, last)
             continue
@@ -153,7 +153,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         # last = airUClient.query('SELECT LAST(Longitude),"SensorModel" FROM ' +
         #                         config['INFLUX_AIRU_LONGITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\' AND time >= now()-' + str(timeFrame) + 's;')
         last = airUClient.query('SELECT LAST(Longitude),"SensorModel" FROM ' +
-                                config['INFLUX_AIRU_LONGITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\')
+                                config['INFLUX_AIRU_LONGITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
         last = list(last.get_points())[0]
         long = last['last']
 
