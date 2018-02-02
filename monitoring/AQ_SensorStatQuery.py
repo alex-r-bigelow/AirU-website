@@ -20,9 +20,6 @@ logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
 
-    # TIMESTAMP = datetime.now().isoformat()
-
-
 def getConfig():
     with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
@@ -210,7 +207,7 @@ if __name__ == "__main__":
     diffInSec = round((now - startDate).total_seconds())
 
     timeFrame = int(diffInSec)  # needs to be in seconds
-    LOGGER.info('timeFrame ' + timeFrame)
+    LOGGER.info('timeFrame: %d', timeFrame)
 
     isSchool = False              # Query the status of all the sensors
     borderBox = {'bottom': 36.9979667663574,
