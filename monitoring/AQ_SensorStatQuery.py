@@ -177,7 +177,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         status = ('Offline' if (res['PM2.5'] is None) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' + '%-11s' % airULatitudes[i] \
                                 + '\t' + '%-13s' % airULongitudes[i] \
-                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status
+                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
 
     for i, anID in enumerate(pAirUniqueIDs):
         result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
@@ -195,7 +195,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         status = ('Offline' if (res['pm2.5 (ug/m^3)'] is None) else ('Failed' if res['pm2.5 (ug/m^3)'] <= 0 else 'Online'))
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % pAirSensorModels[i] + '\t' + '%-11s' % pAirLatitudes[i] + '\t' \
                                 + '%-13s' % pAirLongitudes[i] \
-                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status
+                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
     print(theMessage)
     return theMessage
 
