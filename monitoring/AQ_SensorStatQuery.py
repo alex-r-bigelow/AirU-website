@@ -212,8 +212,11 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         nTotal = len(result)
         nFine = nTotal - nFail - nOff
         status = ('Offline' if (res['PM2.5'] is None) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
+
+
+
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
-                                + '%-12s' % macs[anID]['sensorHolder'] + '%-11s' % airULatitudes[i] \
+                                + '%-12s' % macs[anID]['sensorHolder']+ '\t' + '%-11s' % airULatitudes[i] \
                                 + '\t' + '%-13s' % airULongitudes[i] \
                                 + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
 
@@ -241,13 +244,14 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 if __name__ == "__main__":
 
     # Default arguments
-    startDate = '2018-01-01T00:00:00Z'
-    startDate = datetime.strptime(startDate, '%Y-%m-%dT%H:%M:%SZ')
-    now = datetime.now()
+    # startDate = '2018-01-01T00:00:00Z'
+    # startDate = datetime.strptime(startDate, '%Y-%m-%dT%H:%M:%SZ')
+    # now = datetime.now()
+    #
+    # diffInSec = round((now - startDate).total_seconds())
 
-    diffInSec = round((now - startDate).total_seconds())
-
-    timeFrame = int(diffInSec)  # needs to be in seconds
+    # timeFrame = int(diffInSec)  # needs to be in seconds
+    timeFrame = 3600  # needs to be in seconds
     LOGGER.info('timeFrame: %d', timeFrame)
 
     isSchool = False              # Query the status of all the sensors
