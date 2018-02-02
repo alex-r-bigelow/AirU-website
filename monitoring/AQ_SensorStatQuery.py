@@ -45,10 +45,10 @@ def getMACToCheck():
         macs.append({'macAddress': theMAC, 'sensorHolder': sensorHolder})
 
         # customIDToMAC[aSensor['customSensorID']] = theMAC
-        logger.info(theMAC)
-        logger.info(sensorHolder)
+        LOGGER.info(theMAC)
+        LOGGER.info(sensorHolder)
 
-    logger.info('getMacs done')
+    LOGGER.info('getMacs done')
 
     return macs
 
@@ -204,23 +204,23 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                 + '\t' + '%-13s' % airULongitudes[i] \
                                 + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
 
-    for i, anID in enumerate(pAirUniqueIDs):
-        result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
-                                  str(timeFrame) + 's AND ID = \'' + anID + '\';')
-        result = list(result.get_points())
-        nFail = 0
-        nOff = 0
-        for res in result:
-            if res['pm2.5 (ug/m^3)'] is None:
-                nOff += 1
-            elif res['pm2.5 (ug/m^3)'] <= 0:
-                nFail += 1
-        nTotal = len(result)
-        nFine = nTotal - nFail - nOff
-        status = ('Offline' if (res['pm2.5 (ug/m^3)'] is None) else ('Failed' if res['pm2.5 (ug/m^3)'] <= 0 else 'Online'))
-        theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % pAirSensorModels[i] + '\t' + '%-11s' % pAirLatitudes[i] + '\t' \
-                                + '%-13s' % pAirLongitudes[i] \
-                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
+    # for i, anID in enumerate(pAirUniqueIDs):
+    #     result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
+    #                               str(timeFrame) + 's AND ID = \'' + anID + '\';')
+    #     result = list(result.get_points())
+    #     nFail = 0
+    #     nOff = 0
+    #     for res in result:
+    #         if res['pm2.5 (ug/m^3)'] is None:
+    #             nOff += 1
+    #         elif res['pm2.5 (ug/m^3)'] <= 0:
+    #             nFail += 1
+    #     nTotal = len(result)
+    #     nFine = nTotal - nFail - nOff
+    #     status = ('Offline' if (res['pm2.5 (ug/m^3)'] is None) else ('Failed' if res['pm2.5 (ug/m^3)'] <= 0 else 'Online'))
+    #     theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % pAirSensorModels[i] + '\t' + '%-11s' % pAirLatitudes[i] + '\t' \
+    #                             + '%-13s' % pAirLongitudes[i] \
+    #                             + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
     print(theMessage)
     return theMessage
 
