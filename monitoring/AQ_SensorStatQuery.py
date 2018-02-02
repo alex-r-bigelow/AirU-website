@@ -30,7 +30,7 @@ def getConfig():
     sys.exit(1)
 
 
-def runMonitoring(timeFram, isSchool, borderBox):
+def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient):
 
     # Reading input arguments
     nargv = len(sys.argv)
@@ -90,7 +90,7 @@ def runMonitoring(timeFram, isSchool, borderBox):
                 pAirSensorModels += [row['Sensor Model'].split('+')[0]]
 
     # Querying the airU sensor IDs with their coordinates and sensor model
-    result = airUClient.query('SELECT "PM2.5","ID","SensorModel" FROM ' + config['airu_pm25_measurement'] + ' WHERE time >= now()-' + str(timeFrame) + 's;')
+    result = airUClient.query('SELECT "PM2.5","ID","SensorModel" FROM ' + config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE time >= now()-' + str(timeFrame) + 's;')
     result = list(result.get_points())
 
     # Querying the sensor IDs
@@ -106,13 +106,13 @@ def runMonitoring(timeFram, isSchool, borderBox):
     airUSensorModels = []
     for anID in tmpIDs:
         last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
-                                config['airu_lat_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= now()-' + str(timeFrame) + 's;')
+                                config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\' AND time >= now()-' + str(timeFrame) + 's;')
         last = list(last.get_points())[0]
         senModel = last['SensorModel']
         lat = last['last']
 
         last = airUClient.query('SELECT LAST(Longitude),"SensorModel" FROM ' +
-                                config['airu_long_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= now()-' + str(timeFrame) + 's;')
+                                config['INFLUX_AIRU_LONGITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\' AND time >= now()-' + str(timeFrame) + 's;')
         last = list(last.get_points())[0]
         long = last['last']
 
@@ -151,7 +151,7 @@ def runMonitoring(timeFram, isSchool, borderBox):
     theMessage = theMessage + '------------\t------------\t-----------\t-------------\t------------------------------\t-------------\n'
     for i, anID in enumerate(airUUniqueIDs):
         result = airUClient.query('SELECT "PM2.5" FROM ' +
-                                  config['airu_pm25_measurement'] + ' WHERE time >= now()-' +
+                                  config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE time >= now()-' +
                                   str(timeFrame) + 's AND ID = \'' + anID + '\';')
         result = list(result.get_points())
         nFail = 0
@@ -231,4 +231,4 @@ if __name__ == "__main__":
                                 ssl=True,
                                 verify_ssl=True)
 
-    runMonitoring(timeFrame, isSchool, borderBox)
+    runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient)
