@@ -3,10 +3,9 @@ import logging
 import logging.handlers as handlers
 import sys
 
-# from communication import sendEmail
 from datetime import datetime
-
 from influxdb import InfluxDBClient
+from pymongo import MongoClient
 
 
 LOGGER = logging.getLogger(__name__)
@@ -27,64 +26,93 @@ def getConfig():
     sys.exit(1)
 
 
+def getMACToCheck():
+    mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
+        user=config['MONGO_USER'],
+        password=config['MONGO_PASSWORD'],
+        host=config['MONGO_HOST'],
+        port=config['MONGO_PORT'],
+        database=config['MONGO_DATABASE'])
+
+    mongoClient = MongoClient(mongodb_url)
+    db = mongoClient.airudb
+
+    macs = []
+
+    for aSensor in db.macToCustomSensorID.find():
+        theMAC = ''.join(aSensor['macAddress'].split(':'))
+        sensorHolder = aSensor['sensorHolder']
+        macs.append({'macAddress': theMAC, 'sensorHolder': sensorHolder})
+
+        # customIDToMAC[aSensor['customSensorID']] = theMAC
+        logger.info(theMAC)
+        logger.info(sensorHolder)
+
+    logger.info('getMacs done')
+
+    return macs
+
+
 def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient):
 
-    # Reading input arguments
-    nargv = len(sys.argv)
-    if nargv >= 1:
-        i = 1
-        while (i < nargv):
-            assert(sys.argv[i] == "-timeframe" or sys.argv[i] == "-box" or sys.argv[i] == "-school"), 'argument number ' + str(i) + ' is not a valid argument.'
-            if (sys.argv[i] == "-timeframe"):
-                assert(nargv >= i + 1), '-timeframe argument should be followed by the time frame in H:M:S format.'
-                timeFrame = datetime.strptime(sys.argv[i + 1], '%H:%M:%S')
-                timeFrame = timeFrame.hour * 3600 + timeFrame.minute * 60 + timeFrame.second
-                i += 2
-            elif (sys.argv[i] == "-box"):
-                assert(nargv >= i + 4), '-box argument should be followed by 4 coordinates of the border box [top left bottom right].'
-                borderBox = {'left': float(sys.argv[i + 2]),
-                             'right': float(sys.argv[i + 4]),
-                             'bottom': float(sys.argv[i + 3]),
-                             'top': float(sys.argv[i + 1])}
-                i += 5
-            elif(sys.argv[i] == "-school"):
-                assert(nargv >= i + 1 and (sys.argv[i + 1] == 0 or sys.argv[i + 1] == 1)), 'The -school argument is a boolean argument and should be followed by either 0 or 1.'
-                isSchool = sys.argv[i + 1]
-                i += 2
+    macs = getMACToCheck()
+    print(macs)
+    # # Reading input arguments
+    # nargv = len(sys.argv)
+    # if nargv >= 1:
+    #     i = 1
+    #     while (i < nargv):
+    #         assert(sys.argv[i] == "-timeframe" or sys.argv[i] == "-box" or sys.argv[i] == "-school"), 'argument number ' + str(i) + ' is not a valid argument.'
+    #         if (sys.argv[i] == "-timeframe"):
+    #             assert(nargv >= i + 1), '-timeframe argument should be followed by the time frame in H:M:S format.'
+    #             timeFrame = datetime.strptime(sys.argv[i + 1], '%H:%M:%S')
+    #             timeFrame = timeFrame.hour * 3600 + timeFrame.minute * 60 + timeFrame.second
+    #             i += 2
+    #         elif (sys.argv[i] == "-box"):
+    #             assert(nargv >= i + 4), '-box argument should be followed by 4 coordinates of the border box [top left bottom right].'
+    #             borderBox = {'left': float(sys.argv[i + 2]),
+    #                          'right': float(sys.argv[i + 4]),
+    #                          'bottom': float(sys.argv[i + 3]),
+    #                          'top': float(sys.argv[i + 1])}
+    #             i += 5
+    #         elif(sys.argv[i] == "-school"):
+    #             assert(nargv >= i + 1 and (sys.argv[i + 1] == 0 or sys.argv[i + 1] == 1)), 'The -school argument is a boolean argument and should be followed by either 0 or 1.'
+    #             isSchool = sys.argv[i + 1]
+    #             i += 2
 
     LOGGER.info("Time frame: last " + str(timeFrame) + " seconds")
     LOGGER.info("Geographic area [top left bottom right]: [" + str(borderBox['top']) + ", " + str(borderBox['left']) + ", " + str(borderBox['bottom']) + ", " + str(borderBox['right']) + "]")
 
-    # Querying the Purple Air sensor IDs with their coordinates and sensor model
-    result = pAirClient.query('SELECT "pm2.5 (ug/m^3)","ID","Longitude","Latitude","Sensor Model" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' + str(timeFrame) + 's;')
-    result = list(result.get_points())
-
-    pAirUniqueIDs = []
-    pAirLatitudes = []
-    pAirLongitudes = []
-    pAirSensorModels = []
-    for row in result:
-        # if row['Latitude'] is None or row['Longitude'] is None:
-        # print ("Skipped sensor with ID:" + row['ID'] + " -> Latitude/Longitude information not available!")
-        # continue
-
-        if not((float(row['Longitude']) < borderBox['right']) and (float(row['Longitude']) > borderBox['left'])) or not((float(row['Latitude']) > borderBox['bottom']) and (float(row['Latitude']) < borderBox['top'])):
-            continue
-
-        if row['ID'] not in pAirUniqueIDs:
-            pAirUniqueIDs += [row['ID']]
-            if row['Latitude'] is None:
-                pAirLatitudes += ['missing']
-            else:
-                pAirLatitudes += [row['Latitude']]
-            if row['Longitude'] is None:
-                pAirLongitudes += ['missing']
-            else:
-                pAirLongitudes += [row['Longitude']]
-            if row['Sensor Model'] is None:
-                pAirSensorModels += ['missing']
-            else:
-                pAirSensorModels += [row['Sensor Model'].split('+')[0]]
+    # # Querying the Purple Air sensor IDs with their coordinates and sensor model
+    # result = pAirClient.query('SELECT "pm2.5 (ug/m^3)","ID","Longitude","Latitude","Sensor Model" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' + str(timeFrame) + 's;')
+    # result = list(result.get_points())
+    #
+    # pAirUniqueIDs = []
+    # pAirLatitudes = []
+    # pAirLongitudes = []
+    # pAirSensorModels = []
+    # for row in result:
+    #     # if row['Latitude'] is None or row['Longitude'] is None:
+    #     # print ("Skipped sensor with ID:" + row['ID'] + " -> Latitude/Longitude information not available!")
+    #     # continue
+    #
+    #     if not((float(row['Longitude']) < borderBox['right']) and (float(row['Longitude']) > borderBox['left'])) or not((float(row['Latitude']) > borderBox['bottom']) and (float(row['Latitude']) < borderBox['top'])):
+    #         continue
+    #
+    #     if row['ID'] not in pAirUniqueIDs:
+    #         pAirUniqueIDs += [row['ID']]
+    #         if row['Latitude'] is None:
+    #             pAirLatitudes += ['missing']
+    #         else:
+    #             pAirLatitudes += [row['Latitude']]
+    #         if row['Longitude'] is None:
+    #             pAirLongitudes += ['missing']
+    #         else:
+    #             pAirLongitudes += [row['Longitude']]
+    #         if row['Sensor Model'] is None:
+    #             pAirSensorModels += ['missing']
+    #         else:
+    #             pAirSensorModels += [row['Sensor Model'].split('+')[0]]
 
     # Querying the airU sensor IDs with their coordinates and sensor model
     result = airUClient.query('SELECT "PM2.5","ID","SensorModel" FROM ' + config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE time >= now()-' + str(timeFrame) + 's;')
