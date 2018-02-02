@@ -209,7 +209,7 @@ if __name__ == "__main__":
 
     diffInSec = round((now - startDate).total_seconds())
 
-    timeFrame = diffInSec               # 1 hour
+    timeFrame = int(*diffInSec)  # needs to be in seconds
     LOGGER.info('timeFrame ' + timeFrame)
 
     isSchool = False              # Query the status of all the sensors
