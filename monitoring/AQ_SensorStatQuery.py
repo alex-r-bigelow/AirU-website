@@ -37,7 +37,7 @@ def getMACToCheck():
     mongoClient = MongoClient(mongodb_url)
     db = mongoClient.airudb
 
-    macs = []
+    macs = {}
 
     for aSensor in db.macToCustomSensorID.find():
         theMAC = ''.join(aSensor['macAddress'].split(':'))
