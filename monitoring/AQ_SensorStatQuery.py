@@ -210,6 +210,8 @@ if __name__ == "__main__":
     diffInSec = round((now - startDate).total_seconds())
 
     timeFrame = diffInSec               # 1 hour
+    LOGGER.info('timeFrame ' + timeFrame)
+
     isSchool = False              # Query the status of all the sensors
     borderBox = {'bottom': 36.9979667663574,
                  'top': 42.0013885498047,
