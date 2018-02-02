@@ -190,11 +190,12 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     theMessage = theMessage + '            \t            \t             \t\t\t           \t             \t        Query Status         \t             \n'
     theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\t\t\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
     theMessage = theMessage + '------------\t------------\t-------------\t\t\t-----------\t-------------\t------------------------------\t--------------\n'
+    print('-----------------------------------')
     for i, anID in enumerate(airUUniqueIDs):
         result = airUClient.query('SELECT "PM2.5" FROM ' +
                                   config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE time >= now()-' +
                                   str(timeFrame) + 's AND ID = \'' + anID + '\';')
-        print(anID, result.get_points())
+        print(anID, list(result.get_points()))
         result = list(result.get_points())
         nFail = 0
         nOff = 0
