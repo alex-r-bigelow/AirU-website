@@ -20,7 +20,7 @@ logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
 
-# TIMESTAMP = datetime.now().isoformat()
+    # TIMESTAMP = datetime.now().isoformat()
 
 
 def getConfig():
@@ -203,7 +203,13 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 if __name__ == "__main__":
 
     # Default arguments
-    timeFrame = 3600               # 1 hour
+    startDate = '2018-01-01T00:00:00Z'
+    startDate = datetime.strptime(startDate, '%Y-%m-%dT%H:%M:%SZ')
+    now = datetime.now()
+
+    diffInSec = round((now - startDate).total_seconds())
+
+    timeFrame = diffInSec               # 1 hour
     isSchool = False              # Query the status of all the sensors
     borderBox = {'bottom': 36.9979667663574,
                  'top': 42.0013885498047,
