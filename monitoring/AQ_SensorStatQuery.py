@@ -218,6 +218,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
         nTotal = len(result)
         nFine = nTotal - nFail - nOff
+        print(nTotal, result[1])
         status = ('Offline' if (not result[1]) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
 
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
