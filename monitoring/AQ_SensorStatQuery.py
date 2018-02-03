@@ -196,6 +196,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                   config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE time >= now()-' +
                                   str(timeFrame) + 's AND ID = \'' + anID + '\';')
         print(anID, list(result.get_points()))
+
         result = list(result.get_points())
         nFail = 0
         nOff = 0
@@ -217,7 +218,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
         nTotal = len(result)
         nFine = nTotal - nFail - nOff
-        status = ('Offline' if (res['PM2.5'] is None) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
+        status = ('Offline' if (not result[1]) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
 
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
                                 + '%-12s' % macs[anID]['sensorHolder'] + '\t\t\t' + '%-11s' % airULatitudes[i] \
