@@ -196,9 +196,9 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
     # Printing the status of the sensors in the required box
     theMessage = ''
-    theMessage = theMessage + '            \t            \t             \t\t           \t             \t        Query Status         \t             \n'
-    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\t\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
-    theMessage = theMessage + '------------\t------------\t-------------\t\t-----------\t-------------\t------------------------------\t--------------\n'
+    theMessage = theMessage + '            \t            \t             \t          \t             \t        Query Status         \t             \n'
+    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
+    theMessage = theMessage + '------------\t------------\t-------------\t-----------\t-------------\t------------------------------\t--------------\n'
 
     for i, anID in enumerate(airUUniqueIDs):
         result = airUClient.query('SELECT "PM2.5" FROM ' +
@@ -230,7 +230,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         status = ('Offline' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
 
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
-                                + '%-12s' % macs[anID]['sensorHolder'] + '\t\t' + '%-11s' % airULatitudes[i] \
+                                + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % airULatitudes[i] \
                                 + '\t' + '%-13s' % airULongitudes[i] \
                                 + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
 
