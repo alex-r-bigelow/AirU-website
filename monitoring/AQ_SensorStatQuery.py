@@ -49,13 +49,11 @@ def getMACToCheck(partOfSchoolProject):
         else:
             if not aSensor['schoolProject']:
                 macs[theMAC] = {'sensorHolder': sensorHolder}
-        # macs.append({'macAddress': theMAC, 'sensorHolder': sensorHolder})
 
-        # customIDToMAC[aSensor['customSensorID']] = theMAC
         LOGGER.info(theMAC)
         LOGGER.info(sensorHolder)
 
-    LOGGER.info('getMACs done')
+    LOGGER.info('getMAC is done')
 
     return macs
 
@@ -64,93 +62,47 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
     macs = getMACToCheck(isSchool)
 
-    # print(macs)
-    #
-    # # Reading input arguments
-    # nargv = len(sys.argv)
-    # if nargv >= 1:
-    #     i = 1
-    #     while (i < nargv):
-    #         assert(sys.argv[i] == "-timeframe" or sys.argv[i] == "-box" or sys.argv[i] == "-school"), 'argument number ' + str(i) + ' is not a valid argument.'
-    #         if (sys.argv[i] == "-timeframe"):
-    #             assert(nargv >= i + 1), '-timeframe argument should be followed by the time frame in H:M:S format.'
-    #             timeFrame = datetime.strptime(sys.argv[i + 1], '%H:%M:%S')
-    #             timeFrame = timeFrame.hour * 3600 + timeFrame.minute * 60 + timeFrame.second
-    #             i += 2
-    #         elif (sys.argv[i] == "-box"):
-    #             assert(nargv >= i + 4), '-box argument should be followed by 4 coordinates of the border box [top left bottom right].'
-    #             borderBox = {'left': float(sys.argv[i + 2]),
-    #                          'right': float(sys.argv[i + 4]),
-    #                          'bottom': float(sys.argv[i + 3]),
-    #                          'top': float(sys.argv[i + 1])}
-    #             i += 5
-    #         elif(sys.argv[i] == "-school"):
-    #             assert(nargv >= i + 1 and (sys.argv[i + 1] == 0 or sys.argv[i + 1] == 1)), 'The -school argument is a boolean argument and should be followed by either 0 or 1.'
-    #             isSchool = sys.argv[i + 1]
-    #             i += 2
-
     LOGGER.info("Time frame: last " + str(timeFrame) + " seconds")
     LOGGER.info("Geographic area [top left bottom right]: [" + str(borderBox['top']) + ", " + str(borderBox['left']) + ", " + str(borderBox['bottom']) + ", " + str(borderBox['right']) + "]")
 
-    # # Querying the Purple Air sensor IDs with their coordinates and sensor model
-    # result = pAirClient.query('SELECT "pm2.5 (ug/m^3)","ID","Longitude","Latitude","Sensor Model" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' + str(timeFrame) + 's;')
-    # result = list(result.get_points())
-    #
-    # pAirUniqueIDs = []
-    # pAirLatitudes = []
-    # pAirLongitudes = []
-    # pAirSensorModels = []
-    # for row in result:
-    #     # if row['Latitude'] is None or row['Longitude'] is None:
-    #     # print ("Skipped sensor with ID:" + row['ID'] + " -> Latitude/Longitude information not available!")
-    #     # continue
-    #
-    #     if not((float(row['Longitude']) < borderBox['right']) and (float(row['Longitude']) > borderBox['left'])) or not((float(row['Latitude']) > borderBox['bottom']) and (float(row['Latitude']) < borderBox['top'])):
-    #         continue
-    #
-    #     if row['ID'] not in pAirUniqueIDs:
-    #         pAirUniqueIDs += [row['ID']]
-    #         if row['Latitude'] is None:
-    #             pAirLatitudes += ['missing']
-    #         else:
-    #             pAirLatitudes += [row['Latitude']]
-    #         if row['Longitude'] is None:
-    #             pAirLongitudes += ['missing']
-    #         else:
-    #             pAirLongitudes += [row['Longitude']]
-    #         if row['Sensor Model'] is None:
-    #             pAirSensorModels += ['missing']
-    #         else:
-    #             pAirSensorModels += [row['Sensor Model'].split('+')[0]]
+    LOGGER.info('the macs')
+    LOGGER.info(macs)
 
-    # # Querying the airU sensor IDs with their coordinates and sensor model
-    # result = airUClient.query('SELECT "PM2.5","ID","SensorModel" FROM ' + config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE time >= now()-' + str(timeFrame) + 's;')
-    # result = list(result.get_points())
-
-    # # Querying the sensor IDs
-    # tmpIDs = []
-    # for row in result:
-    #     if row['ID'] not in tmpIDs:
-    #         tmpIDs += [row['ID']]
     tmpIDs = []
     for mac, sensorHolder in macs.items():
         if mac not in tmpIDs:
             tmpIDs += [mac]
-
-    # print(tmpIDs)
 
     # Querying the coordinates and model of each sensor in the queried geographic area
     airUUniqueIDs = []
     airULatitudes = []
     airULongitudes = []
     airUSensorModels = []
+
+    # Printing the status of the sensors in the required box
+    theMessage = ''
+    theMessage = theMessage + '            \t            \t             \t          \t             \t        Query Status         \t             \n'
+    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
+    theMessage = theMessage + '------------\t------------\t-------------\t-----------\t-------------\t------------------------------\t--------------\n'
+
     for anID in tmpIDs:
         # last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
         #                         config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\' AND time >= now()-' + str(timeFrame) + 's;')
         last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
                                 config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
+
+        lastTimestamp = airUClient.query('SELECT LAST(pm25) FROM ' +
+                                         config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
+
         if len(last) == 0:
             # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
+
+            LOGGER.info('lastTimestamp')
+            LOGGER.info(lastTimestamp)
+            theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % 'unknown' + '\t' \
+                                    + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % 'unknown' \
+                                    + '\t' + '%-13s' % 'unknown' \
+                                    + '\t' + 'unknown' + '\t' + 'offline' + '\t' + lastTimestamp + '\n'
             continue
 
         last = list(last.get_points())[0]
@@ -194,12 +146,6 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         else:
             airUSensorModels += [senModel.split('+')[0]]
 
-    # Printing the status of the sensors in the required box
-    theMessage = ''
-    theMessage = theMessage + '            \t            \t             \t          \t             \t        Query Status         \t             \n'
-    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
-    theMessage = theMessage + '------------\t------------\t-------------\t-----------\t-------------\t------------------------------\t--------------\n'
-
     for i, anID in enumerate(airUUniqueIDs):
         result = airUClient.query('SELECT "PM2.5" FROM ' +
                                   config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE time >= now()-' +
@@ -229,10 +175,13 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         nFine = nTotal - nFail - nOff
         status = ('Offline' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
 
+        theLastTimestamp = airUClient.query('SELECT LAST(pm25) FROM ' +
+                                         config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
+
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
                                 + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % airULatitudes[i] \
                                 + '\t' + '%-13s' % airULongitudes[i] \
-                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
+                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\t' + theLastTimestamp + '\n'
 
     # for i, anID in enumerate(pAirUniqueIDs):
     #     result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
