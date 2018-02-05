@@ -91,18 +91,13 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
                                 config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
 
-        lastTimestamp = airUClient.query('SELECT LAST(pm25) FROM ' +
-                                         config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
-
         if len(last) == 0:
             # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
 
-            LOGGER.info('lastTimestamp')
-            LOGGER.info(lastTimestamp)
             theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % 'unknown' + '\t' \
                                     + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % 'unknown' \
                                     + '\t' + '%-13s' % 'unknown' \
-                                    + '\t' + 'unknown' + '\t' + 'offline' + '\t' + lastTimestamp + '\n'
+                                    + '\t' + 'unknown' + '\t' + 'offline' + '\t' + 'never been online' + '\n'
             continue
 
         last = list(last.get_points())[0]
@@ -176,7 +171,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         status = ('Offline' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
 
         theLastTimestamp = airUClient.query('SELECT LAST(pm25) FROM ' +
-                                         config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
+                                            config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
 
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
                                 + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % airULatitudes[i] \
