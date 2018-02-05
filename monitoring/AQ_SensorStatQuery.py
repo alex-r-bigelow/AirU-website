@@ -269,7 +269,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     #                             + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
 
     theMessage = theMessage + emailFooter
-    print(theMessage)
+    # print(theMessage)
 
     return theMessage
 
