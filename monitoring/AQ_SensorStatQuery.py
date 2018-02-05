@@ -170,7 +170,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         nFine = nTotal - nFail - nOff
         status = ('Offline' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
 
-        theLastTimestamp = airUClient.query('SELECT LAST(pm25) FROM ' +
+        theLastTimestamp = airUClient.query('SELECT LAST("PM2.5") FROM ' +
                                             config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
 
         timestamp = list(theLastTimestamp.get_points())
