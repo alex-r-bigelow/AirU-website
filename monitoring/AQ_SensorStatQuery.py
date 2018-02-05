@@ -153,8 +153,9 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
             LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
             continue
 
-        LOGGER.info('ID: ' + anID + ' last Value: ' + last)
         last = list(last.get_points())[0]
+        LOGGER.info('ID: ' + anID + ' last Value: ' + last)
+
         senModel = last['SensorModel']
         lat = last['last']
 
