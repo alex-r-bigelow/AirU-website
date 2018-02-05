@@ -303,4 +303,5 @@ if __name__ == "__main__":
                                 ssl=True,
                                 verify_ssl=True)
 
-    runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient)
+    theRun = runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient)
+    print(theRun)
