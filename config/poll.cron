@@ -1,6 +1,7 @@
 
 # run polling script every 5 minutes
 */5 * * * *   poller  python $WORKING_DIR/poll/poll.py >>/home/poller/poll-info.log 2>>/home/poller/poll-error.log
+00 09 * * *   poller  python $WORKING_DIR/monitoring/AQ_SensorStatQuery_airU.py | mail -s "testing monitoring" pascal.goffin@sci.utah.edu
 
 # run script after system (re)boot
 @reboot       poller  python $WORKING_DIR/poll/poll.py >>/home/poller/poll-info.log 2>>/home/poller/poll-error.log

@@ -256,7 +256,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     #     theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % pAirSensorModels[i] + '\t' + '%-11s' % pAirLatitudes[i] + '\t' \
     #                             + '%-13s' % pAirLongitudes[i] \
     #                             + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
-    # print(theMessage)
+    print(theMessage)
 
     return theMessage
 
