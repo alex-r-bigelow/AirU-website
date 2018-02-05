@@ -29,6 +29,7 @@ emailHeader = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
 
 emailFooter = """</body></html>"""
 
+
 def getConfig():
     with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
@@ -290,7 +291,7 @@ if __name__ == "__main__":
     if sys.argv[1] == 'school':
         isSchool = True
 
-    LOGGER.info('isSchool: ' + isSchool)
+    LOGGER.info('isSchool: ' + str(isSchool))
 
     borderBox = {'bottom': 36.9979667663574,
                  'top': 42.0013885498047,
