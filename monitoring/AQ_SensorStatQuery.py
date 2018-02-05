@@ -173,10 +173,12 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         theLastTimestamp = airUClient.query('SELECT LAST(pm25) FROM ' +
                                             config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
 
+        timestamp = list(theLastTimestamp.get_points())[0]
+
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
                                 + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % airULatitudes[i] \
                                 + '\t' + '%-13s' % airULongitudes[i] \
-                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\t' + theLastTimestamp + '\n'
+                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\t' + timestamp + '\n'
 
     # for i, anID in enumerate(pAirUniqueIDs):
     #     result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
