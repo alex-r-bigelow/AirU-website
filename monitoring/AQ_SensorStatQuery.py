@@ -150,11 +150,11 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
                                 config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
         if len(last) == 0:
-            LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
+            # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
             continue
 
         last = list(last.get_points())[0]
-        LOGGER.info('ID: ' + anID + ' last Value: ' + last)
+        # LOGGER.info('ID: ' + anID + ' last Value: ' + last)
 
         senModel = last['SensorModel']
         lat = last['last']
