@@ -18,17 +18,6 @@ logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
-emailHeader = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
- <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Demystifying Email Design</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-</head>
-<body>"""
-
-emailFooter = """</body></html>"""
-
 
 def getConfig():
     with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
@@ -206,16 +195,11 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
             airUSensorModels += [senModel.split('+')[0]]
 
     # Printing the status of the sensors in the required box
-    # theMessage = ''
-    # theMessage = theMessage + '            \t            \t             \t\t\t           \t             \t        Query Status         \t             \n'
-    # theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\t\t\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
-    # theMessage = theMessage + '------------\t------------\t-------------\t\t\t-----------\t-------------\t------------------------------\t--------------\n'
-    theMessage = emailHeader + '<table>'
-    theMessage = theMessage + '<tr><td></td><td></td><td></td><td></td><td></td><td>Query Status</td><td></td></tr>'
-    theMessage = theMessage + '<tr><td>ID</td><td>Sensor Model</td><td>Sensor Holder</td><td>tLatitude</td><td>tLongitude</td><td>offline/failure/online (total)</td><td>Latest Status</td></tr>'
-    theMessage = theMessage + '</table>'
-    theMessage = theMessage + '------------\t------------\t-------------\t\t\t-----------\t-------------\t------------------------------\t--------------\n'
-    # print('-----------------------------------')
+    theMessage = ''
+    theMessage = theMessage + '            \t            \t             \t\t           \t             \t        Query Status         \t             \n'
+    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\t\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
+    theMessage = theMessage + '------------\t------------\t-------------\t\t-----------\t-------------\t------------------------------\t--------------\n'
+
     for i, anID in enumerate(airUUniqueIDs):
         result = airUClient.query('SELECT "PM2.5" FROM ' +
                                   config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE time >= now()-' +
@@ -246,7 +230,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         status = ('Offline' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
 
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
-                                + '%-12s' % macs[anID]['sensorHolder'] + '\t\t\t' + '%-11s' % airULatitudes[i] \
+                                + '%-12s' % macs[anID]['sensorHolder'] + '\t\t' + '%-11s' % airULatitudes[i] \
                                 + '\t' + '%-13s' % airULongitudes[i] \
                                 + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
 
@@ -268,7 +252,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     #                             + '%-13s' % pAirLongitudes[i] \
     #                             + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
 
-    theMessage = theMessage + emailFooter
+    # theMessage = theMessage + emailFooter
     # print(theMessage)
 
     return theMessage
