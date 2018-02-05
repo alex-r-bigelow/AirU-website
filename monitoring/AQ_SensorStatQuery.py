@@ -18,6 +18,16 @@ logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
+emailHeader = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Demystifying Email Design</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>"""
+
+emailFooter = """</body></html>"""
 
 def getConfig():
     with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
@@ -199,7 +209,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     # theMessage = theMessage + '            \t            \t             \t\t\t           \t             \t        Query Status         \t             \n'
     # theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\t\t\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
     # theMessage = theMessage + '------------\t------------\t-------------\t\t\t-----------\t-------------\t------------------------------\t--------------\n'
-    theMessage = '<table>'
+    theMessage = emailHeader + '<table>'
     theMessage = theMessage + '<tr><td></td><td></td><td></td><td></td><td></td><td>Query Status</td><td></td></tr>'
     theMessage = theMessage + '<tr><td>ID</td><td>Sensor Model</td><td>Sensor Holder</td><td>tLatitude</td><td>tLongitude</td><td>offline/failure/online (total)</td><td>Latest Status</td></tr>'
     theMessage = theMessage + '</table>'
@@ -256,6 +266,8 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     #     theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % pAirSensorModels[i] + '\t' + '%-11s' % pAirLatitudes[i] + '\t' \
     #                             + '%-13s' % pAirLongitudes[i] \
     #                             + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
+
+    theMessage = theMessage + emailFooter
     print(theMessage)
 
     return theMessage
@@ -277,6 +289,8 @@ if __name__ == "__main__":
     isSchool = False              # Query the status of all the sensors
     if sys.argv[1] == 'school':
         isSchool = True
+
+    LOGGER.info('isSchool: ' + isSchool)
 
     borderBox = {'bottom': 36.9979667663574,
                  'top': 42.0013885498047,
