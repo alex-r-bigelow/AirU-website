@@ -26,7 +26,7 @@ def getConfig():
     sys.exit(1)
 
 
-def getMACToCheck():
+def getMACToCheck(partOfSchoolProject):
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
         password=config['MONGO_PASSWORD'],
@@ -42,21 +42,27 @@ def getMACToCheck():
     for aSensor in db.macToCustomSensorID.find():
         theMAC = ''.join(aSensor['macAddress'].split(':'))
         sensorHolder = aSensor['sensorHolder']
-        macs[theMAC] = {'sensorHolder': sensorHolder}
+
+        if partOfSchoolProject:
+            if aSensor['schoolProject']:
+                macs[theMAC] = {'sensorHolder': sensorHolder}
+        else:
+            if not aSensor['schoolProject']:
+                macs[theMAC] = {'sensorHolder': sensorHolder}
         # macs.append({'macAddress': theMAC, 'sensorHolder': sensorHolder})
 
         # customIDToMAC[aSensor['customSensorID']] = theMAC
         LOGGER.info(theMAC)
         LOGGER.info(sensorHolder)
 
-    LOGGER.info('getMacs done')
+    LOGGER.info('getMACs done')
 
     return macs
 
 
 def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient):
 
-    macs = getMACToCheck()
+    macs = getMACToCheck(isSchool)
     print(macs)
     # # Reading input arguments
     # nargv = len(sys.argv)
@@ -259,7 +265,8 @@ if __name__ == "__main__":
     timeFrame = 3600  # needs to be in seconds
     LOGGER.info('timeFrame: %d', timeFrame)
 
-    isSchool = False              # Query the status of all the sensors
+    isSchool = True              # Query the status of all the sensors
+
     borderBox = {'bottom': 36.9979667663574,
                  'top': 42.0013885498047,
                  'left': -114.053932189941,
