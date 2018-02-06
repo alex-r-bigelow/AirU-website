@@ -174,7 +174,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                             config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
 
         timestamp = list(theLastTimestamp.get_points())
-        print(timestamp)
+        # print(timestamp)
 
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
                                 + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % airULatitudes[i] \
