@@ -120,8 +120,8 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 #            print ("Skipped sensor with ID:" + anID + " -> Latitude/Longitude has not been aquired!")
 #            continue
 
-        if not((float(long) < borderBox['right']) and (float(long) > borderBox['left'])) or not((float(lat) > borderBox['bottom']) and (float(lat) < borderBox['top'])):
-            continue
+        # if not((float(long) < borderBox['right']) and (float(long) > borderBox['left'])) or not((float(lat) > borderBox['bottom']) and (float(lat) < borderBox['top'])):
+        #     continue
 
         airUUniqueIDs += [anID]
         if lat is None:
