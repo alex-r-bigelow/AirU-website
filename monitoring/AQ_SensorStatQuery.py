@@ -125,7 +125,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
             theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % 'unknown' + '\t' \
                                     + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-12s' % theEmail + '\t' + '%-11s' % 'unknown' \
                                     + '\t' + '%-13s' % 'unknown' \
-                                    + '\t' + 'unknown' + '\t' + 'offline' + '\t' + 'never been online' + '\n'
+                                    + '\t' + 'unknown' + '\t' + 'OFFLINE' + '\t' + 'never been online' + '\n'
             continue
 
         last = list(last.get_points())[0]
@@ -196,7 +196,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
         nTotal = len(result)
         nFine = nTotal - nFail - nOff
-        status = ('Offline' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
+        status = ('OFFLINE' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'Online'))
 
         theLastTimestamp = airUClient.query('SELECT LAST("PM2.5") FROM ' +
                                             config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
