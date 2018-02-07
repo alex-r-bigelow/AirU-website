@@ -26,6 +26,28 @@ def getConfig():
     sys.exit(1)
 
 
+def getEmail():
+    mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
+        user=config['MONGO_USER'],
+        password=config['MONGO_PASSWORD'],
+        host=config['MONGO_HOST'],
+        port=config['MONGO_PORT'],
+        database=config['MONGO_DATABASE'])
+
+    mongoClient = MongoClient(mongodb_url)
+    db = mongoClient.airudb
+
+    emails = {}
+
+    for aHolder in db.airUSensorHolder.find():
+        name = aHolder['name']
+        email = aHolder['email']
+
+        emails[name] = {'email': email}
+
+    return emails
+
+
 def getMACToCheck(partOfSchoolProject):
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
@@ -61,6 +83,7 @@ def getMACToCheck(partOfSchoolProject):
 def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient):
 
     macs = getMACToCheck(isSchool)
+    emails = getEmail()
 
     LOGGER.info("Time frame: last " + str(timeFrame) + " seconds")
     LOGGER.info("Geographic area [top left bottom right]: [" + str(borderBox['top']) + ", " + str(borderBox['left']) + ", " + str(borderBox['bottom']) + ", " + str(borderBox['right']) + "]")
@@ -81,9 +104,9 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
     # Printing the status of the sensors in the required box
     theMessage = ''
-    theMessage = theMessage + '            \t            \t             \t          \t             \t        Query Status         \t             \n'
-    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
-    theMessage = theMessage + '------------\t------------\t-------------\t-----------\t-------------\t------------------------------\t--------------\n'
+    theMessage = theMessage + '            \t            \t             \t          \t          \t             \t        Query Status         \t             \n'
+    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\email   \tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
+    theMessage = theMessage + '------------\t------------\t-------------\t-----------\t-----------\t-------------\t------------------------------\t--------------\n'
 
     for anID in tmpIDs:
         # last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
@@ -91,11 +114,16 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
                                 config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
 
+        # get the email
+        theEmail = 'unknown'
+        if macs[anID]['sensorHolder'] in emails:
+            theEmail = emails[macs[anID]['sensorHolder']]['email']
+
         if len(last) == 0:
             # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
 
             theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % 'unknown' + '\t' \
-                                    + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % 'unknown' \
+                                    + '%-12s' % macs[anID]['sensorHolder'] + '%-12s' % theEmail + '\t' + '%-11s' % 'unknown' \
                                     + '\t' + '%-13s' % 'unknown' \
                                     + '\t' + 'unknown' + '\t' + 'offline' + '\t' + 'never been online' + '\n'
             continue
@@ -176,8 +204,10 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         timestamp = list(theLastTimestamp.get_points())
         # print(timestamp)
 
+
+
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
-                                + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-11s' % airULatitudes[i] \
+                                + '%-12s' % macs[anID]['sensorHolder'] + '%-12s' % theEmail + '\t' + '%-11s' % airULatitudes[i] \
                                 + '\t' + '%-13s' % airULongitudes[i] \
                                 + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\t' + timestamp[0]['time'] + '\n'
 
