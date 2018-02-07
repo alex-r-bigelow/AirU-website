@@ -105,7 +105,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     # Printing the status of the sensors in the required box
     theMessage = ''
     theMessage = theMessage + '            \t            \t             \t          \t          \t             \t        Query Status         \t             \n'
-    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\email   \tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
+    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\temail     \tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
     theMessage = theMessage + '------------\t------------\t-------------\t-----------\t-----------\t-------------\t------------------------------\t--------------\n'
 
     for anID in tmpIDs:
@@ -123,7 +123,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
             # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
 
             theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % 'unknown' + '\t' \
-                                    + '%-12s' % macs[anID]['sensorHolder'] + '%-12s' % theEmail + '\t' + '%-11s' % 'unknown' \
+                                    + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-12s' % theEmail + '\t' + '%-11s' % 'unknown' \
                                     + '\t' + '%-13s' % 'unknown' \
                                     + '\t' + 'unknown' + '\t' + 'offline' + '\t' + 'never been online' + '\n'
             continue
@@ -204,10 +204,12 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         timestamp = list(theLastTimestamp.get_points())
         # print(timestamp)
 
-
+        theEmail = 'unknown'
+        if macs[anID]['sensorHolder'] in emails:
+            theEmail = emails[macs[anID]['sensorHolder']]['email']
 
         theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
-                                + '%-12s' % macs[anID]['sensorHolder'] + '%-12s' % theEmail + '\t' + '%-11s' % airULatitudes[i] \
+                                + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-12s' % theEmail + '\t' + '%-11s' % airULatitudes[i] \
                                 + '\t' + '%-13s' % airULongitudes[i] \
                                 + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\t' + timestamp[0]['time'] + '\n'
 
