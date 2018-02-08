@@ -217,7 +217,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                 + '%-40s' % theEmail + '\t' \
                                 + '%-13s' % airULatitudes[i] + '\t' \
                                 + '%-13s' % airULongitudes[i] + '\t' \
-                                + '{}/{}/{}({})'format(str(nOff), str(nFail), str(nFine), str(nTotal)) + '\t' \
+                                + '{}/{}/{}({})'.format(str(nOff), str(nFail), str(nFine), str(nTotal)) + '\t' \
                                 + '%-10s' % status + '\t' \
                                 + '%-20s' % timestamp[0]['time'].split('.')[0] + '\n'
 
