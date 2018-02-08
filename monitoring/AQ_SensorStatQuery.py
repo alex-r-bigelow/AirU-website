@@ -109,7 +109,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                             + '%-36s' % '' + '\t' \
                             + '%-13s' % '' + '\t' \
                             + '%-13s' % '' + '\t' \
-                            + '%-12s' % 'query status' + '\t' \
+                            + '%-30s' % 'query status' + '\t' \
                             + '%-10s' % '' + '\t' \
                             + '%-20s' % '' + '\n'
 
@@ -118,7 +118,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                             + '%-36s' % 'email' + '\t' \
                             + '%-13s' % 'latitude' + '\t' \
                             + '%-13s' % 'longitude' + '\t' \
-                            + '%-12s' % 'offline/failure/online (total)' + '\t' \
+                            + '%-30s' % 'offline/failure/online (total)' + '\t' \
                             + '%-10s' % 'current status' + '\t' \
                             + '%-20s' % 'timestamp last data value' + '\n'
 
@@ -127,7 +127,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                             + '%-36s' % '------------' + '\t' \
                             + '%-13s' % '------------' + '\t' \
                             + '%-13s' % '------------' + '\t' \
-                            + '%-12s' % '------------' + '\t' \
+                            + '%-30s' % '------------' + '\t' \
                             + '%-10s' % '------------' + '\t' \
                             + '%-20s' % '------------' + '\n'
 
@@ -150,7 +150,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                     + '%-36s' % theEmail + '\t' \
                                     + '%-13s' % 'unknown' + '\t' \
                                     + '%-13s' % 'unknown' + '\t'\
-                                    + '%-12s' % 'unknown' + '\t' \
+                                    + '%-30s' % 'unknown' + '\t' \
                                     + '%-10s' % 'OFFLINE' + '\t' \
                                     + '%-20s' % 'never been online' + '\n'
             continue
