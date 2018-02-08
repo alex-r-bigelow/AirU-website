@@ -151,7 +151,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                     + '%-13s' % 'unknown' + '\t' \
                                     + '%-13s' % 'unknown' + '\t'\
                                     + '%-30s' % 'unknown' + '\t' \
-                                    + '%-10s' % 'OFFLINE' + '\t' \
+                                    + '%-10s' % '-->OFFLINE' + '\t' \
                                     + '%-20s' % 'never been online' + '\n'
             continue
 
@@ -223,7 +223,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
         nTotal = len(result)
         nFine = nTotal - nFail - nOff
-        status = ('OFFLINE' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'online'))
+        status = ('-->OFFLINE' if (not result) else ('Failed' if res['PM2.5'] < 0 else 'online'))
 
         theLastTimestamp = airUClient.query('SELECT LAST("PM2.5") FROM ' +
                                             config['INFLUX_AIRU_PM25_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\'')
