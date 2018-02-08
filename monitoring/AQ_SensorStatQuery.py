@@ -104,9 +104,9 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
     # Printing the status of the sensors in the required box
     theMessage = ''
-    theMessage = theMessage + '            \t            \t             \t          \t          \t             \t        Query Status         \t             \n'
-    theMessage = theMessage + 'ID          \tSensor Model\tSensor Holder\temail     \tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
-    theMessage = theMessage + '------------\t------------\t-------------\t-----------\t-----------\t-------------\t------------------------------\t--------------\n'
+    theMessage = theMessage + '            \t             \t          \t          \t             \t        Query Status         \t             \n'
+    theMessage = theMessage + 'ID          \tSensor Holder\temail     \tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \n'
+    theMessage = theMessage + '------------\t-------------\t-----------\t-----------\t------------\t------------------------------\t--------------\n'
 
     for anID in tmpIDs:
         # last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
@@ -122,10 +122,14 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         if len(last) == 0:
             # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
 
-            theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % 'unknown' + '\t' \
-                                    + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-12s' % theEmail + '\t' + '%-11s' % 'unknown' \
-                                    + '\t' + '%-13s' % 'unknown' \
-                                    + '\t' + 'unknown' + '\t' + 'OFFLINE' + '\t' + 'never been online' + '\n'
+            theMessage = theMessage + '%-15s' % anID + '\t' \
+                                    + '%-30s' % macs[anID]['sensorHolder'] + '\t' \
+                                    + '%-40s' % theEmail + '\t' \
+                                    + '%-13s' % 'unknown' + '\t' \
+                                    + '%-13s' % 'unknown' + '\t'\
+                                    + '%s' % 'unknown' + '\t' \
+                                    + '%-10s' % 'OFFLINE' + '\t' \
+                                    + '%-20s' % 'never been online' + '\n'
             continue
 
         last = list(last.get_points())[0]
@@ -208,10 +212,14 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         if macs[anID]['sensorHolder'] in emails:
             theEmail = emails[macs[anID]['sensorHolder']]['email']
 
-        theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % airUSensorModels[i] + '\t' \
-                                + '%-12s' % macs[anID]['sensorHolder'] + '\t' + '%-12s' % theEmail + '\t' + '%-11s' % airULatitudes[i] \
-                                + '\t' + '%-13s' % airULongitudes[i] \
-                                + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\t' + timestamp[0]['time'] + '\n'
+        theMessage = theMessage + '%-15s' % anID + '\t' \
+                                + '%-30s' % macs[anID]['sensorHolder'] + '\t' \
+                                + '%-40s' % theEmail + '\t' \
+                                + '%-13s' % airULatitudes[i] + '\t' \
+                                + '%-13s' % airULongitudes[i] + '\t' \
+                                + '{}/{}/{}({})'format(str(nOff), str(nFail), str(nFine), str(nTotal)) + '\t' \
+                                + '%-10s' % status + '\t' \
+                                + '%-20s' % timestamp[0]['time'].split('.')[0] + '\n'
 
     # for i, anID in enumerate(pAirUniqueIDs):
     #     result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
