@@ -105,7 +105,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     # Printing the status of the sensors in the required box
     theMessage = ''
     theMessage = theMessage + '            \t             \t          \t          \t             \t        Query Status         \t             \t             \n'
-    theMessage = theMessage + '%-15s' % 'ID' + '\t'
+    theMessage = theMessage + '%-15s' % 'ID' + '\t' \
                             + '\tSensor Holder\temail                      \tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \tLast Data Value      \n'
     theMessage = theMessage + '------------\t----------------------------\t-----------\t-----------\t------------\t------------------------------\t--------------\t--------------\n'
 
