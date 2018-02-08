@@ -235,12 +235,14 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         if macs[anID]['sensorHolder'] in emails:
             theEmail = emails[macs[anID]['sensorHolder']]['email']
 
+        queryStatus = str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')'
+
         theMessage = theMessage + '%-15s' % anID + '\t' \
                                 + '%-28s' % macs[anID]['sensorHolder'] + '\t' \
                                 + '%-36s' % theEmail + '\t' \
                                 + '%-13s' % airULatitudes[i] + '\t' \
                                 + '%-13s' % airULongitudes[i] + '\t' \
-                                + '{}/{}/{} ({})'.format(str(nOff), str(nFail), str(nFine), str(nTotal)) + '\t' \
+                                + '%-30s' % queryStatus + '\t' \
                                 + '%-10s' % status + '\t' \
                                 + '%-20s' % timestamp[0]['time'].split('.')[0] + '\n'
 
