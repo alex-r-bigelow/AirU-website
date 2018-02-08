@@ -104,10 +104,32 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
     # Printing the status of the sensors in the required box
     theMessage = ''
-    theMessage = theMessage + '            \t             \t          \t          \t             \t        Query Status         \t             \t             \n'
+    theMessage = theMessage + '%-15s' % '' + '\t' \
+                            + '%-28s' % '' + '\t' \
+                            + '%-36s' % '' + '\t' \
+                            + '%-13s' % '' + '\t' \
+                            + '%-13s' % '' + '\t' \
+                            + '%-12s' % 'query status' + '\t' \
+                            + '%-10s' % '' + '\t' \
+                            + '%-20s' % '' + '\n'
+
     theMessage = theMessage + '%-15s' % 'ID' + '\t' \
-                            + '\tSensor Holder\temail                      \tLatitude   \tLongitude    \toffline/failure/online (total)\tLatest Status \tLast Data Value      \n'
-    theMessage = theMessage + '------------\t----------------------------\t-----------\t-----------\t------------\t------------------------------\t--------------\t--------------\n'
+                            + '%-28s' % 'Sensor Holder' + '\t' \
+                            + '%-36s' % 'email' + '\t' \
+                            + '%-13s' % 'latitude' + '\t' \
+                            + '%-13s' % 'longitude' + '\t' \
+                            + '%-12s' % 'offline/failure/online (total)' + '\t' \
+                            + '%-10s' % 'current status' + '\t' \
+                            + '%-20s' % 'timestamp last data value' + '\n'
+
+    theMessage = theMessage + '%-15s' % '------------' + '\t' \
+                            + '%-28s' % '------------' + '\t' \
+                            + '%-36s' % '------------' + '\t' \
+                            + '%-13s' % '------------' + '\t' \
+                            + '%-13s' % '------------' + '\t' \
+                            + '%-12s' % '------------' + '\t' \
+                            + '%-10s' % '------------' + '\t' \
+                            + '%-20s' % '------------' + '\n'
 
     for anID in tmpIDs:
         # last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
@@ -218,7 +240,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                 + '%-36s' % theEmail + '\t' \
                                 + '%-13s' % airULatitudes[i] + '\t' \
                                 + '%-13s' % airULongitudes[i] + '\t' \
-                                + '{}/{}/{}({})'.format(str(nOff), str(nFail), str(nFine), str(nTotal)) + '\t' \
+                                + '{}/{}/{} ({})'.format(str(nOff), str(nFail), str(nFine), str(nTotal)) + '\t' \
                                 + '%-10s' % status + '\t' \
                                 + '%-20s' % timestamp[0]['time'].split('.')[0] + '\n'
 
