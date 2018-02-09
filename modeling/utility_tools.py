@@ -56,10 +56,8 @@ def logdet(M, isPosDef=False):
 def longLat2Km(lng, lat, longOrigin, latOrigin):
     lng = np.matrix(lng)
     lat = np.matrix(lat)
-    print(lng.dtype)
-    print(lat.dtype)
     # converting the lat degrees to km
-    meanLat = lat.mean()*np.pi/float(180.0)
+    meanLat = lat.mean()*np.pi/180.0
     #minLat = lat.min()
     #latDiff = lat-minLat
     latDiff = lat-latOrigin
