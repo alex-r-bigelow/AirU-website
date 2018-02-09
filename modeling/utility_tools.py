@@ -51,11 +51,11 @@ def logdet(M, isPosDef=False):
         c = det(P) * np.prod(np.sign(du))
         return np.log(c) + np.sum(np.log(abs(du)))
 
-def longLat2Km(long,lat, longOrigin, latOrigin):
+def longLat2Km(long, lat, longOrigin, latOrigin):
     long = np.matrix(long)
     lat = np.matrix(lat)
     # converting the lat degrees to km
-    meanLat = lat.mean()*np.pi/180.0
+    meanLat = lat.mean()*float(np.pi)/180.0
     #minLat = lat.min()
     #latDiff = lat-minLat
     latDiff = lat-latOrigin
