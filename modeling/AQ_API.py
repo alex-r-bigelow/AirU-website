@@ -1,6 +1,6 @@
 import numpy as np
 from GPR import gpRegression
-from utility_tools import longLat2Km, longLat2Elevation
+from utility_tools import longLat2Km  # longLat2Elevation
 
 
 def AQGPR(xQuery, x_tr, y_tr, sigmaF0=8.3779, L0=[4.7273, 7.5732], sigmaN=5.81, basisFnDeg=1, isTrain=False, isRegression=True):
