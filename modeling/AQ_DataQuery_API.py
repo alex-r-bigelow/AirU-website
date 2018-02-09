@@ -13,7 +13,7 @@ TIMESTAMP = datetime.now().isoformat()
 
 
 def getConfig():
-    with open(sys.path[0] + './config/config.json', 'r') as configfile:
+    with open(sys.path[0] + '/config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
@@ -111,16 +111,16 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     # Querying the coordinates and model of each sensor in the queried geographic area
     airUUniqueIDs = []
     for anID in tmpIDs:
-        last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM '
-                                + dbs['airu_lat_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= \''
-                                + initialDate + '\' AND time <= \'' + finalDate + '\';')
+        last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
+                                dbs['airu_lat_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= \'' +
+                                initialDate + '\' AND time <= \'' + finalDate + '\';')
         last = list(last.get_points())[0]
         senModel = last['SensorModel']
         lat = last['last']
 
-        last = airUClient.query('SELECT LAST(Longitude),"SensorModel" FROM '
-                                + dbs['airu_long_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= \''
-                                + initialDate + '\' AND time <= \'' + finalDate + '\';')
+        last = airUClient.query('SELECT LAST(Longitude),"SensorModel" FROM ' +
+                                dbs['airu_long_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= \'' +
+                                initialDate + '\' AND time <= \'' + finalDate + '\';')
         last = list(last.get_points())[0]
         long = last['last']
 
@@ -160,10 +160,10 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
 
         for anID in airUUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
-            result = airUClient.query('SELECT MEAN("PM2.5") FROM '
-                                      + config['airu_pm25_measurement'] + ' WHERE time >= \'' + initialDate
-                                      + '\' AND time < \'' + anEndDate + '\' AND ID = \'' + anID
-                                      + '\' group by time(' + str(binFreq) + 's);')
+            result = airUClient.query('SELECT MEAN("PM2.5") FROM ' +
+                                      dbs['airu_pm25_measurement'] + ' WHERE time >= \'' + initialDate + '\' ' +
+                                      'AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' ' +
+                                      'group by time(' + str(binFreq) + 's);')
             result = list(result.get_points())
             if len(pAirUniqueIDs) == 0 and anID == airUUniqueIDs[0]:
                 for row in result:
