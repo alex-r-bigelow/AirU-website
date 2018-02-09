@@ -5,7 +5,7 @@ from math import factorial
 from numpy.linalg import cholesky, det
 from scipy.linalg import lu
 from scipy import interpolate
-from osgeo import gdal
+# from osgeo import gdal
 # import scipy.io as sio
 
 
@@ -71,37 +71,37 @@ def longLat2Km(long,lat, longOrigin, latOrigin):
 
     return [xh/1000., xv/1000.]
 
-def longLat2Elevation(long,lat):
-    if not os.path.isfile('elevation_map/SLC-DEM.tif'):
-        elevation.clip(bounds=(-112.5, 40.5, -111.5, 41), output='elevation_map/SLC-DEM.tif')
-        elevation.clear()
-
-    gdal.UseExceptions()
-    elevData = gdal.Open('elevation_map/SLC-DEM.tif')
-    band = elevData.GetRasterBand(1)
-    elevs = band.ReadAsArray()
-    dataInfo = elevData.GetGeoTransform()
-    initLong = dataInfo[0]
-    initLat = dataInfo[3]
-    dLong = dataInfo[1]
-    dLat = dataInfo[5]
-    nLat = elevs.shape[0]
-    nLong = elevs.shape[1]
-    gridLongs = [initLong+dLong*i for i in range(nLong)]
-    gridLats = [initLat+dLat*i for i in range(nLat)]
-    f = interpolate.interp2d(gridLongs, gridLats, elevs, kind='linear')
-    endLong = initLong + (nLong-1)* dLong
-    endLat = initLat + (nLat-1)* dLat
-#    sio.savemat('elevationMap.mat', {'elevs':elevs,'gridLongs':gridLongs,'gridLats':gridLats,'initLong':initLong,'initLat':initLat,'endLong':endLong,'endLat':endLat})
-    el = []
-    for i in range(long.shape[0]):
-        lo = long[i, 0]
-        la = lat[i, 0]
-        assert(lo>=initLong and lo<=endLong), "The longitude is out of bound for elevation look-up!"
-        assert(la<=initLat and la>=endLat), "The latitude is out of bound for elevation look-up!"
-        el += [f(lo, la)[0]]
-
-    return (np.matrix(el).T)/1000.
+# def longLat2Elevation(long,lat):
+#     if not os.path.isfile('elevation_map/SLC-DEM.tif'):
+#         elevation.clip(bounds=(-112.5, 40.5, -111.5, 41), output='elevation_map/SLC-DEM.tif')
+#         elevation.clear()
+#
+#     gdal.UseExceptions()
+#     elevData = gdal.Open('elevation_map/SLC-DEM.tif')
+#     band = elevData.GetRasterBand(1)
+#     elevs = band.ReadAsArray()
+#     dataInfo = elevData.GetGeoTransform()
+#     initLong = dataInfo[0]
+#     initLat = dataInfo[3]
+#     dLong = dataInfo[1]
+#     dLat = dataInfo[5]
+#     nLat = elevs.shape[0]
+#     nLong = elevs.shape[1]
+#     gridLongs = [initLong+dLong*i for i in range(nLong)]
+#     gridLats = [initLat+dLat*i for i in range(nLat)]
+#     f = interpolate.interp2d(gridLongs, gridLats, elevs, kind='linear')
+#     endLong = initLong + (nLong-1)* dLong
+#     endLat = initLat + (nLat-1)* dLat
+# #    sio.savemat('elevationMap.mat', {'elevs':elevs,'gridLongs':gridLongs,'gridLats':gridLats,'initLong':initLong,'initLat':initLat,'endLong':endLong,'endLat':endLat})
+#     el = []
+#     for i in range(long.shape[0]):
+#         lo = long[i, 0]
+#         la = lat[i, 0]
+#         assert(lo>=initLong and lo<=endLong), "The longitude is out of bound for elevation look-up!"
+#         assert(la<=initLat and la>=endLat), "The latitude is out of bound for elevation look-up!"
+#         el += [f(lo, la)[0]]
+#
+#     return (np.matrix(el).T)/1000.
 
 def calibrate(x, models):
     assert(np.shape(x)[1]==len(models)), 'You need to provide a model name for each column of the data matrix.'
