@@ -33,8 +33,8 @@ def getConfig():
 
 
 def generateQueryMeshGrid(numberGridCells1D, topLeftCorner, bottomRightCorner):
-    gridCellSize_lat = abs(topLeftCorner.lat - bottomRightCorner.lat) / numberGridCells1D
-    gridCellSize_lng = abs(topLeftCorner.lng - bottomRightCorner.lng) / numberGridCells1D
+    gridCellSize_lat = abs(topLeftCorner['lat'] - bottomRightCorner['lat']) / numberGridCells1D
+    gridCellSize_lng = abs(topLeftCorner['lng'] - bottomRightCorner['lng']) / numberGridCells1D
 
     lats = []
     lngs = []
