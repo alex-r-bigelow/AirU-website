@@ -1,6 +1,6 @@
 import numpy as np
 import os.path
-import elevation
+# import elevation
 from math import factorial
 from numpy.linalg import cholesky, det
 from scipy.linalg import lu
