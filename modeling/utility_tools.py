@@ -1,10 +1,10 @@
 import numpy as np
-import os.path
+# import os.path
 # import elevation
 from math import factorial
 from numpy.linalg import cholesky, det
 from scipy.linalg import lu
-from scipy import interpolate
+# from scipy import interpolate
 # from osgeo import gdal
 # import scipy.io as sio
 
@@ -30,6 +30,7 @@ def basisTerms(x,remDeg,res,terms):
             terms = basisTerms(x[0, 1:],remDeg-i,new_res,terms)
         return terms
 
+
 # This calculates number of possible combinations of k objects chosen from n objects or n-choose-k
 def nchoosek(n, k):
     return factorial(n) / factorial(k) / factorial(n - k)
@@ -51,12 +52,13 @@ def logdet(M, isPosDef=False):
         c = det(P) * np.prod(np.sign(du))
         return np.log(c) + np.sum(np.log(abs(du)))
 
-def longLat2Km(long, lat, longOrigin, latOrigin):
-    long = np.matrix(long)
+
+def longLat2Km(lng, lat, longOrigin, latOrigin):
+    lng = np.matrix(lng)
     lat = np.matrix(lat)
+    print(lng.dtype)
+    print(lat.dtype)
     # converting the lat degrees to km
-    print(lat.mean())
-    print(np.pi)
     meanLat = lat.mean()*np.pi/float(180.0)
     #minLat = lat.min()
     #latDiff = lat-minLat
@@ -65,7 +67,7 @@ def longLat2Km(long, lat, longOrigin, latOrigin):
     # converting the lat degrees to km
     #minLong = long.min()
     #longDiff = long-minLong
-    longDiff = long-longOrigin
+    longDiff = lng-longOrigin
     a = 6378137.0
     b = 6356752.3142
     psi = np.arctan((b/a) * np.tan(lat*np.pi/180.0))
@@ -104,6 +106,7 @@ def longLat2Km(long, lat, longOrigin, latOrigin):
 #         el += [f(lo, la)[0]]
 #
 #     return (np.matrix(el).T)/1000.
+
 
 def calibrate(x, models):
     assert(np.shape(x)[1]==len(models)), 'You need to provide a model name for each column of the data matrix.'
