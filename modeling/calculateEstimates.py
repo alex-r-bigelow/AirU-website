@@ -57,7 +57,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
     bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
 
-    data = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topleftCorner.lat, topleftCorner.lng, bottomRightCorner.lat, bottomRightCorner.lng)
+    data = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topleftCorner['lat'], topleftCorner['lng'], bottomRightCorner['lat'], bottomRightCorner['lng'])
 
     pm25 = data[0]
     longitudes = data[1]
