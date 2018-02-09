@@ -88,9 +88,9 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     lat_tr = latitudes
     # time_tr = np.matrix(time_tr)
     time_tr = times
-    long_Q = np.matrix(meshInfo.lngs)
-    lat_Q = np.matrix(meshInfo.lats)
-    time_Q = np.matrix(meshInfo.times)
+    long_Q = np.matrix(meshInfo['lngs'])
+    lat_Q = np.matrix(meshInfo['lats'])
+    time_Q = np.matrix(meshInfo['times'])
 
     # This would be y_tr of the AQGPR function
     # pm2p5_tr = np.matrix(pm25)
