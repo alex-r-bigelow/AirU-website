@@ -101,6 +101,9 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     # This would be the xQuery of the AQGPR function
     x_Q = np.concatenate((lat_Q, long_Q, time_Q), axis=1)
 
+    print('****** x_Q ******')
+    print(x_Q)
+
     # set parameters
     # we usually initialize sigmaF0 for training as the standard deviation of the sensor measurements
     # sigmaF0=np.std(pm2p5_tr, ddof=1)
