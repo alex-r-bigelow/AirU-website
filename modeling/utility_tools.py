@@ -57,6 +57,8 @@ def longLat2Km(lng, lat, longOrigin, latOrigin):
     lng = np.matrix(lng)
     lat = np.matrix(lat)
     # converting the lat degrees to km
+    print('lat for mean')
+    print(lat)
     meanLat = lat.mean()*np.pi/180.0
     #minLat = lat.min()
     #latDiff = lat-minLat
