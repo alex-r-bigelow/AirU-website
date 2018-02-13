@@ -44,9 +44,9 @@ def generateQueryMeshGrid(numberGridCells1D, topLeftCorner, bottomRightCorner):
 
         for lat in range(numberGridCells1D):
             latitude = topLeftCorner['lat'] - (lat * gridCellSize_lat)
-            lats.append(latitude)
-            lngs.append(longitude)
-            times.append(0)
+            lats.append(float(latitude))
+            lngs.append(float(longitude))
+            times.append(int(0))
 
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
