@@ -57,8 +57,6 @@ def longLat2Km(lng, lat, longOrigin, latOrigin):
     lng = np.matrix(lng, float)
     lat = np.matrix(lat, float)
     # converting the lat degrees to km
-    print('lat for mean')
-    print(lat)
     meanLat = lat.mean()*np.pi/180.0
     #minLat = lat.min()
     #latDiff = lat-minLat
@@ -70,9 +68,6 @@ def longLat2Km(lng, lat, longOrigin, latOrigin):
     longDiff = lng-longOrigin
     a = 6378137.0
     b = 6356752.3142
-    print('lat for tan')
-    print(lat)
-    print(lat*np.pi/180.0)
     psi = np.arctan((b/a) * np.tan(lat*np.pi/180.0))
     xh = np.multiply(longDiff , (np.pi/180.0)* a * np.cos(psi) )
 

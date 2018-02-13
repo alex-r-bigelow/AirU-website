@@ -61,8 +61,6 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     pm25 = data[0]
     longitudes = data[1]
-    print('longitudes in getEstimate')
-    print(longitudes)
     latitudes = data[2]
     nLats = len(latitudes)
     times = data[3]
@@ -97,14 +95,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     # This would be y_tr of the AQGPR function
     # pm2p5_tr = np.matrix(pm25)
     pm2p5_tr = pm25
-    print('lat_tr')
-    print(lat_tr)
-    print('long_tr')
-    print(long_tr)
-    print('long_Q')
-    print(long_Q)
-    print('lat_Q')
-    print(lat_Q)
+
     # This would be the x_tr of the AQGPR function
     x_tr = np.concatenate((lat_tr, long_tr, time_tr), axis=1)
     # This would be the xQuery of the AQGPR function

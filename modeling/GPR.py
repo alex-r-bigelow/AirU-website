@@ -11,6 +11,9 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
     # assert(y.shape[0]>=y.shape[1]),'The observed values shold be in a column vector'
     assert(x.shape[0] >= x.shape[1]), 'The independent variables should be in the columns, and the observations in the rows'
     # assert(y_tr.shape[0]>=y_tr.shape[1]),'The observed values shold be in a column vector'
+    print('shapes')
+    print(x_tr.shape[0])
+    print(x_tr.shape[1)
     assert(x_tr.shape[0] >= x_tr.shape[1]), 'The independent variables should be in the columns, and the observations in the rows'
     assert(xQuery.shape[0] >= xQuery.shape[1]), 'The independent variables should be in the columns, and the tests in the rows'
 
