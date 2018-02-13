@@ -5,6 +5,7 @@ import sys
 
 from datetime import datetime
 from datetime import timedelta
+import numpy as np
 
 # from influxdb import InfluxDBClient
 
@@ -135,10 +136,6 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
             continue
 
         airUUniqueIDs += [anID]
-        print('before')
-        print(lat)
-        print('after')
-        print(float(lat))
         latitudes += [float(lat)]
         longitudes += [float(long)]
         if senModel is None:
@@ -181,9 +178,13 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
 
     IDs = pAirUniqueIDs + airUUniqueIDs
 
+    # conversion from unicode to float
+    longitudes_np = np.array(longitudes)
+    longitudes_float = longitudes_np.astype(np.float)
+
     print('***************** longitudes *****************')
-    print(longitudes)
-    print('***************** longitudes *****************')
+    print(longitudes_float)
+    print('***************** latitudes *****************')
     print(latitudes)
 
     return [data, longitudes, latitudes, times, sensorModels, IDs]
