@@ -61,6 +61,8 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     pm25 = data[0]
     longitudes = data[1]
+    print('longitudes in getEstimate')
+    print(longitudes)
     latitudes = data[2]
     nLats = len(latitudes)
     times = data[3]
