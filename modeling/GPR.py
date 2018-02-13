@@ -11,9 +11,6 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
     # assert(y.shape[0]>=y.shape[1]),'The observed values shold be in a column vector'
     assert(x.shape[0] >= x.shape[1]), 'The independent variables should be in the columns, and the observations in the rows'
     # assert(y_tr.shape[0]>=y_tr.shape[1]),'The observed values shold be in a column vector'
-    print('shapes')
-    print(xQuery.shape[0])
-    print(xQuery.shape[1])
     assert(x_tr.shape[0] >= x_tr.shape[1]), 'The independent variables should be in the columns, and the observations in the rows'
     assert(xQuery.shape[0] >= xQuery.shape[1]), 'The independent variables should be in the columns, and the tests in the rows'
 
@@ -123,7 +120,8 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
             nBasis = int(nchoosek(basisFnDeg + nIvar, basisFnDeg))
             H = np.matrix(np.zeros((nBasis, nObs)))
             HStar = np.matrix(np.zeros((nBasis, nQuery)))
-
+        print('******* kerfunc *******')
+        print(x)
         for i in range(nObs):
             for j in range(nObs):
                 K[i, j] = kerFunc(x[i, :], x[j, :], sigmaF, L) + sigmaN**2 * delta[i, j]

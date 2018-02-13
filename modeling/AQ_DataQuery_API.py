@@ -184,11 +184,6 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     latitudes_np = np.array(latitudes)
     latitudes_float = latitudes_np.astype(np.float)
 
-    print('***************** longitudes *****************')
-    print(longitudes_float)
-    print('***************** latitudes *****************')
-    print(latitudes_float)
-
     return [data, longitudes_float, latitudes_float, times, sensorModels, IDs]
 
 
