@@ -135,8 +135,8 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
             continue
 
         airUUniqueIDs += [anID]
-        latitudes += [lat]
-        longitudes += [long]
+        latitudes += [float(lat)]
+        longitudes += [float(long)]
         if senModel is None:
             sensorModels += ['']
         else:
@@ -176,12 +176,12 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
         initialDate = anEndDate
 
     IDs = pAirUniqueIDs + airUUniqueIDs
-    print('***************** data *****************')
-    print(data)
+
     print('***************** longitudes *****************')
     print(longitudes)
-    print('***************** times *****************')
-    print(times)
+    print('***************** longitudes *****************')
+    print(latitudes)
+    
     return [data, longitudes, latitudes, times, sensorModels, IDs]
 
 
