@@ -178,13 +178,6 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
 
     IDs = pAirUniqueIDs + airUUniqueIDs
 
-    # conversion from unicode to float
-    # longitudes_np = np.array(longitudes)
-    # longitudes_float = longitudes_np.astype(np.float)
-    # latitudes_np = np.array(latitudes)
-    # latitudes_float = latitudes_np.astype(np.float)
-    print('****** times *******')
-    print(times)
     # return [data, longitudes_float, latitudes_float, times, sensorModels, IDs]
     return [data, longitudes, latitudes, times, sensorModels, IDs]
 

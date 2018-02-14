@@ -120,8 +120,7 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
             nBasis = int(nchoosek(basisFnDeg + nIvar, basisFnDeg))
             H = np.matrix(np.zeros((nBasis, nObs)))
             HStar = np.matrix(np.zeros((nBasis, nQuery)))
-        print('******* kerfunc *******')
-        print(x)
+
         for i in range(nObs):
             for j in range(nObs):
                 K[i, j] = kerFunc(x[i, :], x[j, :], sigmaF, L) + sigmaN**2 * delta[i, j]

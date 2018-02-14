@@ -174,6 +174,8 @@ if __name__ == '__main__':
 
     theEstimate = getEstimate(pAirClient, airUClient, dbs)
 
+    print(theEstimate)
+
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
         password=config['MONGO_PASSWORD'],
