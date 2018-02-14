@@ -148,12 +148,16 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
         times = []
         for anID in pAirUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
+            query = 'SELECT MEAN("pm2.5 (ug/m^3)") FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= \'' + initialDate + '\' AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' group by time(' + str(binFreq) + 's);'
             result = pAirClient.query('SELECT MEAN("pm2.5 (ug/m^3)") FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= \'' + initialDate + '\' AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' group by time(' + str(binFreq) + 's);')
             result = list(result.get_points())
             if anID == pAirUniqueIDs[0]:
                 for row in result:
                     t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
                     times += [t]
+                    print('pAirUniqueIDs')
+                    print(query)
+                    print(row['mean'])
                     data.append([row['mean']])
             else:
                 for i in range(len(result)):
@@ -161,15 +165,19 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
 
         for anID in airUUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
+            queryAiru = 'SELECT MEAN("PM2.5") FROM ' + dbs['airu_pm25_measurement'] + ' WHERE time >= \'' + initialDate + '\' ' + 'AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' ' + 'group by time(' + str(binFreq) + 's);'
             result = airUClient.query('SELECT MEAN("PM2.5") FROM ' +
                                       dbs['airu_pm25_measurement'] + ' WHERE time >= \'' + initialDate + '\' ' +
                                       'AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' ' +
                                       'group by time(' + str(binFreq) + 's);')
             result = list(result.get_points())
-            if len(pAirUniqueIDs) == 0 and anID == airUUniqueIDs[0]:
+            if len(pAirUniqueIDs) == 0 and anID == airUUniqueIDs[0]:        # TODO does that line make sense
                 for row in result:
                     t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
                     times += [t]
+                    print('airUUniqueIDs')
+                    print(queryAiru)
+                    print(row['mean'])
                     data.append([row['mean']])
             else:
                 for i in range(len(result)):
