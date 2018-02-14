@@ -125,6 +125,24 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     # Indicating wether we want to do the regression and find some estimates or not
     isRegression = True
+    print('************** x_Q *************')
+    print(x_Q)
+    print('************** x_tr *************')
+    print(x_tr)
+    print('************** pm2p5_tr *************')
+    print(pm2p5_tr)
+    print('************** sigmaF0 *************')
+    print(sigmaF0)
+    print('************** L0 *************')
+    print(L0)
+    print('************** sigmaN *************')
+    print(sigmaN)
+    print('************** basisFnDeg *************')
+    print(basisFnDeg)
+    print('************** isTrain *************')
+    print(isTrain)
+    print('************** isRegression *************')
+    print(isRegression)
 
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
