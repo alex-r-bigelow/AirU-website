@@ -194,6 +194,8 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     IDs = pAirUniqueIDs + airUUniqueIDs
 
     # return [data, longitudes_float, latitudes_float, times, sensorModels, IDs]
+    print('********* data vector ***********')
+    print(data)
     return [data, longitudes, latitudes, times, sensorModels, IDs]
 
 
