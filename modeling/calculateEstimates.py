@@ -60,6 +60,9 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topleftCorner['lat'], topleftCorner['lng'], bottomRightCorner['lat'], bottomRightCorner['lng'])
 
+    print('****************** data_tr[0] *****************')
+    print(data_tr[0])
+
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
     lat_tr = data_tr[2]
@@ -131,18 +134,6 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     print(x_tr)
     print('************** pm2p5_tr *************')
     print(pm2p5_tr)
-    print('************** sigmaF0 *************')
-    print(sigmaF0)
-    print('************** L0 *************')
-    print(L0)
-    print('************** sigmaN *************')
-    print(sigmaN)
-    print('************** basisFnDeg *************')
-    print(basisFnDeg)
-    print('************** isTrain *************')
-    print(isTrain)
-    print('************** isRegression *************')
-    print(isRegression)
 
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
