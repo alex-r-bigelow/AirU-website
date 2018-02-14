@@ -106,7 +106,7 @@ def longLat2Km(lng, lat, longOrigin, latOrigin):
 #     return (np.matrix(el).T)/1000.
 
 
-# Calibrates sensor readings with respect to their model    
+# Calibrates sensor readings with respect to their model
 def calibrate(x, models):
     assert(np.shape(x)[1]==len(models)), 'You need to provide a model name for each column of the data matrix.'
     xCalibrated = x.copy()
@@ -121,10 +121,11 @@ def calibrate(x, models):
             xCalibrated[:,i] = 0.4528*x[:,i]+3.526
     return xCalibrated
 
-# Converts datetime absolute format to a relative time format    
+
+# Converts datetime absolute format to a relative time format
 def datetime2Reltime(times, refTime):
     relTimes = []
     for t in times:
-        relTimes += [(t-refTime).total_seconds()/3600.0]
-    
+        relTimes += [(t - refTime).total_seconds() / 3600.0]
+
     return relTimes

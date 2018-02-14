@@ -8,8 +8,9 @@ import sys
 from AQ_API import AQGPR
 from AQ_DataQuery_API import AQDataQuery
 from datetime import datetime
-from pymongo import MongoClient
 from influxdb import InfluxDBClient
+from pymongo import MongoClient
+from utility_tools import calibrate, datetime2Reltime
 
 
 logger = logging.getLogger(__name__)
@@ -57,20 +58,23 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
     bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
 
-    data = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topleftCorner['lat'], topleftCorner['lng'], bottomRightCorner['lat'], bottomRightCorner['lng'])
+    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topleftCorner['lat'], topleftCorner['lng'], bottomRightCorner['lat'], bottomRightCorner['lng'])
 
-    pm25 = data[0]
-    longitudes = data[1]
-    latitudes = data[2]
-    nLats = len(latitudes)
-    times = data[3]
-    nts = len(times)
-    # sensorModels = data[4]
+    pm2p5_tr = data_tr[0]
+    long_tr = data_tr[1]
+    lat_tr = data_tr[2]
+    nLats = len(lat_tr)
+    time_tr = data_tr[3]
+    nts = len(time_tr)
+    sensorModels = data_tr[4]
 
-    pm25 = np.matrix(pm25).flatten().T
-    latitudes = np.tile(np.matrix(latitudes).T, [nts, 1])
-    longitudes = np.tile(np.matrix(longitudes).T, [nts, 1])
-    times = np.repeat(np.matrix(times).T, nLats, axis=0)
+    pm2p5_tr = np.matrix(pm2p5_tr, dtype=float)
+    pm2p5_tr = calibrate(pm2p5_tr, sensorModels)
+    pm2p5_tr = pm2p5_tr.flatten().T
+    lat_tr = np.tile(np.matrix(lat_tr).T, [nts, 1])
+    long_tr = np.tile(np.matrix(long_tr).T, [nts, 1])
+    time_tr = datetime2Reltime(time_tr, min(time_tr))
+    time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
     meshInfo = generateQueryMeshGrid(20, topleftCorner, bottomRightCorner)
 
@@ -83,18 +87,18 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     # time_Q = readCSVFile('data/example_data/TIME_Q.csv')
 
     # long_tr = np.matrix(long_tr)
-    long_tr = longitudes
+    # long_tr = longitudes
     # lat_tr = np.matrix(lat_tr)
-    lat_tr = latitudes
+    # lat_tr = latitudes
     # time_tr = np.matrix(time_tr)
-    time_tr = times
+    # time_tr = times
     long_Q = np.matrix(meshInfo['lngs'])
     lat_Q = np.matrix(meshInfo['lats'])
     time_Q = np.matrix(meshInfo['times'])
 
     # This would be y_tr of the AQGPR function
     # pm2p5_tr = np.matrix(pm25)
-    pm2p5_tr = pm25
+    # pm2p5_tr = pm25
 
     # This would be the x_tr of the AQGPR function
     x_tr = np.concatenate((lat_tr, long_tr, time_tr), axis=1)
