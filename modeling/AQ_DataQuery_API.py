@@ -163,7 +163,7 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                 for i in range(len(result)):
                     print('else part pAirUniqueIDs')
                     print(query)
-                    print(row['mean'])
+                    print(result[i]['mean'])
                     data[i] += [result[i]['mean']]
 
         for anID in airUUniqueIDs:
@@ -186,7 +186,7 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                 for i in range(len(result)):
                     print('else part airUUniqueIDs')
                     print(queryAiru)
-                    print(row['mean'])
+                    print(result[i]['mean'])
                     data[i] += [result[i]['mean']]
 
         initialDate = anEndDate
