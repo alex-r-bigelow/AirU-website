@@ -5,7 +5,7 @@ import sys
 
 from datetime import datetime
 from datetime import timedelta
-import numpy as np
+# import numpy as np
 
 # from influxdb import InfluxDBClient
 
@@ -92,8 +92,8 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
 
         if row['ID'] not in pAirUniqueIDs:
             pAirUniqueIDs += [row['ID']]
-            latitudes += [row['Latitude']]
-            longitudes += [row['Longitude']]
+            latitudes += [float(row['Latitude'])]
+            longitudes += [float(row['Longitude'])]
             if row['Sensor Model'] is None:
                 sensorModels += ['PMS5003']
             else:
@@ -179,13 +179,14 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     IDs = pAirUniqueIDs + airUUniqueIDs
 
     # conversion from unicode to float
-    longitudes_np = np.array(longitudes)
-    longitudes_float = longitudes_np.astype(np.float)
-    latitudes_np = np.array(latitudes)
-    latitudes_float = latitudes_np.astype(np.float)
+    # longitudes_np = np.array(longitudes)
+    # longitudes_float = longitudes_np.astype(np.float)
+    # latitudes_np = np.array(latitudes)
+    # latitudes_float = latitudes_np.astype(np.float)
     print('****** times *******')
     print(times)
-    return [data, longitudes_float, latitudes_float, times, sensorModels, IDs]
+    # return [data, longitudes_float, latitudes_float, times, sensorModels, IDs]
+    return [data, longitudes, latitudes, times, sensorModels, IDs]
 
 
 if __name__ == "__main__":
