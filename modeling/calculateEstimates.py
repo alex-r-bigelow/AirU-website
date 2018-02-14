@@ -128,6 +128,11 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
+    print('************** yPred **************')
+    print(yPred)
+    print('************** yVar **************')
+    print(yVar)
+
     return [yPred, yVar]
 
 
