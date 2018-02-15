@@ -149,6 +149,8 @@ def storeInMongo(client, anEstimate):
 
     db = client.airudb
 
+    # anEstimate = np.squeeze(np.asarray(M)) TODOOOOOOOOOOOOOOO
+
     anEstimateSlice = {"estimationFor": TIMESTAMP,
                        "estimate": anEstimate[0],
                        "variability": anEstimate[1]}
