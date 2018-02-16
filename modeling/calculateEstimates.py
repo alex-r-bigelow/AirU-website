@@ -149,11 +149,12 @@ def storeInMongo(client, anEstimate):
 
     db = client.airudb
 
-    # anEstimate = np.squeeze(np.asarray(M)) TODOOOOOOOOOOOOOOO
+    variability = np.squeeze(np.asarray(anEstimate[1]))
+    print(variability)
 
     anEstimateSlice = {"estimationFor": TIMESTAMP,
                        "estimate": anEstimate[0],
-                       "variability": anEstimate[1]}
+                       "variability": variability}
 
     db.timeSlicedEstimates.insert_one(anEstimateSlice)
     logger.info('inserted data slice for %s', TIMESTAMP)
