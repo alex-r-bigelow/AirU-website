@@ -186,38 +186,38 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                     # print(queryAiru)
                     # print(row['mean'])
 
-                    if row['mean'] is None and not noneElement:
-                        # first None element
-
-                        print('airUUniqueIDs')
-                        print(queryAiru)
-                        print(row['mean'])
-
-                        noneElement = True
-                        previousElementIdx = idx - 1
-                        startElement['value'] = result[previousElementIdx]['mean']
-                        startElement['index'] = previousElementIdx
-                    elif row['mean'] is not None and noneElement:
-                        # last None element
-
-                        endElement['value'] = row['mean']
-                        endElement['index'] = idx
-
-                        numberNoneElements = endElement['index'] - startElement['index']
-                        increment = (endElement['value'] - startElement['value']) / numberNoneElements
-
-                        for i in range(1, numberNoneElements):
-                            data.append([startElement['value'] + (i * increment)])
-                            print([startElement['value'] + (i * increment)])
-
-                        data.append([endElement['value']])
-                        print([endElement['value']])
-
-                        noneElement = False
-
-                    elif row['mean'] is not None and not noneElement:
+                    # if row['mean'] is None and not noneElement:
+                    #     # first None element
+                    #
+                    #     print('airUUniqueIDs')
+                    #     print(queryAiru)
+                    #     print(row['mean'])
+                    #
+                    #     noneElement = True
+                    #     previousElementIdx = idx - 1
+                    #     startElement['value'] = result[previousElementIdx]['mean']
+                    #     startElement['index'] = previousElementIdx
+                    # elif row['mean'] is not None and noneElement:
+                    #     # last None element
+                    #
+                    #     endElement['value'] = row['mean']
+                    #     endElement['index'] = idx
+                    #
+                    #     numberNoneElements = endElement['index'] - startElement['index']
+                    #     increment = (endElement['value'] - startElement['value']) / numberNoneElements
+                    #
+                    #     for i in range(1, numberNoneElements):
+                    #         data.append([startElement['value'] + (i * increment)])
+                    #         print([startElement['value'] + (i * increment)])
+                    #
+                    #     data.append([endElement['value']])
+                    #     print([endElement['value']])
+                    #
+                    #     noneElement = False
+                    #
+                    # elif row['mean'] is not None and not noneElement:
                         # a regular element
-                        data.append([row['mean']])
+                    data.append([row['mean']])
 
             else:
                 startElement = {}
@@ -228,38 +228,38 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                     # print(queryAiru)
                     # print(result[i]['mean'])
                     rowMeanValue = result[i]['mean']
-                    if rowMeanValue is None and not noneElement:
-                        # first None element
-
-                        print('else part airUUniqueIDs')
-                        print(queryAiru)
-                        print(result[i]['mean'])
-
-                        noneElement = True
-                        previousElementIdx = i - 1
-                        startElement['value'] = result[previousElementIdx]['mean']
-                        startElement['index'] = previousElementIdx
-                    elif rowMeanValue is not None and noneElement:
-                        # last None element
-
-                        endElement['value'] = rowMeanValue
-                        endElement['index'] = i
-
-                        numberNoneElements = endElement['index'] - startElement['index']
-                        increment = (endElement['value'] - startElement['value']) / numberNoneElements
-
-                        for j in range(1, numberNoneElements):
-                            data.append([startElement['value'] + (j * increment)])
-                            print([startElement['value'] + (j * increment)])
-
-                        data.append([endElement['value']])
-                        print([endElement['value']])
-
-                        noneElement = False
-
-                    elif rowMeanValue is not None and not noneElement:
+                    # if rowMeanValue is None and not noneElement:
+                    #     # first None element
+                    #
+                    #     print('else part airUUniqueIDs')
+                    #     print(queryAiru)
+                    #     print(result[i]['mean'])
+                    #
+                    #     noneElement = True
+                    #     previousElementIdx = i - 1
+                    #     startElement['value'] = result[previousElementIdx]['mean']
+                    #     startElement['index'] = previousElementIdx
+                    # elif rowMeanValue is not None and noneElement:
+                    #     # last None element
+                    #
+                    #     endElement['value'] = rowMeanValue
+                    #     endElement['index'] = i
+                    #
+                    #     numberNoneElements = endElement['index'] - startElement['index']
+                    #     increment = (endElement['value'] - startElement['value']) / numberNoneElements
+                    #
+                    #     for j in range(1, numberNoneElements):
+                    #         data.append([startElement['value'] + (j * increment)])
+                    #         print([startElement['value'] + (j * increment)])
+                    #
+                    #     data.append([endElement['value']])
+                    #     print([endElement['value']])
+                    #
+                    #     noneElement = False
+                    #
+                    # elif rowMeanValue is not None and not noneElement:
                         # a regular element
-                        data[i] += [rowMeanValue]
+                    data[i] += [rowMeanValue]
 
         initialDate = anEndDate
 
