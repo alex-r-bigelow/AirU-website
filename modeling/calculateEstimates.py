@@ -149,7 +149,7 @@ def storeInMongo(client, anEstimate):
 
     db = client.airudb
 
-    variability = np.squeeze(np.asarray(anEstimate[1]))
+    variability = np.squeeze(np.asarray(anEstimate[1])).tolist()
     print(variability)
 
     anEstimateSlice = {"estimationFor": TIMESTAMP,
