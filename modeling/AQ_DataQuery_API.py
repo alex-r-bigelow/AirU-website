@@ -84,7 +84,7 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     sensorModels = []
     for row in result:
         if row['Latitude'] is None or row['Longitude'] is None:
-            print "Skipped sensor with ID:" + row['ID'] + " -> Latitude/Longitude information not available!"
+            print("Skipped sensor with ID:" + row['ID'] + " -> Latitude/Longitude information not available!")
             continue
 
         if not((float(row['Longitude']) < borderBox['right']) and (float(row['Longitude']) > borderBox['left'])) or not((float(row['Latitude']) > borderBox['bottom']) and (float(row['Latitude']) < borderBox['top'])):
@@ -126,10 +126,10 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
         long = last['last']
 
         if lat is None or long is None:
-            print "Skipped sensor with ID:" + anID + " -> Latitude/Longitude information not available!"
+            print("Skipped sensor with ID:" + anID + " -> Latitude/Longitude information not available!")
             continue
         if lat == 0 or long == 0:
-            print "Skipped sensor with ID:" + anID + " -> Latitude/Longitude has not been aquired!"
+            print("Skipped sensor with ID:" + anID + " -> Latitude/Longitude has not been aquired!")
             continue
 
         if not((float(long) < borderBox['right']) and (float(long) > borderBox['left'])) or not((float(lat) > borderBox['bottom']) and (float(lat) < borderBox['top'])):
@@ -149,23 +149,16 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     for anEndDate in datePartitions:
         for anID in pAirUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
-            query = 'SELECT MEAN("pm2.5 (ug/m^3)") FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= \'' + initialDate + '\' AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' group by time(' + str(binFreq) + 's);'
             result = pAirClient.query('SELECT MEAN("pm2.5 (ug/m^3)") FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= \'' + initialDate + '\' AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' group by time(' + str(binFreq) + 's);')
             result = list(result.get_points())
-            print(result)
+
             if anID == pAirUniqueIDs[0]:
                 for row in result:
                     t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
                     times += [t]
-                    print('pAirUniqueIDs')
-                    print(query)
-                    print(row['mean'])
                     data.append([row['mean']])
             else:
                 for i in range(len(result)):
-                    print('else part pAirUniqueIDs')
-                    print(query)
-                    print(result[i]['mean'])
                     data[i + nres] += [result[i]['mean']]
 
         for anID in airUUniqueIDs:
@@ -192,9 +185,6 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
 
     IDs = pAirUniqueIDs + airUUniqueIDs
 
-    # return [data, longitudes_float, latitudes_float, times, sensorModels, IDs]
-    # print('********* data vector ***********')
-    # print(data)
     return [data, longitudes, latitudes, times, sensorModels, IDs]
 
 

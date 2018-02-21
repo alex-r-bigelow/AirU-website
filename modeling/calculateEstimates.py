@@ -60,9 +60,6 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topleftCorner['lat'], topleftCorner['lng'], bottomRightCorner['lat'], bottomRightCorner['lng'])
 
-    print('****************** data_tr[0] *****************')
-    print(data_tr[0])
-
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
     lat_tr = data_tr[2]
@@ -130,19 +127,8 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     # Indicating wether we want to do the regression and find some estimates or not
     isRegression = True
-    print('************** x_Q *************')
-    print(x_Q)
-    print('************** x_tr *************')
-    print(x_tr)
-    print('************** pm2p5_tr *************')
-    print(pm2p5_tr)
 
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
-
-    print('************** yPred **************')
-    print(yPred)
-    print('************** yVar **************')
-    print(yVar)
 
     return [yPred, yVar]
 
@@ -195,8 +181,6 @@ if __name__ == '__main__':
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
     theEstimate = getEstimate(pAirClient, airUClient, dbs)
-
-    print(theEstimate)
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
