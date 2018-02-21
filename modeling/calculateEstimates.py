@@ -149,7 +149,7 @@ def storeInMongo(client, anEstimate):
 
     theEstimates = []
     for aZippedEstimate in zippedEstimateData:
-        header = ('lat', 'long', 'pm2.5', 'variability')
+        header = ('lat', 'long', 'pm25', 'variability')
         anEstimate = dict(zip(header, aZippedEstimate))
         theEstimates.append(anEstimate)
 
