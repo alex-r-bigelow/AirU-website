@@ -130,7 +130,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
-    return [yPred, yVar]
+    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1]]
 
 
 def storeInMongo(client, anEstimate):
@@ -142,10 +142,20 @@ def storeInMongo(client, anEstimate):
     estimates = np.squeeze(np.asarray(anEstimate[0])).tolist()
     print(estimates)
 
+    lat = np.squeeze(np.asarray(anEstimate[2])).toList()
+    lng = np.squeeze(np.asarray(anEstimate[3])).toList()
+
+    zippedEstimateData = zip(lat, lng, estimates, variability)
+
+    theEstimates = []
+    for aZippedEstimate in zippedEstimateData:
+        header = ('lat', 'long', 'pm2.5', 'variability')
+        anEstimate = dict(zip(header, aZippedEstimate))
+        theEstimates.append(anEstimate)
+
     anEstimateSlice = {"estimationFor": TIMESTAMP,
                        "modelVersion": '1.0.0',
-                       "estimate": estimates,
-                       "variability": variability}
+                       "estimate": theEstimates}
 
     db.timeSlicedEstimates.insert_one(anEstimateSlice)
     logger.info('inserted data slice for %s', TIMESTAMP)
