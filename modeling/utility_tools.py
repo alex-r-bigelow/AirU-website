@@ -1,7 +1,7 @@
 import numpy as np
 # import os.path
 # import elevation
-from math import factorial
+from math import factorial, isnan
 from numpy.linalg import cholesky, det
 from scipy.linalg import lu
 # from scipy import interpolate
@@ -129,3 +129,47 @@ def datetime2Reltime(times, refTime):
         relTimes += [(t - refTime).total_seconds() / 3600.0]
 
     return relTimes
+
+
+# Finds the missing values and marks interpolates the middle points and marks the rest as None    
+def findMissings(data):
+    nt = len(data)
+    nID = len(data[0])
+    for t in range(nt):
+        for id in range(nID):
+            if (data[t][id]<=0) or (data[t][id]>300):
+                data[t][id] = None
+
+    for j in range(nID):
+        i =0;
+        while i<nt:
+            if data[i][j] is None and i==0:
+                while i<nt and data[i][j] is None:
+                    i+=1;
+                    continue
+            elif data[i][j] is None:
+                z=i+1
+                while z<nt and data[z][j] is None:
+                    z=z+1
+                if z<nt:
+                    for k in range(i, z):
+                        data[k][j] = data[i-1][j] + (k-(i-1))*(data[z][j]-data[i-1][j])/(z-(i-1));
+                    i = z
+                    continue
+                else:
+                    break;
+            i += 1
+
+    return data
+
+
+# Removes the Nan values from the data and its correspondent points
+def removeMissings(x_data, y_data):
+    nPts = np.shape(y_data)[0]
+    toRmv = []
+    for i in range(nPts):
+        if isnan(y_data[i, 0]):
+            toRmv += [i]
+    y_data = np.delete(y_data, toRmv, 0)
+    x_data = np.delete(x_data, toRmv, 0)
+    return x_data, y_data    
