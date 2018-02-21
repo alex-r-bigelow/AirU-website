@@ -142,8 +142,8 @@ def storeInMongo(client, anEstimate):
     estimates = np.squeeze(np.asarray(anEstimate[0])).tolist()
     print(estimates)
 
-    lat = np.squeeze(np.asarray(anEstimate[2])).toList()
-    lng = np.squeeze(np.asarray(anEstimate[3])).toList()
+    lat = np.squeeze(np.asarray(anEstimate[2])).tolist()
+    lng = np.squeeze(np.asarray(anEstimate[3])).tolist()
 
     zippedEstimateData = zip(lat, lng, estimates, variability)
 
