@@ -143,9 +143,10 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
         else:
             sensorModels += [senModel.split('+')[0]]
 
+    nres = 0
+    data=[]
+    times=[]
     for anEndDate in datePartitions:
-        data = []
-        times = []
         for anID in pAirUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
             query = 'SELECT MEAN("pm2.5 (ug/m^3)") FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= \'' + initialDate + '\' AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' group by time(' + str(binFreq) + 's);'
@@ -165,7 +166,7 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                     print('else part pAirUniqueIDs')
                     print(query)
                     print(result[i]['mean'])
-                    data[i] += [result[i]['mean']]
+                    data[i+nres] += [result[i]['mean']]
 
         for anID in airUUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
@@ -259,10 +260,11 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                     #
                     # elif rowMeanValue is not None and not noneElement:
                         # a regular element
-                    data[i] += [rowMeanValue]
+                    data[i+nres] += [rowMeanValue]
 
         initialDate = anEndDate
-
+        nres+=len(result)
+        
     IDs = pAirUniqueIDs + airUUniqueIDs
 
     # return [data, longitudes_float, latitudes_float, times, sensorModels, IDs]
