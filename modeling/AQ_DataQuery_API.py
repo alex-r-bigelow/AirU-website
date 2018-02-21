@@ -144,8 +144,8 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
             sensorModels += [senModel.split('+')[0]]
 
     nres = 0
-    data=[]
-    times=[]
+    data = []
+    times = []
     for anEndDate in datePartitions:
         for anID in pAirUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
@@ -166,105 +166,30 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                     print('else part pAirUniqueIDs')
                     print(query)
                     print(result[i]['mean'])
-                    data[i+nres] += [result[i]['mean']]
+                    data[i + nres] += [result[i]['mean']]
 
         for anID in airUUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
-            queryAiru = 'SELECT MEAN("PM2.5") FROM ' + dbs['airu_pm25_measurement'] + ' WHERE time >= \'' + initialDate + '\' ' + 'AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' ' + 'group by time(' + str(binFreq) + 's);'
             result = airUClient.query('SELECT MEAN("PM2.5") FROM ' +
                                       dbs['airu_pm25_measurement'] + ' WHERE time >= \'' + initialDate + '\' ' +
                                       'AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' ' +
                                       'group by time(' + str(binFreq) + 's);')
             result = list(result.get_points())
             if len(pAirUniqueIDs) == 0 and anID == airUUniqueIDs[0]:        # TODO does that line make sense
-                startElement = {}
-                endElement = {}
-                noneElement = False
+
                 for idx, row in enumerate(result):
                     t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
                     times += [t]
-                    # print('airUUniqueIDs')
-                    # print(queryAiru)
-                    # print(row['mean'])
-
-                    # if row['mean'] is None and not noneElement:
-                    #     # first None element
-                    #
-                    #     print('airUUniqueIDs')
-                    #     print(queryAiru)
-                    #     print(row['mean'])
-                    #
-                    #     noneElement = True
-                    #     previousElementIdx = idx - 1
-                    #     startElement['value'] = result[previousElementIdx]['mean']
-                    #     startElement['index'] = previousElementIdx
-                    # elif row['mean'] is not None and noneElement:
-                    #     # last None element
-                    #
-                    #     endElement['value'] = row['mean']
-                    #     endElement['index'] = idx
-                    #
-                    #     numberNoneElements = endElement['index'] - startElement['index']
-                    #     increment = (endElement['value'] - startElement['value']) / numberNoneElements
-                    #
-                    #     for i in range(1, numberNoneElements):
-                    #         data.append([startElement['value'] + (i * increment)])
-                    #         print([startElement['value'] + (i * increment)])
-                    #
-                    #     data.append([endElement['value']])
-                    #     print([endElement['value']])
-                    #
-                    #     noneElement = False
-                    #
-                    # elif row['mean'] is not None and not noneElement:
-                        # a regular element
                     data.append([row['mean']])
 
             else:
-                startElement = {}
-                endElement = {}
-                noneElement = False
                 for i in range(len(result)):
-                    # print('else part airUUniqueIDs')
-                    # print(queryAiru)
-                    # print(result[i]['mean'])
                     rowMeanValue = result[i]['mean']
-                    # if rowMeanValue is None and not noneElement:
-                    #     # first None element
-                    #
-                    #     print('else part airUUniqueIDs')
-                    #     print(queryAiru)
-                    #     print(result[i]['mean'])
-                    #
-                    #     noneElement = True
-                    #     previousElementIdx = i - 1
-                    #     startElement['value'] = result[previousElementIdx]['mean']
-                    #     startElement['index'] = previousElementIdx
-                    # elif rowMeanValue is not None and noneElement:
-                    #     # last None element
-                    #
-                    #     endElement['value'] = rowMeanValue
-                    #     endElement['index'] = i
-                    #
-                    #     numberNoneElements = endElement['index'] - startElement['index']
-                    #     increment = (endElement['value'] - startElement['value']) / numberNoneElements
-                    #
-                    #     for j in range(1, numberNoneElements):
-                    #         data.append([startElement['value'] + (j * increment)])
-                    #         print([startElement['value'] + (j * increment)])
-                    #
-                    #     data.append([endElement['value']])
-                    #     print([endElement['value']])
-                    #
-                    #     noneElement = False
-                    #
-                    # elif rowMeanValue is not None and not noneElement:
-                        # a regular element
-                    data[i+nres] += [rowMeanValue]
+                    data[i + nres] += [rowMeanValue]
 
         initialDate = anEndDate
-        nres+=len(result)
-        
+        nres += len(result)
+
     IDs = pAirUniqueIDs + airUUniqueIDs
 
     # return [data, longitudes_float, latitudes_float, times, sensorModels, IDs]

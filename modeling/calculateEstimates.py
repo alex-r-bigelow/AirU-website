@@ -10,7 +10,7 @@ from AQ_DataQuery_API import AQDataQuery
 from datetime import datetime
 from influxdb import InfluxDBClient
 from pymongo import MongoClient
-from utility_tools import calibrate, datetime2Reltime
+from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
 
 
 logger = logging.getLogger(__name__)
@@ -71,6 +71,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     nts = len(time_tr)
     sensorModels = data_tr[4]
 
+    pm2p5_tr = findMissings(pm2p5_tr)
     pm2p5_tr = np.matrix(pm2p5_tr, dtype=float)
     pm2p5_tr = calibrate(pm2p5_tr, sensorModels)
     pm2p5_tr = pm2p5_tr.flatten().T
@@ -105,6 +106,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     # This would be the x_tr of the AQGPR function
     x_tr = np.concatenate((lat_tr, long_tr, time_tr), axis=1)
+    x_tr, pm2p5_tr = removeMissings(x_tr, pm2p5_tr)
     # This would be the xQuery of the AQGPR function
     x_Q = np.concatenate((lat_Q, long_Q, time_Q), axis=1)
 
@@ -151,9 +153,12 @@ def storeInMongo(client, anEstimate):
 
     variability = np.squeeze(np.asarray(anEstimate[1])).tolist()
     print(variability)
+    estimates = np.squeeze(np.asarray(anEstimate[0])).tolist()
+    print(estimates)
 
     anEstimateSlice = {"estimationFor": TIMESTAMP,
-                       "estimate": anEstimate[0],
+                       "modelVersion": '1.0.0',
+                       "estimate": estimates,
                        "variability": variability}
 
     db.timeSlicedEstimates.insert_one(anEstimateSlice)
