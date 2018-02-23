@@ -181,6 +181,7 @@ def storeInMongo(client, anEstimate):
 
     variability = np.squeeze(np.asarray(anEstimate[1])).tolist()
     # print(variability)
+    print(type(anEstimate[0]))
     print(anEstimate[0])
     print('******spacing*******')
     print(np.asarray(anEstimate[0]))
