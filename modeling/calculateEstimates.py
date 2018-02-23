@@ -2,12 +2,13 @@
 import json
 import logging
 import logging.handlers as handlers
+import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
 from AQ_API import AQGPR
 from AQ_DataQuery_API import AQDataQuery
-from datetime import datetime
+from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
 from pymongo import MongoClient
 from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
@@ -53,8 +54,10 @@ def generateQueryMeshGrid(numberGridCells1D, topLeftCorner, bottomRightCorner):
 
 
 def getEstimate(purpleAirClient, airuClient, theDBs):
-    startDate = datetime(2018, 1, 7)
-    endDate = datetime(2018, 1, 11)
+    currentUTCtime = datetime.utcnow()
+
+    startDate = currentUTCtime - timedelta(days=1)
+    endDate = currentUTCtime
     topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
     bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
 
@@ -133,14 +136,56 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     return [yPred, yVar, x_Q[:, 0], x_Q[:, 1]]
 
 
+def calculateContours(estimates):
+
+    x = []
+    y = []
+    z = []
+
+    for i in estimates:
+        x.append(i["long"])
+        y.append(i["lat"])
+        z.append(i["pm25"])
+
+    X = np.zeros((50, 66))
+    Y = np.zeros((50, 66))
+    Z = np.zeros((50, 66))
+
+    X = structureData(x, X)
+    Y = structureData(y, Y)
+    Z = structureData(z, Z)
+
+    plt.figure()
+    # to set contourf levels, simply add N like so:
+    #    # N = 4
+    #    # CS = plt.contourf(Z, N)
+    # there will be filled colored regions between the values set
+
+    # Y ou can also do this to manually change the cutoff levels for the contours:
+    #    # levels = [0.0, 0.2, 0.5, 0.9, 1.5, 2.5, 3.5]
+    #    # contour = plt.contour(Z, levels)
+
+    # To set colors:
+    # c = ('#ff0000', '#ffff00', '#0000FF', '0.6', 'c', 'm')
+    # CS = plt.contourf(Z, 5, colors=c)
+    CS = plt.contourf(Z)
+
+    plt.colorbar(CS)  # This will give you a legend
+    plt.axis('off')  # Removes axes
+    plt.savefig("test.svg", format="svg")
+
+
 def storeInMongo(client, anEstimate):
 
     db = client.airudb
 
     variability = np.squeeze(np.asarray(anEstimate[1])).tolist()
-    print(variability)
+    # print(variability)
+    print(anEstimate[0])
+    print('******spacing*******')
+    print(np.asarray(anEstimate[0]))
     estimates = np.squeeze(np.asarray(anEstimate[0])).tolist()
-    print(estimates)
+    # print(estimates)
 
     lat = np.squeeze(np.asarray(anEstimate[2])).tolist()
     lng = np.squeeze(np.asarray(anEstimate[3])).tolist()
@@ -152,6 +197,10 @@ def storeInMongo(client, anEstimate):
         header = ('lat', 'long', 'pm25', 'variability')
         anEstimate = dict(zip(header, aZippedEstimate))
         theEstimates.append(anEstimate)
+
+    # take the estimates and get the contours
+
+    # save the contour svg serialized in the db.
 
     anEstimateSlice = {"estimationFor": TIMESTAMP,
                        "modelVersion": '1.0.0',
