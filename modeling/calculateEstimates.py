@@ -184,6 +184,7 @@ def storeInMongo(client, anEstimate):
     print(type(anEstimate[0]))
     print(anEstimate[0])
     print('******spacing*******')
+    print(type(np.asarray(anEstimate[0])))
     print(np.asarray(anEstimate[0]))
     estimates = np.squeeze(np.asarray(anEstimate[0])).tolist()
     # print(estimates)
