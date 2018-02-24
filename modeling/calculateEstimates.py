@@ -190,8 +190,8 @@ def storeInMongo(client, anEstimate):
     theEstimates = []
     for aZippedEstimate in zippedEstimateData:
         header = ('lat', 'long', 'pm25', 'variability')
-        anEstimate = dict(zip(header, aZippedEstimate))
-        theEstimates.append(anEstimate)
+        theEstimate = dict(zip(header, aZippedEstimate))
+        theEstimates.append(theEstimate)
 
     # take the estimates and get the contours
     calculateContours(latQuery, longQuery, pmEstimates)
