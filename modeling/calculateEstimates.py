@@ -165,6 +165,8 @@ def calculateContours(X, Y, Z):
     plt.savefig(stringFile, format="svg")
     theSVG = stringFile.buf
     print(theSVG)
+    print(stringFile)
+    print(stringFile.getvalue())
     # figdata_svg = '<svg' + figfile.buf.split('<svg')[1]
 
 
@@ -180,8 +182,6 @@ def storeInMongo(client, anEstimate):
 
     # make numpy arrays for the contours
     pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[4], anEstimate[4])
-    print('******spacing*******')
-    print(pmEstimates)
     latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[4], anEstimate[4])
     longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[4], anEstimate[4])
 
