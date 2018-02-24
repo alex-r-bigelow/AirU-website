@@ -11,6 +11,7 @@ from AQ_DataQuery_API import AQDataQuery
 from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
 from pymongo import MongoClient
+from StringIO import StringIO
 from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
 
 
@@ -54,6 +55,7 @@ def generateQueryMeshGrid(numberGridCells1D, topLeftCorner, bottomRightCorner):
 
 
 def getEstimate(purpleAirClient, airuClient, theDBs):
+    numberOfGridCells1D = 20
     currentUTCtime = datetime.utcnow()
 
     startDate = currentUTCtime - timedelta(days=1)
@@ -80,7 +82,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     time_tr = datetime2Reltime(time_tr, min(time_tr))
     time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
-    meshInfo = generateQueryMeshGrid(20, topleftCorner, bottomRightCorner)
+    meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
 
     # long_tr = readCSVFile('data/example_data/LONG_tr.csv')
     # lat_tr = readCSVFile('data/example_data/LAT_tr.csv')
@@ -133,27 +135,13 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
-    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1]]
+    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberOfGridCells1D]
 
 
-def calculateContours(estimates):
+def calculateContours(X, Y, Z):
 
-    x = []
-    y = []
-    z = []
-
-    for i in estimates:
-        x.append(i["long"])
-        y.append(i["lat"])
-        z.append(i["pm25"])
-
-    X = np.zeros((50, 66))
-    Y = np.zeros((50, 66))
-    Z = np.zeros((50, 66))
-
-    X = structureData(x, X)
-    Y = structureData(y, Y)
-    Z = structureData(z, Z)
+    # from: http://hplgit.github.io/web4sciapps/doc/pub/._part0013_web4sa_plain.html
+    stringFile = StringIO()
 
     plt.figure()
     # to set contourf levels, simply add N like so:
@@ -168,31 +156,34 @@ def calculateContours(estimates):
     # To set colors:
     # c = ('#ff0000', '#ffff00', '#0000FF', '0.6', 'c', 'm')
     # CS = plt.contourf(Z, 5, colors=c)
-    CS = plt.contourf(Z)
+    CS = plt.contourf(X, Y, Z)
 
     plt.colorbar(CS)  # This will give you a legend
     plt.axis('off')  # Removes axes
-    plt.savefig("test.svg", format="svg")
+    plt.savefig(stringFile, format="svg")
+    theSVG = stringFile.buf
+    print(theSVG)
+    # figdata_svg = '<svg' + figfile.buf.split('<svg')[1]
 
 
 def storeInMongo(client, anEstimate):
 
     db = client.airudb
 
+    # flatten the matrices to list
+    estimates_list = np.squeeze(np.asarray(anEstimate[0])).tolist()
     variability = np.squeeze(np.asarray(anEstimate[1])).tolist()
-    # print(variability)
-    print(type(anEstimate[0]))
-    print(anEstimate[0])
+    lat_list = np.squeeze(np.asarray(anEstimate[2])).tolist()
+    lng_list = np.squeeze(np.asarray(anEstimate[3])).tolist()
+
+    # make numpy arrays for the contours
+    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[4], anEstimate[4])
     print('******spacing*******')
-    print(type(np.asarray(anEstimate[0])))
-    print(np.asarray(anEstimate[0]))
-    estimates = np.squeeze(np.asarray(anEstimate[0])).tolist()
-    # print(estimates)
+    print(pmEstimates)
+    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[4], anEstimate[4])
+    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[4], anEstimate[4])
 
-    lat = np.squeeze(np.asarray(anEstimate[2])).tolist()
-    lng = np.squeeze(np.asarray(anEstimate[3])).tolist()
-
-    zippedEstimateData = zip(lat, lng, estimates, variability)
+    zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
     theEstimates = []
     for aZippedEstimate in zippedEstimateData:
@@ -201,11 +192,13 @@ def storeInMongo(client, anEstimate):
         theEstimates.append(anEstimate)
 
     # take the estimates and get the contours
+    calculateContours(latQuery, longQuery, pmEstimates)
 
     # save the contour svg serialized in the db.
 
     anEstimateSlice = {"estimationFor": TIMESTAMP,
                        "modelVersion": '1.0.0',
+                       "numberOfGridCells1D": anEstimate[4],
                        "estimate": theEstimates}
 
     db.timeSlicedEstimates.insert_one(anEstimateSlice)
