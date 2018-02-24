@@ -163,11 +163,8 @@ def calculateContours(X, Y, Z):
     plt.colorbar(CS)  # This will give you a legend
     plt.axis('off')  # Removes axes
     plt.savefig(stringFile, format="svg")
-    theSVG = stringFile.buf
-    print(theSVG)
-    print(stringFile)
-    print(stringFile.getvalue())
-    # figdata_svg = '<svg' + figfile.buf.split('<svg')[1]
+    theSVG = stringFile.getvalue()
+    print('<svg' + theSVG.split('<svg')[1])
 
 
 def storeInMongo(client, anEstimate):
