@@ -168,9 +168,12 @@ def calculateContours(X, Y, Z):
     theSVG = stringFile.getvalue()
     # theSVG = '<svg' + theSVG.split('<svg')[1]
 
-    # print(theSVG)
+    print(type(theSVG))
     # print('********* see ******')
     # encodedString = theSVG.encode()
+    print(theSVG.decode('utf8'))
+    print(str(theSVG))
+    print(type(str(theSVG)))
     encodedString = theSVG.encode('utf-8')
     # print(type(encodedString))
 
