@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
 from io import BytesIO
 from pymongo import MongoClient
-from StringIO import StringIO
+    from StringIO import StringIO
 from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
 
 
@@ -169,17 +169,15 @@ def calculateContours(X, Y, Z):
     # theSVG = '<svg' + theSVG.split('<svg')[1]
 
     # print(theSVG)
-    print('********* see ******')
+    # print('********* see ******')
     # encodedString = theSVG.encode()
-    encodedString = unicode(theSVG, 'utf-8')
-    encodedString = encodedString.encode()
-    print(type(encodedString))
-
+    encodedString = theSVG.encode('utf-8')
+    # print(type(encodedString))
 
     binaryFile = Binary(encodedString)
 
-    print(type(binaryFile))
-    print(binaryFile)
+    # print(type(binaryFile))
+    # print(binaryFile)
     stringFile.close()
 
     return binaryFile
