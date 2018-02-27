@@ -167,12 +167,13 @@ def calculateContours(X, Y, Z):
     plt.savefig(stringFile, format="svg")
     theSVG = stringFile.getvalue()
     theSVG = '<svg' + theSVG.split('<svg')[1]
-    stringFile.close()
+
     # print(theSVG)
 
     binaryFile = Binary(stringFile.read())
 
     print(type(binaryFile))
+    stringFile.close()
 
     return binaryFile
 
