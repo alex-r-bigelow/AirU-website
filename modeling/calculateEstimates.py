@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
 from io import BytesIO
 from pymongo import MongoClient
-    from StringIO import StringIO
+from StringIO import StringIO
 from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
 
 
