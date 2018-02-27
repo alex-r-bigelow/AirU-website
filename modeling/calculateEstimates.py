@@ -169,7 +169,7 @@ def calculateContours(X, Y, Z):
     theSVG = '<svg' + theSVG.split('<svg')[1]
     stringFile.close()
     print(theSVG)
-    binaryFile = Binary(BytesIO(stringFile))
+    binaryFile = Binary(str.encode(stringFile))
     return binaryFile
 
 
