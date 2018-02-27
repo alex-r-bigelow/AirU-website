@@ -177,6 +177,8 @@ def calculateContours(X, Y, Z):
     # print(type(str(theSVG)))
     # encodedString = theSVG.encode('utf-8')
     # print(type(encodedString))
+    encodedString = encodedString.encode('utf8')
+    print(type(encodedString))
 
     binaryFile = Binary(encodedString)
 
