@@ -170,7 +170,7 @@ def calculateContours(X, Y, Z):
 
     # print(theSVG)
     print('********* see ******')
-    print(stringFile.read())
+    print(type(theSVG))
 
 
     binaryFile = Binary(stringFile.read())
