@@ -168,8 +168,13 @@ def calculateContours(X, Y, Z):
     theSVG = stringFile.getvalue()
     theSVG = '<svg' + theSVG.split('<svg')[1]
     stringFile.close()
-    print(theSVG)
-    binaryFile = Binary(str.encode(theSVG))
+    # print(theSVG)
+
+    with open(stringFile, 'rb') as anSVG:
+        binaryFile = Binary(anSVG.read())
+
+    print(type(binaryFile))
+
     return binaryFile
 
 
