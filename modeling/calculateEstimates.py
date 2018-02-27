@@ -10,6 +10,7 @@ import sys
 
 from AQ_API import AQGPR
 from AQ_DataQuery_API import AQDataQuery
+from bson.binary import Binary
 from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
 from pymongo import MongoClient
@@ -164,7 +165,11 @@ def calculateContours(X, Y, Z):
     plt.axis('off')  # Removes axes
     plt.savefig(stringFile, format="svg")
     theSVG = stringFile.getvalue()
-    print('<svg' + theSVG.split('<svg')[1])
+    theSVG = '<svg' + theSVG.split('<svg')[1]
+    stringFile.close()
+    print(theSVG)
+    binaryFile = Binary(stringFile)
+    return binaryFile
 
 
 def storeInMongo(client, anEstimate):
@@ -191,14 +196,15 @@ def storeInMongo(client, anEstimate):
         theEstimates.append(theEstimate)
 
     # take the estimates and get the contours
-    calculateContours(latQuery, longQuery, pmEstimates)
+    binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
 
     # save the contour svg serialized in the db.
 
     anEstimateSlice = {"estimationFor": TIMESTAMP,
                        "modelVersion": '1.0.0',
                        "numberOfGridCells1D": anEstimate[4],
-                       "estimate": theEstimates}
+                       "estimate": theEstimates,
+                       "svgBinary": binaryFile}
 
     db.timeSlicedEstimates.insert_one(anEstimateSlice)
     logger.info('inserted data slice for %s', TIMESTAMP)
