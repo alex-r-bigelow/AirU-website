@@ -170,7 +170,8 @@ def calculateContours(X, Y, Z):
 
     # print(theSVG)
     print('********* see ******')
-    encodedString = theSVG.encode()
+    # encodedString = theSVG.encode()
+    encodedString = unicode(theSVG, 'utf-8')
     print(type(encodedString))
 
 
