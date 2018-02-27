@@ -13,6 +13,7 @@ from AQ_DataQuery_API import AQDataQuery
 from bson.binary import Binary
 from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
+from io import BytesIO
 from pymongo import MongoClient
 from StringIO import StringIO
 from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
@@ -168,7 +169,7 @@ def calculateContours(X, Y, Z):
     theSVG = '<svg' + theSVG.split('<svg')[1]
     stringFile.close()
     print(theSVG)
-    binaryFile = Binary(stringFile)
+    binaryFile = Binary(BytesIO(stringFile))
     return binaryFile
 
 
