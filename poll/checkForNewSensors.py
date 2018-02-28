@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-logHandler = handlers.TimedRotatingFileHandler('cronChecker.log', when='D', interval=1, backupCount=3)
+logHandler = handlers.TimedRotatingFileHandler('cronChecker.log', when='H', interval=12, backupCount=3)
 logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
@@ -57,7 +57,7 @@ def checkForNewSensors(influxClient, mongoClient):
         logger.info(anID)
 
         theID = anID['ID']
-        idWithColon = ":".join([theID[i:i+2] for i in range(0, len(theID), 2)])
+        idWithColon = ":".join([theID[i:i + 2] for i in range(0, len(theID), 2)])
         logger.info(idWithColon)
 
         if idWithColon not in allSchools:
