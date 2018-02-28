@@ -181,7 +181,7 @@ def calculateContours(X, Y, Z):
     print(type(encodedString))
 
     binaryFile = Binary(encodedString)
-    binaryFile = bson.BSON.encode(binaryFile)
+    binaryFile = bson.BSON.encode({'svg': binaryFile})
 
     # print(type(binaryFile))
     # print(binaryFile)
