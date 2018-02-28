@@ -1,4 +1,5 @@
 # import csv
+import bson
 import json
 import logging
 import logging.handlers as handlers
@@ -13,7 +14,6 @@ from AQ_DataQuery_API import AQDataQuery
 from bson.binary import Binary
 from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
-from io import BytesIO
 from pymongo import MongoClient
 from StringIO import StringIO
 from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
@@ -181,6 +181,7 @@ def calculateContours(X, Y, Z):
     print(type(encodedString))
 
     binaryFile = Binary(encodedString)
+    binaryFile = bson.BSON.encode(binaryFile)
 
     # print(type(binaryFile))
     # print(binaryFile)
