@@ -152,7 +152,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
             # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
 
             theMessage = theMessage + '%-15s' % anID + '\t' \
-                                    + '%-5s' % macs[anID]['batch'] + '\t' \
+                                    + '%-5d' % macs[anID]['batch'] + '\t' \
                                     + '%-28s' % macs[anID]['sensorHolder'] + '\t' \
                                     + '%-36s' % theEmail + '\t' \
                                     + '%-13s' % 'unknown' + '\t' \
