@@ -42,8 +42,9 @@ def getEmail():
     for aHolder in db.airUSensorHolder.find():
         name = aHolder['name']
         email = aHolder['email']
+        batch = aHolder['batch']
 
-        emails[name] = {'email': email}
+        emails[name] = {'email': email, 'batch': batch}
 
     return emails
 
@@ -105,6 +106,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     # Printing the status of the sensors in the required box
     theMessage = ''
     theMessage = theMessage + '%-15s' % '' + '\t' \
+                            + '%-5s' % '' + '\t' \
                             + '%-28s' % '' + '\t' \
                             + '%-36s' % '' + '\t' \
                             + '%-13s' % '' + '\t' \
@@ -114,6 +116,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                             + '%-20s' % '' + '\n'
 
     theMessage = theMessage + '%-15s' % 'ID' + '\t' \
+                            + '%-5s' % 'batch' + '\t' \
                             + '%-28s' % 'Sensor Holder' + '\t' \
                             + '%-36s' % 'email' + '\t' \
                             + '%-13s' % 'latitude' + '\t' \
@@ -123,6 +126,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                             + '%-20s' % 'timestamp last data value' + '\n'
 
     theMessage = theMessage + '%-15s' % '------------' + '\t' \
+                            + '%-5s' % '----' + '\t' \
                             + '%-28s' % '------------' + '\t' \
                             + '%-36s' % '------------' + '\t' \
                             + '%-13s' % '------------' + '\t' \
@@ -146,6 +150,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
             # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
 
             theMessage = theMessage + '%-15s' % anID + '\t' \
+                                    + '%-5s' % macs[anID]['batch'] + '\t' \
                                     + '%-28s' % macs[anID]['sensorHolder'] + '\t' \
                                     + '%-36s' % theEmail + '\t' \
                                     + '%-13s' % 'unknown' + '\t' \
@@ -238,6 +243,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         queryStatus = str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')'
 
         theMessage = theMessage + '%-15s' % anID + '\t' \
+                                + '%-5s' % macs[anID]['batch'] + '\t' \
                                 + '%-28s' % macs[anID]['sensorHolder'] + '\t' \
                                 + '%-36s' % theEmail + '\t' \
                                 + '%-13s' % airULatitudes[i] + '\t' \
