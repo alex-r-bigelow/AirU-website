@@ -85,6 +85,8 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
     macs = getMACToCheck(isSchool)
     emails = getEmail()
+    LOGGER.info(emails)
+    print(emails)
 
     LOGGER.info("Time frame: last " + str(timeFrame) + " seconds")
     LOGGER.info("Geographic area [top left bottom right]: [" + str(borderBox['top']) + ", " + str(borderBox['left']) + ", " + str(borderBox['bottom']) + ", " + str(borderBox['right']) + "]")
@@ -322,4 +324,5 @@ if __name__ == "__main__":
                                 verify_ssl=True)
 
     theRun = runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient)
-    print(theRun)
+    # print(theRun)
+    LOGGER.info('Monitoring successfull.')
