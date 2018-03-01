@@ -275,7 +275,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
     # theMessage = theMessage + emailFooter
     # print(theMessage)
-
+    print(theMessage)
     return theMessage
 
 
