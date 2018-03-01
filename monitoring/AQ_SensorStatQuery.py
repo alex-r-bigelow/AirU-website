@@ -147,12 +147,13 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         theEmail = 'unknown'
         if macs[anID]['sensorHolder'] in emails:
             theEmail = emails[macs[anID]['sensorHolder']]['email']
+            theBatch = emails[macs[anID]['sensorHolder']]['batch']
 
         if len(last) == 0:
             # LOGGER.info('never pushed data for ID: ' + anID + ' last Value: ' + last)
 
             theMessage = theMessage + '%-15s' % anID + '\t' \
-                                    + '%-5d' % macs[anID]['batch'] + '\t' \
+                                    + '%-5d' % theBatch + '\t' \
                                     + '%-28s' % macs[anID]['sensorHolder'] + '\t' \
                                     + '%-36s' % theEmail + '\t' \
                                     + '%-13s' % 'unknown' + '\t' \
@@ -241,11 +242,12 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         theEmail = 'unknown'
         if macs[anID]['sensorHolder'] in emails:
             theEmail = emails[macs[anID]['sensorHolder']]['email']
+            theBatch = emails[macs[anID]['sensorHolder']]['batch']
 
         queryStatus = str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')'
 
         theMessage = theMessage + '%-15s' % anID + '\t' \
-                                + '%-5s' % macs[anID]['batch'] + '\t' \
+                                + '%-5d' % theBatch + '\t' \
                                 + '%-28s' % macs[anID]['sensorHolder'] + '\t' \
                                 + '%-36s' % theEmail + '\t' \
                                 + '%-13s' % airULatitudes[i] + '\t' \
