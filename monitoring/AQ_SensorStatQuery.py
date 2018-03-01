@@ -274,8 +274,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
     #                             + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
 
     # theMessage = theMessage + emailFooter
-    # print(theMessage)
-    print(theMessage)
+
     return theMessage
 
 
@@ -325,4 +324,7 @@ if __name__ == "__main__":
                                 verify_ssl=True)
 
     theRun = runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient)
+
+    # needed as this is used to put the text into the email!!!
+    print(theRun)
     LOGGER.info('Monitoring successfull.')
