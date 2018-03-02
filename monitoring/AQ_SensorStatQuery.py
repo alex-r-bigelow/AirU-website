@@ -31,7 +31,7 @@ def getConfig():
 
 def appendToCSVFile(fileName, data):
 
-    with io.open(fileName, 'a', newline='\n') as csvFile:
+    with io.open(fileName, 'ab', newline='\n') as csvFile:
         writer = csv.writer(csvFile, delimiter=',', quoting=csv.QUOTE_ALL)
         writer.writerow(data)
 
