@@ -1,6 +1,8 @@
+import csv
 import json
 import logging
 import logging.handlers as handlers
+import os
 import sys
 
 # from datetime import datetime
@@ -24,6 +26,13 @@ def getConfig():
         return json.loads(configfile.read())
     LOGGER.info('ConfigError\tProblem reading config file.')
     sys.exit(1)
+
+
+def appendToCSVFile(fileName, data):
+
+    with open(fileName, 'a', newline='\n') as csvFile:
+        writer = csv.writer(csvFile, delimiter=',', quoting=csv.QUOTE_ALL)
+        writer.writerow(data)
 
 
 def getEmail():
@@ -83,6 +92,19 @@ def getMACToCheck(partOfSchoolProject):
 
 def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient):
 
+    outputDirectory = '/home/poller'
+
+    dataWithSolutions = 'monitoring_notSchool_airu.csv'
+    if isSchool:
+        dataWithSolutions = 'monitoring_school_airu.csv'
+
+    filePathSolution = os.path.join(outputDirectory, dataWithSolutions)
+
+    try:
+        os.remove(filePathSolution)
+    except OSError:
+        pass
+
     macs = getMACToCheck(isSchool)
     emails = getEmail()
     LOGGER.info(emails)
@@ -125,6 +147,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                             + '%-30s' % 'offline/failure/online (total)' + '\t' \
                             + '%-10s' % 'current status' + '\t' \
                             + '%-20s' % 'timestamp last data value' + '\n'
+    appendToCSVFile(filePathSolution, ['ID', 'batch', 'Sensor Holder', 'email', 'latitude', 'longitude', 'offline/failure/online (total)', 'current status', 'timestamp last data value'])
 
     theMessage = theMessage + '%-15s' % '------------' + '\t' \
                             + '%-5s' % '----' + '\t' \
@@ -160,6 +183,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                     + '%-30s' % 'unknown' + '\t' \
                                     + '%-10s' % '-->OFFLINE' + '\t' \
                                     + '%-20s' % 'never been online' + '\n'
+            appendToCSVFile(filePathSolution, [anID, theBatch, macs[anID]['sensorHolder'], theEmail, 'unknown', 'unknown', 'unknown', '-->OFFLINE', 'never been online'])
             continue
 
         last = list(last.get_points())[0]
@@ -254,6 +278,8 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                 + '%-30s' % queryStatus + '\t' \
                                 + '%-10s' % status + '\t' \
                                 + '%-20s' % timestamp[0]['time'].split('.')[0] + '\n'
+
+        appendToCSVFile(filePathSolution, [anID, theBatch, macs[anID]['sensorHolder'], theEmail, airULatitudes[i], airULongitudes[i], queryStatus, status, timestamp[0]['time'].split('.')[0]])
 
     # for i, anID in enumerate(pAirUniqueIDs):
     #     result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
