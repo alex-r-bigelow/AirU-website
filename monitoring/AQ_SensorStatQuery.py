@@ -184,7 +184,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                     + '%-30s' % 'unknown' + '\t' \
                                     + '%-10s' % '-->OFFLINE' + '\t' \
                                     + '%-20s' % 'never been online' + '\n'
-            appendToCSVFile(filePathSolution, [anID, theBatch, macs[anID]['sensorHolder'], theEmail, 'unknown', 'unknown', 'unknown', '-->OFFLINE', 'never been online'])
+            appendToCSVFile(filePathSolution, [anID, int(theBatch), macs[anID]['sensorHolder'], theEmail, 'unknown', 'unknown', 'unknown', '-->OFFLINE', 'never been online'])
             continue
 
         last = list(last.get_points())[0]
@@ -280,7 +280,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                                 + '%-10s' % status + '\t' \
                                 + '%-20s' % timestamp[0]['time'].split('.')[0] + '\n'
 
-        appendToCSVFile(filePathSolution, [anID, theBatch, macs[anID]['sensorHolder'], theEmail, airULatitudes[i], airULongitudes[i], queryStatus, status, timestamp[0]['time'].split('.')[0]])
+        appendToCSVFile(filePathSolution, [anID, int(theBatch), macs[anID]['sensorHolder'], theEmail, airULatitudes[i], airULongitudes[i], queryStatus, status, timestamp[0]['time'].split('.')[0]])
 
     # for i, anID in enumerate(pAirUniqueIDs):
     #     result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
