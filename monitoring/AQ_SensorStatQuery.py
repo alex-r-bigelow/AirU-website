@@ -1,5 +1,5 @@
 import csv
-import io
+# import io
 import json
 import logging
 import logging.handlers as handlers
@@ -31,7 +31,7 @@ def getConfig():
 
 def appendToCSVFile(fileName, data):
 
-    with io.open(fileName, 'ab', newline='\n') as csvFile:
+    with open(fileName, 'ab') as csvFile:
         writer = csv.writer(csvFile, delimiter=',', quoting=csv.QUOTE_ALL)
         writer.writerow(data)
 
