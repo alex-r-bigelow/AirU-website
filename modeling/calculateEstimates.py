@@ -1,5 +1,5 @@
 # import csv
-import bson
+# import bson
 import json
 import logging
 import logging.handlers as handlers
@@ -160,34 +160,71 @@ def calculateContours(X, Y, Z):
     # To set colors:
     # c = ('#ff0000', '#ffff00', '#0000FF', '0.6', 'c', 'm')
     # CS = plt.contourf(Z, 5, colors=c)
-    CS = plt.contourf(X, Y, Z)
 
-    plt.colorbar(CS)  # This will give you a legend
-    plt.axis('off')  # Removes axes
-    plt.savefig(stringFile, format="svg")
-    theSVG = stringFile.getvalue()
-    # theSVG = '<svg' + theSVG.split('<svg')[1]
+    levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
+    c = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
+    theContours = plt.contourf(X, Y, Z, levels, colors=c)
 
-    print(type(theSVG))
-    # print('********* see ******')
-    # encodedString = theSVG.encode()
-    encodedString = theSVG.decode('utf8')
-    print(type(encodedString))
-    # print(str(theSVG))
-    # print(type(str(theSVG)))
-    # encodedString = theSVG.encode('utf-8')
+    # plt.colorbar(theContours)  # This will give you a legend
+
+    new_contours = []
+
+    for i, collection in enumerate(theContours.collections):
+        # print(collection)
+        for path in collection.get_paths():
+            # print(path)
+            coords = path.vertices
+            # print(coords)
+            # print(path.codes)
+            new_contour = {}
+            new_contour['path'] = []
+            new_contour['level'] = i
+            new_contour['k'] = i
+
+            # prev_coords = None
+            for (coords, code_type) in zip(path.vertices, path.codes):
+
+                '''
+                if prev_coords is not None and np.allclose(coords, prev_coords):
+                    continue
+                '''
+
+                # prev_coords = coords
+
+                #print >>sys.stderr, "coords, code_type:", coords, code_type, i
+
+                if code_type == 1:
+                    new_contour['path'] += [['M', float('{:.3f}'.format(coords[0])),float('{:.3f}'.format(coords[1])) ]]
+                elif code_type == 2:
+                    new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])),float('{:.3f}'.format(coords[1])) ]]
+
+            new_contours += [new_contour]
+
+    return new_contours
+
+
+
+
+
+    # saving the svg part
+    # plt.axis('off')  # Removes axes
+    # plt.savefig(stringFile, format="svg")
+    # theSVG = stringFile.getvalue()
+    # # theSVG = '<svg' + theSVG.split('<svg')[1]
+    #
+    # print(type(theSVG))
+    # encodedString = theSVG.decode('utf8')
     # print(type(encodedString))
-    encodedString = encodedString.encode('utf8')
-    print(type(encodedString))
-
-    binaryFile = Binary(encodedString)
-    binaryFile = bson.BSON.encode({'svg': binaryFile})
-
-    # print(type(binaryFile))
-    # print(binaryFile)
-    stringFile.close()
-
-    return binaryFile
+    #
+    # encodedString = encodedString.encode('utf8')
+    # print(type(encodedString))
+    #
+    # binaryFile = Binary(encodedString)
+    # binaryFile = bson.BSON.encode({'svg': binaryFile})
+    #
+    # stringFile.close()
+    #
+    # return binaryFile
 
 
 def storeInMongo(client, anEstimate):
@@ -214,7 +251,8 @@ def storeInMongo(client, anEstimate):
         theEstimates.append(theEstimate)
 
     # take the estimates and get the contours
-    binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
+    # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
+    contours = calculateContours(latQuery, longQuery, pmEstimates)
 
     # save the contour svg serialized in the db.
 
@@ -222,7 +260,8 @@ def storeInMongo(client, anEstimate):
                        "modelVersion": '1.0.0',
                        "numberOfGridCells1D": anEstimate[4],
                        "estimate": theEstimates,
-                       "svgBinary": binaryFile}
+                       # "svgBinary": binaryFile}
+                       "contours": contours}
 
     db.timeSlicedEstimates.insert_one(anEstimateSlice)
     logger.info('inserted data slice for %s', TIMESTAMP)
