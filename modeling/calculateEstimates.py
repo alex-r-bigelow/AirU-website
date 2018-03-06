@@ -1,5 +1,3 @@
-# import csv
-# import bson
 import json
 import logging
 import logging.handlers as handlers
@@ -11,7 +9,7 @@ import sys
 
 from AQ_API import AQGPR
 from AQ_DataQuery_API import AQDataQuery
-from bson.binary import Binary
+# from bson.binary import Binary
 from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
 from pymongo import MongoClient
@@ -60,7 +58,7 @@ def generateQueryMeshGrid(numberGridCells1D, topLeftCorner, bottomRightCorner):
 
 def getEstimate(purpleAirClient, airuClient, theDBs):
     numberOfGridCells1D = 20
-    currentUTCtime = datetime.utcnow()
+    currentUTCtime = datetime.utcnow() - timedelta(days=20)
 
     startDate = currentUTCtime - timedelta(days=1)
     endDate = currentUTCtime
@@ -165,6 +163,11 @@ def calculateContours(X, Y, Z):
     c = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
     theContours = plt.contourf(X, Y, Z, levels, colors=c)
 
+    plt.axis('off')  # Removes axes
+    plt.savefig(stringFile, format="svg")
+    theSVG = stringFile.getvalue()
+    print(theSVG)
+
     # plt.colorbar(theContours)  # This will give you a legend
 
     new_contours = []
@@ -191,20 +194,16 @@ def calculateContours(X, Y, Z):
 
                 # prev_coords = coords
 
-                #print >>sys.stderr, "coords, code_type:", coords, code_type, i
+                # print >>sys.stderr, "coords, code_type:", coords, code_type, i
 
                 if code_type == 1:
-                    new_contour['path'] += [['M', float('{:.3f}'.format(coords[0])),float('{:.3f}'.format(coords[1])) ]]
+                    new_contour['path'] += [['M', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
                 elif code_type == 2:
-                    new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])),float('{:.3f}'.format(coords[1])) ]]
+                    new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
 
             new_contours += [new_contour]
 
     return new_contours
-
-
-
-
 
     # saving the svg part
     # plt.axis('off')  # Removes axes
