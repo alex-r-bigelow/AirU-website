@@ -121,7 +121,10 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
         if mac not in tmpIDs:
             tmpIDs += [mac]
     print(tmpIDs)
-    print(tmpIDs.sort(key=lambda aMAC: aMAC.encode('utf-8')))
+    sortedMAC = tmpIDs.sort(key=lambda aMAC: aMAC.encode('utf-8'))
+    print(sortedMAC)
+    sortedMAC2 = sorted(tmpIDs, key=lambda aMAC: aMAC.encode('utf-8'))
+    print(sortedMAC2)
 
     # Querying the coordinates and model of each sensor in the queried geographic area
     airUUniqueIDs = []
