@@ -355,4 +355,4 @@ if __name__ == "__main__":
     # needed as this is used to put the text into the email!!!
     print(theRun)
     LOGGER.info(theRun)
-    LOGGER.info('Monitoring successfull. Is school: ' + isSchool)
+    LOGGER.info('Monitoring successfull. Is school: ' + str(isSchool))
