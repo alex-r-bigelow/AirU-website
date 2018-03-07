@@ -162,7 +162,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
                             + '%-10s' % '------------' + '\t' \
                             + '%-20s' % '------------' + '\n'
 
-        for anID in tmpIDs:
+    for anID in tmpIDs:
         # last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
         #                         config['INFLUX_AIRU_LATITUDE_MEASUREMENT'] + ' WHERE ID=\'' + anID + '\' AND time >= now()-' + str(timeFrame) + 's;')
         last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
