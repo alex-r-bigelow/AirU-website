@@ -304,11 +304,14 @@ def storeInMongo(client, anEstimate):
 if __name__ == '__main__':
 
     if len(sys.argv) > 1:
-        , numberGridCells_LAT, numberGridCells_LONG = sys.argv[1]
+        numberGridCells_LAT = sys.argv[1]
         numberGridCells_LONG = sys.argv[2]
     else:
         numberGridCells_LAT = 10
         numberGridCells_LONG = 16
+
+    print(numberGridCells_LAT)
+    print(numberGridCells_LONG)
 
     config = getConfig()
 
