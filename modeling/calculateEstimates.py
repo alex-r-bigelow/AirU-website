@@ -320,7 +320,8 @@ if __name__ == '__main__':
         endDate = datetime(2018, 1, 11, 0, 0, 0)
 
     print(numberGridCells_LAT)
-    print(numberGridCells_LONG)
+    print(startDate)
+    print(endDate)
 
     config = getConfig()
 
