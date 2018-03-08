@@ -67,7 +67,7 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
         longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
 
         for lat in range(numberGridCellsLAT):
-            latitude = topRightCorner['lat'] + (lat * gridCellSize_lat)
+            latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
             lats.append([float(latitude)])
             lngs.append([float(longitude)])
             times.append([int(0)])
@@ -102,6 +102,8 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, 
     topRightCorner = {'lat': 40.810476, 'lng': -111.713403}
 
     data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topRightCorner['lat'], bottomLeftCorner['lng'], bottomLeftCorner['lat'], topRightCorner['lng'])
+
+    print(data_tr)
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
