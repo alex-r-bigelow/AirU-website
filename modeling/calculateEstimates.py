@@ -56,6 +56,32 @@ def generateQueryMeshGrid(numberGridCells1D, topLeftCorner, bottomRightCorner):
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
+def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, topLeftCorner, bottomRightCorner):
+    gridCellSize_lat = abs(topLeftCorner['lat'] - bottomRightCorner['lat']) / numberGridCellsLAT
+    gridCellSize_lng = abs(topLeftCorner['lng'] - bottomRightCorner['lng']) / numberGridCellsLONG
+
+    lats = []
+    lngs = []
+    times = []
+    for lng in range(numberGridCellsLONG):
+        longitude = topLeftCorner['lng'] + (lng * gridCellSize_lng)
+
+        for lat in range(numberGridCellsLAT):
+            latitude = topLeftCorner['lat'] - (lat * gridCellSize_lat)
+            lats.append([float(latitude)])
+            lngs.append([float(longitude)])
+            times.append([int(0)])
+
+    print('*******lats******')
+    print(lats)
+    print('*******lngs******')
+    print(lngs)
+    print('*******times******')
+    print(times)
+
+    return {'lats': lats, 'lngs': lngs, 'times': times}
+
+
 def getEstimate(purpleAirClient, airuClient, theDBs):
     numberOfGridCells1D = 20
     currentUTCtime = datetime.utcnow() - timedelta(days=20)
@@ -88,7 +114,8 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     time_tr = datetime2Reltime(time_tr, min(time_tr))
     time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
-    meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
+    # meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
+    meshInfo = generateQueryMeshVariableGrid(9, 15, topleftCorner, bottomRightCorner)
 
     # long_tr = readCSVFile('data/example_data/LONG_tr.csv')
     # lat_tr = readCSVFile('data/example_data/LAT_tr.csv')
