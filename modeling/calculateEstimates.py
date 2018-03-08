@@ -98,10 +98,10 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, 
     # topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
     # bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
 
-    topRightCorner = {'lat': 40.598850, 'lng': -112.001349}
-    bottomLeftCorner = {'lat': 40.810476, 'lng': -111.713403}
+    bottomLeftCorner = {'lat': 40.598850, 'lng': -112.001349}
+    topRightCorner = {'lat': 40.810476, 'lng': -111.713403}
 
-    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, bottomLeftCorner['lat'], topRightCorner['lng'], topRightCorner['lat'], bottomLeftCorner['lng'])
+    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topRightCorner['lat'], bottomLeftCorner['lng'], bottomLeftCorner['lat'], topRightCorner['lng'])
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
