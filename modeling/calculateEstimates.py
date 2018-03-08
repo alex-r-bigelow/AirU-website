@@ -60,8 +60,12 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     numberOfGridCells1D = 20
     currentUTCtime = datetime.utcnow() - timedelta(days=20)
 
-    startDate = currentUTCtime - timedelta(days=1)
-    endDate = currentUTCtime
+    # startDate = currentUTCtime - timedelta(days=1)
+    # endDate = currentUTCtime
+
+    startDate = datetime(2018, 1, 7, 0, 0, 0)
+    endDate = datetime(2018, 1, 11, 0, 0, 0)
+
     topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
     bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
 
