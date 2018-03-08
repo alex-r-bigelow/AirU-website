@@ -341,7 +341,7 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, numberGridCells_LAT, numberGridCells_LONG)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, int(numberGridCells_LAT), int(numberGridCells_LONG))
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
