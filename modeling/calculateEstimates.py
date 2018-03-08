@@ -82,11 +82,11 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, topLe
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs):
-    numberOfGridCells1D = 20
+def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong):
+    # numberOfGridCells1D = 20
 
-    numberGridCells_LAT = 10
-    numberGridCells_LONG = 16
+    numberGridCells_LAT = numberOfLat
+    numberGridCells_LONG = numberOfLong
     currentUTCtime = datetime.utcnow() - timedelta(days=20)
 
     # startDate = currentUTCtime - timedelta(days=1)
@@ -271,9 +271,9 @@ def storeInMongo(client, anEstimate):
     lng_list = np.squeeze(np.asarray(anEstimate[3])).tolist()
 
     # make numpy arrays for the contours
-    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[4], anEstimate[5])
-    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[4], anEstimate[5])
-    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[4], anEstimate[5])
+    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[5], anEstimate[4])
+    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[5], anEstimate[4])
+    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[5], anEstimate[4])
 
     zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
@@ -302,6 +302,14 @@ def storeInMongo(client, anEstimate):
 
 
 if __name__ == '__main__':
+
+    if len(sys.argv) > 1:
+        , numberGridCells_LAT, numberGridCells_LONG = sys.argv[1]
+        numberGridCells_LONG = sys.argv[2]
+    else:
+        numberGridCells_LAT = 10
+        numberGridCells_LONG = 16
+
     config = getConfig()
 
     # PurpleAir client
@@ -330,7 +338,7 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, numberGridCells_LAT, numberGridCells_LONG)
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
