@@ -37,18 +37,18 @@ def getConfig():
     sys.exit(1)
 
 
-def generateQueryMeshGrid(numberGridCells1D, topLeftCorner, bottomRightCorner):
-    gridCellSize_lat = abs(topLeftCorner['lat'] - bottomRightCorner['lat']) / numberGridCells1D
-    gridCellSize_lng = abs(topLeftCorner['lng'] - bottomRightCorner['lng']) / numberGridCells1D
+def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner):
+    gridCellSize_lat = abs(bottomLeftCorner['lat'] - topRightCorner['lat']) / numberGridCells1D
+    gridCellSize_lng = abs(bottomLeftCorner['lng'] - topRightCorner['lng']) / numberGridCells1D
 
     lats = []
     lngs = []
     times = []
     for lng in range(numberGridCells1D):
-        longitude = topLeftCorner['lng'] + (lng * gridCellSize_lng)
+        longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
 
         for lat in range(numberGridCells1D):
-            latitude = topLeftCorner['lat'] - (lat * gridCellSize_lat)
+            latitude = topRightCorner['lat'] + (lat * gridCellSize_lat)
             lats.append([float(latitude)])
             lngs.append([float(longitude)])
             times.append([int(0)])
@@ -56,18 +56,18 @@ def generateQueryMeshGrid(numberGridCells1D, topLeftCorner, bottomRightCorner):
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, topLeftCorner, bottomRightCorner):
-    gridCellSize_lat = abs(topLeftCorner['lat'] - bottomRightCorner['lat']) / numberGridCellsLAT
-    gridCellSize_lng = abs(topLeftCorner['lng'] - bottomRightCorner['lng']) / numberGridCellsLONG
+def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, bottomLeftCorner, topRightCorner):
+    gridCellSize_lat = abs(bottomLeftCorner['lat'] - topRightCorner['lat']) / numberGridCellsLAT
+    gridCellSize_lng = abs(bottomLeftCorner['lng'] - topRightCorner['lng']) / numberGridCellsLONG
 
     lats = []
     lngs = []
     times = []
     for lng in range(numberGridCellsLONG):
-        longitude = topLeftCorner['lng'] + (lng * gridCellSize_lng)
+        longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
 
         for lat in range(numberGridCellsLAT):
-            latitude = topLeftCorner['lat'] - (lat * gridCellSize_lat)
+            latitude = topRightCorner['lat'] + (lat * gridCellSize_lat)
             lats.append([float(latitude)])
             lngs.append([float(longitude)])
             times.append([int(0)])
@@ -82,7 +82,7 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, topLe
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong):
+def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, start, end):
     # numberOfGridCells1D = 20
 
     numberGridCells_LAT = numberOfLat
@@ -92,13 +92,16 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong):
     # startDate = currentUTCtime - timedelta(days=1)
     # endDate = currentUTCtime
 
-    startDate = datetime(2018, 1, 7, 0, 0, 0)
-    endDate = datetime(2018, 1, 11, 0, 0, 0)
+    startDate = start
+    endDate = end
 
-    topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
-    bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
+    # topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
+    # bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
 
-    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topleftCorner['lat'], topleftCorner['lng'], bottomRightCorner['lat'], bottomRightCorner['lng'])
+    topRightCorner = {'lat': 40.598850, 'lng': -112.001349}
+    bottomLeftCorner = {'lat': 40.810476, 'lng': -111.713403}
+
+    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, bottomLeftCorner['lat'], topRightCorner['lng'], topRightCorner['lat'], bottomLeftCorner['lng'])
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
@@ -118,7 +121,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong):
     time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
     # meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
-    meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, topleftCorner, bottomRightCorner)
+    meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner)
 
     # long_tr = readCSVFile('data/example_data/LONG_tr.csv')
     # lat_tr = readCSVFile('data/example_data/LAT_tr.csv')
@@ -302,13 +305,17 @@ def storeInMongo(client, anEstimate):
 
 
 if __name__ == '__main__':
-
+    # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
     if len(sys.argv) > 1:
         numberGridCells_LAT = sys.argv[1]
         numberGridCells_LONG = sys.argv[2]
+        startDate = datetime.strptime(sys.argv[3], '%Y-%m-%dT%H:%M:%SZ')
+        endDate = datetime.strptime(sys.argv[4], '%Y-%m-%dT%H:%M:%SZ')
     else:
         numberGridCells_LAT = 10
         numberGridCells_LONG = 16
+        startDate = datetime(2018, 1, 7, 0, 0, 0)
+        endDate = datetime(2018, 1, 11, 0, 0, 0)
 
     print(numberGridCells_LAT)
     print(numberGridCells_LONG)
@@ -341,7 +348,7 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, int(numberGridCells_LAT), int(numberGridCells_LONG))
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate)
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
