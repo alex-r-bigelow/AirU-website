@@ -84,6 +84,9 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, topLe
 
 def getEstimate(purpleAirClient, airuClient, theDBs):
     numberOfGridCells1D = 20
+
+    numberGridCells_LAT = 10
+    numberGridCells_LONG = 16
     currentUTCtime = datetime.utcnow() - timedelta(days=20)
 
     # startDate = currentUTCtime - timedelta(days=1)
@@ -115,7 +118,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
     time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
     # meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
-    meshInfo = generateQueryMeshVariableGrid(9, 15, topleftCorner, bottomRightCorner)
+    meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, topleftCorner, bottomRightCorner)
 
     # long_tr = readCSVFile('data/example_data/LONG_tr.csv')
     # lat_tr = readCSVFile('data/example_data/LAT_tr.csv')
@@ -168,7 +171,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs):
 
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
-    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberOfGridCells1D]
+    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberGridCells_LAT, numberGridCells_LONG]
 
 
 def calculateContours(X, Y, Z):
@@ -268,9 +271,9 @@ def storeInMongo(client, anEstimate):
     lng_list = np.squeeze(np.asarray(anEstimate[3])).tolist()
 
     # make numpy arrays for the contours
-    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[4], anEstimate[4])
-    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[4], anEstimate[4])
-    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[4], anEstimate[4])
+    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[4], anEstimate[5])
+    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[4], anEstimate[5])
+    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[4], anEstimate[5])
 
     zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
@@ -288,7 +291,8 @@ def storeInMongo(client, anEstimate):
 
     anEstimateSlice = {"estimationFor": TIMESTAMP,
                        "modelVersion": '1.0.0',
-                       "numberOfGridCells1D": anEstimate[4],
+                       "numberOfGridCells_LAT": anEstimate[4],
+                       "numberOfGridCells_LONG": anEstimate[5],
                        "estimate": theEstimates,
                        # "svgBinary": binaryFile}
                        "contours": contours}
