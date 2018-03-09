@@ -39,12 +39,14 @@ def getConfig():
     sys.exit(1)
 
 
-def getUTCTime(aTimeString):
+def getUTCTime(aTime_dt):
     localTimezone = pytz.timezone('MST')
     UTCTimezone = pytz.timezone('UTC')
-    local_dt = localTimezone.localize(datetime.strptime(aTimeString, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)  # now local time on server is MST, add that information to the time
+    local_dt = localTimezone.localize(aTime_dt, is_dst=None)  # now local time on server is MST, add that information to the time
+    # local_dt = localTimezone.localize(datetime.strptime(aTimeString, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)  # now local time on server is MST, add that information to the time
     utc_dt = local_dt.astimezone(UTCTimezone)
-    return utc_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    # utc_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    return utc_dt
 
 
 def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner):
