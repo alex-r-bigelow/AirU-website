@@ -5,6 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 import sys
 
 from AQ_API import AQGPR
@@ -179,10 +180,13 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, 
     return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberGridCells_LAT, numberGridCells_LONG]
 
 
-def calculateContours(X, Y, Z):
+def calculateContours(X, Y, Z, endDate):
 
     # from: http://hplgit.github.io/web4sciapps/doc/pub/._part0013_web4sa_plain.html
     stringFile = StringIO()
+
+    outputFolder = '/home/airu/AirU-website/svgs'
+    anSVGfile = os.path.join(outputFolder, endDate + '.svg')
 
     plt.figure()
     # to set contourf levels, simply add N like so:
@@ -206,6 +210,8 @@ def calculateContours(X, Y, Z):
     plt.savefig(stringFile, format="svg")
     theSVG = stringFile.getvalue()
     print(theSVG)
+
+    plt.savefig(anSVGfile, format="svg")
 
     # plt.colorbar(theContours)  # This will give you a legend
 
@@ -265,7 +271,7 @@ def calculateContours(X, Y, Z):
     # return binaryFile
 
 
-def storeInMongo(client, anEstimate):
+def storeInMongo(client, anEstimate, endDate):
 
     db = client.airudb
 
@@ -290,7 +296,7 @@ def storeInMongo(client, anEstimate):
 
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
-    contours = calculateContours(latQuery, longQuery, pmEstimates)
+    contours = calculateContours(latQuery, longQuery, pmEstimates, endDate)
 
     # save the contour svg serialized in the db.
 
@@ -361,6 +367,7 @@ if __name__ == '__main__':
         database=config['MONGO_DATABASE'])
 
     mongoClient = MongoClient(mongodb_url)
-    storeInMongo(mongoClient, theEstimate)
+    endDateString = endDate.strftime('%Y-%m-%dT%H:%M:%SZ')
+    storeInMongo(mongoClient, theEstimate, endDateString)
 
     logger.info('new sensor check successful.')
