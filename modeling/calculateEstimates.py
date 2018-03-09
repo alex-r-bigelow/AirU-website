@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
+import pytz
 
 from AQ_API import AQGPR
 from AQ_DataQuery_API import AQDataQuery
@@ -36,6 +37,14 @@ def getConfig():
         return json.loads(configfile.read())
     sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
+
+
+def getUTCTime(aTimeString):
+    localTimezone = pytz.timezone('MST')
+    UTCTimezone = pytz.timezone('UTC')
+    local_dt = localTimezone.localize(datetime.strptime(aTimeString, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)  # now local time on server is MST, add that information to the time
+    utc_dt = local_dt.astimezone(UTCTimezone)
+    return utc_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
 def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner):
@@ -93,8 +102,8 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, 
     # startDate = currentUTCtime - timedelta(days=1)
     # endDate = currentUTCtime
 
-    startDate = start
-    endDate = end
+    startDate = getUTCTime(start)
+    endDate = getUTCTime(end)
 
     # topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
     # bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
