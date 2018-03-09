@@ -180,13 +180,13 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, 
     return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberGridCells_LAT, numberGridCells_LONG]
 
 
-def calculateContours(X, Y, Z, endDate):
+def calculateContours(X, Y, Z, endDate, levels, colorBands):
 
     # from: http://hplgit.github.io/web4sciapps/doc/pub/._part0013_web4sa_plain.html
     stringFile = StringIO()
 
-    outputFolder = '/home/airu/AirU-website/svgs'
-    anSVGfile = os.path.join(outputFolder, endDate + '.svg')
+    outputdirectory = '/home/airu/AirU-website/svgs'
+    anSVGfile = os.path.join(outputdirectory, endDate + '.svg')
 
     plt.figure()
     # to set contourf levels, simply add N like so:
@@ -202,15 +202,16 @@ def calculateContours(X, Y, Z, endDate):
     # c = ('#ff0000', '#ffff00', '#0000FF', '0.6', 'c', 'm')
     # CS = plt.contourf(Z, 5, colors=c)
 
-    levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
-    c = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
-    theContours = plt.contourf(X, Y, Z, levels, colors=c)
+    # levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
+    # c = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
+    theContours = plt.contourf(X, Y, Z, levels, colors=colorBands)
 
     plt.axis('off')  # Removes axes
     plt.savefig(stringFile, format="svg")
     theSVG = stringFile.getvalue()
     print(theSVG)
 
+    # to save as svg file in directory svgs
     plt.savefig(anSVGfile, format="svg")
 
     # plt.colorbar(theContours)  # This will give you a legend
@@ -271,7 +272,7 @@ def calculateContours(X, Y, Z, endDate):
     # return binaryFile
 
 
-def storeInMongo(client, anEstimate, endDate):
+def storeInMongo(client, anEstimate, endDate, levels, colorBands):
 
     db = client.airudb
 
@@ -296,7 +297,7 @@ def storeInMongo(client, anEstimate, endDate):
 
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
-    contours = calculateContours(latQuery, longQuery, pmEstimates, endDate)
+    contours = calculateContours(latQuery, longQuery, pmEstimates, endDate, levels, colorBands)
 
     # save the contour svg serialized in the db.
 
@@ -313,6 +314,10 @@ def storeInMongo(client, anEstimate, endDate):
 
 
 if __name__ == '__main__':
+
+    # TODO have the configuration stored in a JSON file an read from there
+
+    # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
     # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
     if len(sys.argv) > 1:
         numberGridCells_LAT = sys.argv[1]
@@ -324,6 +329,9 @@ if __name__ == '__main__':
         numberGridCells_LONG = 16
         startDate = datetime(2018, 1, 7, 0, 0, 0)
         endDate = datetime(2018, 1, 11, 0, 0, 0)
+
+    levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
+    colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
 
     print(numberGridCells_LAT)
     print(startDate)
@@ -368,6 +376,6 @@ if __name__ == '__main__':
 
     mongoClient = MongoClient(mongodb_url)
     endDateString = endDate.strftime('%Y-%m-%dT%H:%M:%SZ')
-    storeInMongo(mongoClient, theEstimate, endDateString)
+    storeInMongo(mongoClient, theEstimate, endDateString, levels, colorBands)
 
     logger.info('new sensor check successful.')
