@@ -40,10 +40,10 @@ def generateDatePartitions(start, end, delta):
 
 
 def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, maxLat=42.0013885498047, minLong=-114.053932189941, minLat=36.9979667663574, maxLong=-109.041069030762):
-    borderBox = {'left': minLong,
-                 'right': maxLong,
+    borderBox = {'left':   minLong,
+                 'right':  maxLong,
                  'bottom': minLat,
-                 'top': maxLat
+                 'top':    maxLat
                  }
 
     # # Reading the config file
@@ -70,82 +70,85 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     # )
 
     # Creating the time stamps using the start date, end date, and the binning frequency
-    datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds=500 * binFreq))
-    initialDate = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
-    finalDate = endDate.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-    # Querying the Purple Air sensor IDs with their coordinates and sensor model
-    result = pAirClient.query('SELECT "pm2.5 (ug/m^3)","ID","Longitude","Latitude","Sensor Model" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= \'' + initialDate + '\' AND time <= \'' + finalDate + '\';')
-    result = list(result.get_points())
+    datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds = 500 * binFreq))
 
     pAirUniqueIDs = []
     latitudes = []
     longitudes = []
     sensorModels = []
-    for row in result:
-        if row['Latitude'] is None or row['Longitude'] is None:
-            print("Skipped sensor with ID:" + row['ID'] + " -> Latitude/Longitude information not available!")
-            continue
-
-        if not((float(row['Longitude']) < borderBox['right']) and (float(row['Longitude']) > borderBox['left'])) or not((float(row['Latitude']) > borderBox['bottom']) and (float(row['Latitude']) < borderBox['top'])):
-            continue
-
-        if row['ID'] not in pAirUniqueIDs:
-            pAirUniqueIDs += [row['ID']]
-            latitudes += [float(row['Latitude'])]
-            longitudes += [float(row['Longitude'])]
-            if row['Sensor Model'] is None:
-                sensorModels += ['PMS5003']
-            else:
-                sensorModels += [row['Sensor Model'].split('+')[0]]
-
-    # Querying the airU sensor IDs with their coordinates and sensor model
-    result = airUClient.query('SELECT "PM2.5","ID","SensorModel" FROM ' + dbs['airu_pm25_measurement'] + ' WHERE time >= \'' + initialDate + '\' AND time <= \'' + finalDate + '\';')
-    result = list(result.get_points())
-
-    # Querying the sensor IDs
-    tmpIDs = []
-    for row in result:
-        if row['ID'] not in tmpIDs:
-            tmpIDs += [row['ID']]
-
-    # Querying the coordinates and model of each sensor in the queried geographic area
     airUUniqueIDs = []
-    for anID in tmpIDs:
-        last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
-                                dbs['airu_lat_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= \'' +
-                                initialDate + '\' AND time <= \'' + finalDate + '\';')
-        last = list(last.get_points())[0]
-        senModel = last['SensorModel']
-        lat = last['last']
+    initialDate = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-        last = airUClient.query('SELECT LAST(Longitude),"SensorModel" FROM ' +
-                                dbs['airu_long_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= \'' +
-                                initialDate + '\' AND time <= \'' + finalDate + '\';')
-        last = list(last.get_points())[0]
-        long = last['last']
+    for anEndDate in datePartitions:
+        # Querying the Purple Air sensor IDs with their coordinates and sensor model
+        result = pAirClient.query('SELECT "pm2.5 (ug/m^3)","ID","Longitude","Latitude","Sensor Model" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= \'' + initialDate + '\' AND time <= \'' + anEndDate + '\';')
+        result = list(result.get_points())
 
-        if lat is None or long is None:
-            print("Skipped sensor with ID:" + anID + " -> Latitude/Longitude information not available!")
-            continue
-        if lat == 0 or long == 0:
-            print("Skipped sensor with ID:" + anID + " -> Latitude/Longitude has not been aquired!")
-            continue
+        for row in result:
+            if row['Latitude'] is None or row['Longitude'] is None:
+                print("Skipped sensor with ID:" + row['ID'] + " -> Latitude/Longitude information not available!")
+                continue
 
-        if not((float(long) < borderBox['right']) and (float(long) > borderBox['left'])) or not((float(lat) > borderBox['bottom']) and (float(lat) < borderBox['top'])):
-            continue
+            if not((float(row['Longitude']) < borderBox['right']) and (float(row['Longitude']) > borderBox['left'])) or not((float(row['Latitude']) > borderBox['bottom']) and (float(row['Latitude']) < borderBox['top'])):
+                continue
 
-        airUUniqueIDs += [anID]
-        latitudes += [float(lat)]
-        longitudes += [float(long)]
-        if senModel is None:
-            sensorModels += ['']
-        else:
-            sensorModels += [senModel.split('+')[0]]
+            if row['ID'] not in pAirUniqueIDs:
+                pAirUniqueIDs += [row['ID']]
+                latitudes += [float(row['Latitude'])]
+                longitudes += [float(row['Longitude'])]
+                if row['Sensor Model'] is None:
+                    sensorModels += ['PMS5003']
+                else:
+                    sensorModels += [row['Sensor Model'].split('+')[0]]
+
+        # Querying the airU sensor IDs with their coordinates and sensor model
+        result = airUClient.query('SELECT "PM2.5","ID","SensorModel" FROM ' + dbs['airu_pm25_measurement'] + ' WHERE time >= \'' + initialDate + '\' AND time <= \'' + anEndDate + '\';')
+        result = list(result.get_points())
+
+        # Querying the sensor IDs
+        tmpIDs = []
+        for row in result:
+            if row['ID'] not in tmpIDs and row['ID'] not in airUUniqueIDs:
+                tmpIDs += [row['ID']]
+
+        # Querying the coordinates and model of each sensor in the queried geographic area
+        for anID in tmpIDs:
+            last = airUClient.query('SELECT LAST(Latitude),"SensorModel" FROM ' +
+                                    dbs['airu_lat_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= \'' +
+                                    initialDate + '\' AND time <= \'' + anEndDate + '\';')
+            last = list(last.get_points())[0]
+            senModel = last['SensorModel']
+            lat = last['last']
+
+            last = airUClient.query('SELECT LAST(Longitude),"SensorModel" FROM ' +
+                                    dbs['airu_long_measurement'] + ' WHERE ID=\'' + anID + '\' AND time >= \'' +
+                                    initialDate + '\' AND time <= \'' + anEndDate + '\';')
+            last = list(last.get_points())[0]
+            long = last['last']
+
+            if lat is None or long is None:
+                print("Skipped sensor with ID:" + anID + " -> Latitude/Longitude information not available!")
+                continue
+            if lat == 0 or long == 0:
+                print("Skipped sensor with ID:" + anID + " -> Latitude/Longitude has not been aquired!")
+                continue
+
+            if not((float(long) < borderBox['right']) and (float(long) > borderBox['left'])) or not((float(lat) > borderBox['bottom']) and (float(lat) < borderBox['top'])):
+                continue
+
+            airUUniqueIDs += [anID]
+            latitudes += [float(lat)]
+            longitudes += [float(long)]
+            if senModel is None:
+                sensorModels += ['']
+            else:
+                sensorModels += [senModel.split('+')[0]]
+        initialDate = anEndDate
 
     nres = 0
     data = []
     times = []
+    initialDate = startDate.strftime('%Y-%m-%dT%H:%M:%SZ')
     for anEndDate in datePartitions:
         for anID in pAirUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
@@ -169,7 +172,6 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                                       'group by time(' + str(binFreq) + 's);')
             result = list(result.get_points())
             if len(pAirUniqueIDs) == 0 and anID == airUUniqueIDs[0]:        # TODO does that line make sense
-
                 for idx, row in enumerate(result):
                     t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
                     times += [t]
@@ -207,13 +209,13 @@ if __name__ == "__main__":
     print "Binning frequency: " + sys.argv[3]  # The frequency that we use to bin the sensor reading (e.g. every 6 hours)
 
     startDate = datetime.strptime(sys.argv[1], '%Y-%m-%d')
-    endDate = datetime.strptime(sys.argv[2], '%Y-%m-%d')
+    endDate   = datetime.strptime(sys.argv[2], '%Y-%m-%d')
     # converting MST to UTC
     startDate = startDate + timedelta(hours=7)
-    endDate = endDate + timedelta(hours=7)
+    endDate   = endDate + timedelta(hours=7)
 
     binFreqT = datetime.strptime(sys.argv[3], '%H:%M:%S')
-    binFreq = binFreqT.hour * 3600 + binFreqT.minute * 60 + binFreqT.second
+    binFreq  = binFreqT.hour * 3600 + binFreqT.minute * 60 + binFreqT.second
 
     # Reading the Geographic area box's GPS coordinates if provided
     if len(sys.argv) >= 7:
