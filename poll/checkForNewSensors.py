@@ -29,9 +29,14 @@ def checkForNewSensors(influxClient, mongoClient):
 
     logger.info('checking for new sensor.')
 
-    now = datetime.now()
-    min10Ago = now - timedelta(minutes=10)
+    # now = datetime.now()
+    # min10Ago = now - timedelta(minutes=10)
+    # min10AgoStr = min10Ago.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+    nowUTC = datetime.utcnow()
+    min10Ago = nowUTC - timedelta(minutes=10)
     min10AgoStr = min10Ago.strftime('%Y-%m-%dT%H:%M:%SZ')
+
     logger.info(min10AgoStr)
 
     queryInflux = "SELECT ID, LAST(\"PM2.5\") AS pm25 " \
@@ -63,7 +68,7 @@ def checkForNewSensors(influxClient, mongoClient):
         if idWithColon not in allSchools:
             logger.info('ID %s is not a school', idWithColon)
             aSensor = {"macAddress": idWithColon,
-                       "createdAt": now}
+                       "createdAt_utc": nowUTC}
 
             foundID = db.liveSensors.find_one({'macAddress': idWithColon})
             logger.info(foundID)
