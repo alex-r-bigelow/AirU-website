@@ -332,8 +332,6 @@ def storeInMongo(client, anEstimate, endDate, levels, colorBands, theNowMinusCHL
         # theEstimates.append(theEstimate)
         theEstimates[i] = {'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
 
-
-
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
     contours = calculateContours(latQuery, longQuery, pmEstimates, endDate, levels, colorBands)
@@ -356,6 +354,7 @@ def storeInMongo(client, anEstimate, endDate, levels, colorBands, theNowMinusCHL
         # TODO: have two tables, table1 push the estimates for point now()-characteristic length time
         # before pushing remove oldest element from
         # table2 push estimates for point now(), before
+        print('nothing there yet')
 
 
 if __name__ == '__main__':
