@@ -429,4 +429,4 @@ if __name__ == '__main__':
     queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
     storeInMongo(mongoClient, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT)
 
-    logger.info('new sensor check successful.')
+    logger.info('new sensor check successful for ' + queryTimeString)
