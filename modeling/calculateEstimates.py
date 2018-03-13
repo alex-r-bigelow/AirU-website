@@ -101,7 +101,7 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong, start, end):
+def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong)  # , start, end):
     # numberOfGridCells1D = 20
 
     numberGridCells_LAT = numberOfLat
@@ -375,15 +375,15 @@ if __name__ == '__main__':
     else:
         numberGridCells_LAT = 10
         numberGridCells_LONG = 16
-        startDate = datetime(2018, 1, 7, 0, 0, 0)
-        endDate = datetime(2018, 1, 11, 0, 0, 0)
+        # startDate = datetime(2018, 1, 7, 0, 0, 0)
+        # endDate = datetime(2018, 1, 11, 0, 0, 0)
 
     levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
     colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
 
     print(numberGridCells_LAT)
-    print(startDate)
-    print(endDate)
+    # print(startDate)
+    # print(endDate)
 
     config = getConfig()
 
@@ -413,7 +413,7 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, int(numberGridCells_LAT), int(numberGridCells_LONG))  # , startDate, endDate)
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
