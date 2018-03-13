@@ -45,7 +45,7 @@ def getConfig():
 
 
 def getUTCTime(aTime_dt):
-    localTimezone = pytz.timezone('MST')
+    localTimezone = pytz.timezone('MST7MDT')
     UTCTimezone = pytz.timezone('UTC')
     local_dt = localTimezone.localize(aTime_dt, is_dst=None)  # now local time on server is MST, add that information to the time
     # local_dt = localTimezone.localize(datetime.strptime(aTimeString, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)  # now local time on server is MST, add that information to the time
@@ -328,103 +328,96 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
 
     # save the contour svg serialized in the db.
 
-    if theNowMinusCHLT:
-        anEstimateSlice = {"estimationFor": currentUTCtime,
-                           "modelVersion": '1.0.0',
-                           "numberOfGridCells_LAT": anEstimate[4],
-                           "numberOfGridCells_LONG": anEstimate[5],
-                           "estimate": theEstimates,
-                           "location": location,
-                           # "svgBinary": binaryFile}
-                           "contours": contours}
-
-        db.timeSlicedEstimates.insert_one(anEstimateSlice)
-        logger.info('inserted data slice for %s', currentUTCtime_str)
-    else:
-        # TODO: have two tables, table1 push the estimates for point now()-characteristic length time
-        # before pushing remove oldest element from
-        # table2 push estimates for point now(), before
-        print('nothing there yet')
+    # if theNowMinusCHLT:
+    #     anEstimateSlice = {"estimationFor": currentUTCtime,
+    #                        "modelVersion": '1.0.0',
+    #                        "numberOfGridCells_LAT": anEstimate[4],
+    #                        "numberOfGridCells_LONG": anEstimate[5],
+    #                        "estimate": theEstimates,
+    #                        "location": location,
+    #                        # "svgBinary": binaryFile}
+    #                        "contours": contours}
+    #
+    #     db.timeSlicedEstimates.insert_one(anEstimateSlice)
+    #     logger.info('inserted data slice for %s', currentUTCtime_str)
+    # else:
+    #     # TODO: have two tables, table1 push the estimates for point now()-characteristic length time
+    #     # before pushing remove oldest element from
+    #     # table2 push estimates for point now(), before
+    #     print('nothing there yet')
 
 
 if __name__ == '__main__':
 
-    # TODO have the configuration stored in a JSON file an read from there
+    dateStart = datetime(2017, 3, 7, 00, 00, 00)
+    dateEnd = datetime(2017, 3, 10, 00, 00, 00)
 
-    # true means only now()-characteristicLength; false means now() to now()-characteristicLength and to now()-2*characteristicLength
-    nowMinusCHLT = bool(strtobool(sys.argv[1]))
+    startDate_UTC = getUTCTime(dateStart)
+    endDate_UTC = getUTCTime(dateEnd)
 
-    if nowMinusCHLT:
-        startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
-        endDate = currentUTCtime
-        queryTime = endDate
-    else:
-        startDate = currentUTCtime - timedelta(hours=(2 * characteristicTimeLength))
-        endDate = currentUTCtime
-        queryTime = endDate - timedelta(hours=characteristicTimeLength)
+    aDate = startDate_UTC
+    dates = [startDate_UTC]
+    while aDate < endDate_UTC:
+        aNewDate = aDate + timedelta(hours=1)
+        dates.append(aNewDate)
 
-    queryTimeRelative = datetime2Reltime([queryTime], startDate)[0]
-    print(queryTimeRelative)
+        aDate = aNewDate
 
-    # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
-    # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
-    if len(sys.argv) > 2:
-        numberGridCells_LAT = sys.argv[2]
-        numberGridCells_LONG = sys.argv[3]
-        startDate = datetime.strptime(sys.argv[4], '%Y-%m-%dT%H:%M:%SZ')
-        endDate = datetime.strptime(sys.argv[5], '%Y-%m-%dT%H:%M:%SZ')
-    else:
+    for someDate in dates:
+        startDate = someDate - timedelta(hours=characteristicTimeLength)
+        endDate = someDate + timedelta(hours=characteristicTimeLength)
+        queryTime = someDate
+        queryTimeRelative = datetime2Reltime([queryTime], startDate)[0]
+
         numberGridCells_LAT = 10
         numberGridCells_LONG = 16
-        # startDate = datetime(2018, 1, 7, 0, 0, 0)
-        # endDate = datetime(2018, 1, 11, 0, 0, 0)
 
-    levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
-    colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
+        levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
+        colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
 
-    print(numberGridCells_LAT)
-    # print(startDate)
-    # print(endDate)
+        print(numberGridCells_LAT)
+        # print(startDate)
+        # print(endDate)
 
-    config = getConfig()
+        config = getConfig()
 
-    # PurpleAir client
-    pAirClient = InfluxDBClient(
-        config['INFLUX_HOST'],
-        config['INFLUX_PORT'],
-        config['INFLUX_MODELLING_USERNAME'],
-        config['INFLUX_MODELLING_PASSWORD'],
-        config['PURPLE_AIR_DB'],
-        ssl=True,
-        verify_ssl=True
-    )
+        # PurpleAir client
+        pAirClient = InfluxDBClient(
+            config['INFLUX_HOST'],
+            config['INFLUX_PORT'],
+            config['INFLUX_MODELLING_USERNAME'],
+            config['INFLUX_MODELLING_PASSWORD'],
+            config['PURPLE_AIR_DB'],
+            ssl=True,
+            verify_ssl=True
+        )
 
-    # airU client
-    airUClient = InfluxDBClient(
-        config['INFLUX_HOST'],
-        config['INFLUX_PORT'],
-        config['INFLUX_MODELLING_USERNAME'],
-        config['INFLUX_MODELLING_PASSWORD'],
-        config['AIRU_DB'],
-        ssl=True,
-        verify_ssl=True
-    )
+        # airU client
+        airUClient = InfluxDBClient(
+            config['INFLUX_HOST'],
+            config['INFLUX_PORT'],
+            config['INFLUX_MODELLING_USERNAME'],
+            config['INFLUX_MODELLING_PASSWORD'],
+            config['AIRU_DB'],
+            ssl=True,
+            verify_ssl=True
+        )
 
-    dbs = {'airu_pm25_measurement': config['INFLUX_AIRU_PM25_MEASUREMENT'],
-           'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
-           'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
+        dbs = {'airu_pm25_measurement': config['INFLUX_AIRU_PM25_MEASUREMENT'],
+               'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
+               'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate, queryTimeRelative)
+        theEstimate = getEstimate(pAirClient, airUClient, dbs, False, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate, queryTimeRelative)
 
-    mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
-        user=config['MONGO_USER'],
-        password=config['MONGO_PASSWORD'],
-        host=config['MONGO_HOST'],
-        port=config['MONGO_PORT'],
-        database=config['MONGO_DATABASE'])
+        mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
+            user=config['MONGO_USER'],
+            password=config['MONGO_PASSWORD'],
+            host=config['MONGO_HOST'],
+            port=config['MONGO_PORT'],
+            database=config['MONGO_DATABASE'])
 
-    mongoClient = MongoClient(mongodb_url)
-    queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
-    storeInMongo(mongoClient, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT)
+        mongoClient = MongoClient(mongodb_url)
+        queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
+        storeInMongo(mongoClient, theEstimate, queryTimeString, levels, colorBands, False)
 
-    logger.info('new sensor check successful for ' + queryTimeString)
+        logger.info('new sensor check successful for ' + queryTimeString)
