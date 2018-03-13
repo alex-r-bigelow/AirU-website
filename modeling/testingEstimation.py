@@ -349,8 +349,8 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
 
 if __name__ == '__main__':
 
-    dateStart = datetime(2017, 3, 7, 00, 00, 00)
-    dateEnd = datetime(2017, 3, 10, 00, 00, 00)
+    dateStart = datetime(2018, 3, 7, 00, 00, 00)
+    dateEnd = datetime(2018, 3, 10, 00, 00, 00)
 
     startDate_UTC = getUTCTime(dateStart)
     endDate_UTC = getUTCTime(dateEnd)
@@ -368,6 +368,8 @@ if __name__ == '__main__':
         endDate = someDate + timedelta(hours=characteristicTimeLength)
         queryTime = someDate
         queryTimeRelative = datetime2Reltime([queryTime], startDate)[0]
+
+        print(startDate, endDate, queryTime, queryTimeRelative)
 
         numberGridCells_LAT = 10
         numberGridCells_LONG = 16
