@@ -118,7 +118,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, 
         endDate = currentUTCtime
         queryTime = endDate - timedelta(hours=characteristicTimeLength)
 
-    queryTime = datetime2Reltime([queryTime], startDate)
+    queryTime = datetime2Reltime([queryTime], startDate)[0]
     print(queryTime)
 
     # startDate = currentUTCtime - timedelta(days=1)
