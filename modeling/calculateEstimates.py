@@ -31,8 +31,8 @@ logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
 
 # TIMESTAMP = datetime.now().isoformat()
-TIMESTAMP_UTC = datetime.utcnow()
-TIMESTAMP_UTC_STR = TIMESTAMP_UTC.isoformat()
+currentUTCtime = datetime.utcnow()
+currentUTCtime_str = currentUTCtime.isoformat()
 
 characteristicTimeLength = 7.5732
 
@@ -40,7 +40,7 @@ characteristicTimeLength = 7.5732
 def getConfig():
     with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
-    sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % TIMESTAMP_UTC_STR)
+    sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % currentUTCtime_str)
     sys.exit(1)
 
 
@@ -54,7 +54,7 @@ def getUTCTime(aTime_dt):
     return utc_dt
 
 
-def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner, theQueryTime):
+def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner, theQueryTimeRel):
     gridCellSize_lat = abs(bottomLeftCorner['lat'] - topRightCorner['lat']) / numberGridCells1D
     gridCellSize_lng = abs(bottomLeftCorner['lng'] - topRightCorner['lng']) / numberGridCells1D
 
@@ -69,12 +69,12 @@ def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner, t
             lats.append([float(latitude)])
             lngs.append([float(longitude)])
             # times.append([int(0)])
-            times.append([theQueryTime])
+            times.append([theQueryTimeRel])
 
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, bottomLeftCorner, topRightCorner, theQueryTime):
+def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, bottomLeftCorner, topRightCorner, theQueryTimeRel):
     gridCellSize_lat = abs(bottomLeftCorner['lat'] - topRightCorner['lat']) / numberGridCellsLAT
     gridCellSize_lng = abs(bottomLeftCorner['lng'] - topRightCorner['lng']) / numberGridCellsLONG
 
@@ -89,7 +89,7 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
             lats.append([float(latitude)])
             lngs.append([float(longitude)])
             # times.append([int(0)])
-            times.append([theQueryTime])
+            times.append([theQueryTimeRel])
 
     # print('*******lats******')
     # print(lats)
@@ -101,25 +101,14 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong):  # , start, end):
+def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong, start, end, queryTimeRel):
     # numberOfGridCells1D = 20
 
     numberGridCells_LAT = numberOfLat
     numberGridCells_LONG = numberOfLong
 
-    currentUTCtime = datetime.utcnow()
-
-    if nowMinusCHLT:
-        startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
-        endDate = currentUTCtime
-        queryTime = endDate
-    else:
-        startDate = currentUTCtime - timedelta(hours=(2 * characteristicTimeLength))
-        endDate = currentUTCtime
-        queryTime = endDate - timedelta(hours=characteristicTimeLength)
-
-    queryTime = datetime2Reltime([queryTime], startDate)[0]
-    print(queryTime)
+    startDate = start
+    endDate = end
 
     # startDate = currentUTCtime - timedelta(days=1)
     # endDate = currentUTCtime
@@ -155,7 +144,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, 
     time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
     # meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
-    meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTime)
+    meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRel)
 
     # long_tr = readCSVFile('data/example_data/LONG_tr.csv')
     # lat_tr = readCSVFile('data/example_data/LAT_tr.csv')
@@ -304,7 +293,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # return binaryFile
 
 
-def storeInMongo(client, anEstimate, endDate, levels, colorBands, theNowMinusCHLT):
+def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusCHLT):
 
     db = client.airudb
 
@@ -335,12 +324,12 @@ def storeInMongo(client, anEstimate, endDate, levels, colorBands, theNowMinusCHL
 
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
-    contours = calculateContours(latQuery, longQuery, pmEstimates, endDate, levels, colorBands)
+    contours = calculateContours(latQuery, longQuery, pmEstimates, queryTime, levels, colorBands)
 
     # save the contour svg serialized in the db.
 
     if theNowMinusCHLT:
-        anEstimateSlice = {"estimationFor": TIMESTAMP_UTC,
+        anEstimateSlice = {"estimationFor": currentUTCtime,
                            "modelVersion": '1.0.0',
                            "numberOfGridCells_LAT": anEstimate[4],
                            "numberOfGridCells_LONG": anEstimate[5],
@@ -350,7 +339,7 @@ def storeInMongo(client, anEstimate, endDate, levels, colorBands, theNowMinusCHL
                            "contours": contours}
 
         db.timeSlicedEstimates.insert_one(anEstimateSlice)
-        logger.info('inserted data slice for %s', TIMESTAMP_UTC_STR)
+        logger.info('inserted data slice for %s', currentUTCtime_str)
     else:
         # TODO: have two tables, table1 push the estimates for point now()-characteristic length time
         # before pushing remove oldest element from
@@ -364,6 +353,20 @@ if __name__ == '__main__':
 
     # true means only now()-characteristicLength; false means now() to now()-characteristicLength and to now()-2*characteristicLength
     nowMinusCHLT = bool(strtobool(sys.argv[1]))
+
+    # currentUTCtime = datetime.utcnow()
+
+    if nowMinusCHLT:
+        startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
+        endDate = currentUTCtime
+        queryTime = endDate
+    else:
+        startDate = currentUTCtime - timedelta(hours=(2 * characteristicTimeLength))
+        endDate = currentUTCtime
+        queryTime = endDate - timedelta(hours=characteristicTimeLength)
+
+    queryTimeRelative = datetime2Reltime([queryTime], startDate)[0]
+    print(queryTimeRelative)
 
     # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
     # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
@@ -413,7 +416,7 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, int(numberGridCells_LAT), int(numberGridCells_LONG))  # , startDate, endDate)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate, queryTimeRelative)
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
@@ -423,7 +426,7 @@ if __name__ == '__main__':
         database=config['MONGO_DATABASE'])
 
     mongoClient = MongoClient(mongodb_url)
-    endDateString = endDate.strftime('%Y-%m-%dT%H:%M:%SZ')
-    storeInMongo(mongoClient, theEstimate, endDateString, levels, colorBands, nowMinusCHLT)
+    queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
+    storeInMongo(mongoClient, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT)
 
     logger.info('new sensor check successful.')
