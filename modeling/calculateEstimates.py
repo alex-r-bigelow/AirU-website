@@ -13,6 +13,7 @@ from AQ_API import AQGPR
 from AQ_DataQuery_API import AQDataQuery
 # from bson.binary import Binary
 from datetime import datetime, timedelta
+from distutils.util import strtobool
 from influxdb import InfluxDBClient
 from pymongo import MongoClient
 from StringIO import StringIO
@@ -29,13 +30,17 @@ logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
 
-TIMESTAMP = datetime.now().isoformat()
+# TIMESTAMP = datetime.now().isoformat()
+TIMESTAMP_UTC = datetime.utcnow()
+TIMESTAMP_UTC_STR = TIMESTAMP_UTC.isoformat()
+
+characteristicTimeLength = 7.5732
 
 
 def getConfig():
     with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
-    sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % TIMESTAMP)
+    sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % TIMESTAMP_UTC_STR)
     sys.exit(1)
 
 
@@ -49,7 +54,7 @@ def getUTCTime(aTime_dt):
     return utc_dt
 
 
-def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner):
+def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner, theQueryTime):
     gridCellSize_lat = abs(bottomLeftCorner['lat'] - topRightCorner['lat']) / numberGridCells1D
     gridCellSize_lng = abs(bottomLeftCorner['lng'] - topRightCorner['lng']) / numberGridCells1D
 
@@ -63,12 +68,13 @@ def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner):
             latitude = topRightCorner['lat'] + (lat * gridCellSize_lat)
             lats.append([float(latitude)])
             lngs.append([float(longitude)])
-            times.append([int(0)])
+            # times.append([int(0)])
+            times.append([theQueryTime])
 
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, bottomLeftCorner, topRightCorner):
+def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, bottomLeftCorner, topRightCorner, theQueryTime):
     gridCellSize_lat = abs(bottomLeftCorner['lat'] - topRightCorner['lat']) / numberGridCellsLAT
     gridCellSize_lng = abs(bottomLeftCorner['lng'] - topRightCorner['lng']) / numberGridCellsLONG
 
@@ -82,40 +88,53 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
             latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
             lats.append([float(latitude)])
             lngs.append([float(longitude)])
-            times.append([int(0)])
+            # times.append([int(0)])
+            times.append([theQueryTime])
 
-    print('*******lats******')
-    print(lats)
-    print('*******lngs******')
-    print(lngs)
-    print('*******times******')
-    print(times)
+    # print('*******lats******')
+    # print(lats)
+    # print('*******lngs******')
+    # print(lngs)
+    # print('*******times******')
+    # print(times)
 
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, start, end):
+def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong, start, end):
     # numberOfGridCells1D = 20
 
     numberGridCells_LAT = numberOfLat
     numberGridCells_LONG = numberOfLong
-    currentUTCtime = datetime.utcnow() - timedelta(days=20)
+
+    currentUTCtime = datetime.utcnow()
+
+    if nowMinusCHLT:
+        startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
+        endDate = currentUTCtime
+        queryTime = endDate
+    else:
+        startDate = currentUTCtime - timedelta(hours=(2 * characteristicTimeLength))
+        endDate = currentUTCtime
+        queryTime = endDate - timedelta(hours=characteristicTimeLength)
+
+    queryTime = datetime2Reltime(queryTime, startDate)
 
     # startDate = currentUTCtime - timedelta(days=1)
     # endDate = currentUTCtime
 
-    startDate = getUTCTime(start)
-    endDate = getUTCTime(end)
+    # startDate = getUTCTime(start)
+    # endDate = getUTCTime(end)
 
     # topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
     # bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
 
     bottomLeftCorner = {'lat': 40.598850, 'lng': -112.001349}
     topRightCorner = {'lat': 40.810476, 'lng': -111.713403}
-
+# TODO is the binnfrequency the way to get the 3 to 6 points?
     data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topRightCorner['lat'], bottomLeftCorner['lng'], bottomLeftCorner['lat'], topRightCorner['lng'])
 
-    print(data_tr)
+    # print(data_tr)
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
@@ -135,7 +154,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, 
     time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
     # meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
-    meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner)
+    meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTime)
 
     # long_tr = readCSVFile('data/example_data/LONG_tr.csv')
     # lat_tr = readCSVFile('data/example_data/LAT_tr.csv')
@@ -169,24 +188,25 @@ def getEstimate(purpleAirClient, airuClient, theDBs, numberOfLat, numberOfLong, 
     # we usually initialize sigmaF0 for training as the standard deviation of the sensor measurements
     # sigmaF0=np.std(pm2p5_tr, ddof=1)
     # If we know  sigmaF from previous training we use the found parameter
-    sigmaF0 = 8.3779
-
-    # characteristic length for space (x and y), characteristic length for time
-    L0 = [4.7273, 7.5732]
-
-    # This is the noise variance and is being calculated from the sensor calibration data. This is hard coded in the AQGPR as well
-    sigmaN = 5.81
-
-    # This is the degree of the mean function used in the regression, we would like to have it equal to 1 for now
-    basisFnDeg = 1
+    # sigmaF0 = 8.3779
+    #
+    # # characteristic length for space (x and y), characteristic length for time
+    # L0 = [4.7273, 7.5732]
+    #
+    # # This is the noise variance and is being calculated from the sensor calibration data. This is hard coded in the AQGPR as well
+    # sigmaN = 5.81
+    #
+    # # This is the degree of the mean function used in the regression, we would like to have it equal to 1 for now
+    # basisFnDeg = 1
 
     # Indicating wether we want to do training to find model parameters or not
-    isTrain = False
+    # isTrain = False
+    #
+    # # Indicating wether we want to do the regression and find some estimates or not
+    # isRegression = True
 
-    # Indicating wether we want to do the regression and find some estimates or not
-    isRegression = True
-
-    [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
+    # the rest uses the default values given by Amir
+    [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr)  # , sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
     return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberGridCells_LAT, numberGridCells_LONG]
 
@@ -244,10 +264,10 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
             # prev_coords = None
             for (coords, code_type) in zip(path.vertices, path.codes):
 
-                '''
-                if prev_coords is not None and np.allclose(coords, prev_coords):
-                    continue
-                '''
+                # '''
+                # if prev_coords is not None and np.allclose(coords, prev_coords):
+                #     continue
+                # '''
 
                 # prev_coords = coords
 
@@ -283,7 +303,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # return binaryFile
 
 
-def storeInMongo(client, anEstimate, endDate, levels, colorBands):
+def storeInMongo(client, anEstimate, endDate, levels, colorBands, theNowMinusCHLT):
 
     db = client.airudb
 
@@ -300,11 +320,19 @@ def storeInMongo(client, anEstimate, endDate, levels, colorBands):
 
     zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
+    # theEstimates = []
     theEstimates = []
-    for aZippedEstimate in zippedEstimateData:
+    location = {}
+    for i, aZippedEstimate in enumerate(zippedEstimateData):
         header = ('lat', 'long', 'pm25', 'variability')
         theEstimate = dict(zip(header, aZippedEstimate))
-        theEstimates.append(theEstimate)
+
+        location[i] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
+
+        # theEstimates.append(theEstimate)
+        theEstimates[i] = {'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
+
+
 
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
@@ -312,29 +340,38 @@ def storeInMongo(client, anEstimate, endDate, levels, colorBands):
 
     # save the contour svg serialized in the db.
 
-    anEstimateSlice = {"estimationFor": TIMESTAMP,
-                       "modelVersion": '1.0.0',
-                       "numberOfGridCells_LAT": anEstimate[4],
-                       "numberOfGridCells_LONG": anEstimate[5],
-                       "estimate": theEstimates,
-                       # "svgBinary": binaryFile}
-                       "contours": contours}
+    if theNowMinusCHLT:
+        anEstimateSlice = {"estimationFor": TIMESTAMP_UTC,
+                           "modelVersion": '1.0.0',
+                           "numberOfGridCells_LAT": anEstimate[4],
+                           "numberOfGridCells_LONG": anEstimate[5],
+                           "estimate": theEstimates,
+                           "location": location,
+                           # "svgBinary": binaryFile}
+                           "contours": contours}
 
-    db.timeSlicedEstimates.insert_one(anEstimateSlice)
-    logger.info('inserted data slice for %s', TIMESTAMP)
+        db.timeSlicedEstimates.insert_one(anEstimateSlice)
+        logger.info('inserted data slice for %s', TIMESTAMP_UTC_STR)
+    else:
+        # TODO: have two tables, table1 push the estimates for point now()-characteristic length time
+        # before pushing remove oldest element from
+        # table2 push estimates for point now(), before
 
 
 if __name__ == '__main__':
 
     # TODO have the configuration stored in a JSON file an read from there
 
+    # true means only now()-characteristicLength; false means now() to now()-characteristicLength and to now()-2*characteristicLength
+    nowMinusCHLT = bool(strtobool(sys.argv[1]))
+
     # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
     # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
-    if len(sys.argv) > 1:
-        numberGridCells_LAT = sys.argv[1]
-        numberGridCells_LONG = sys.argv[2]
-        startDate = datetime.strptime(sys.argv[3], '%Y-%m-%dT%H:%M:%SZ')
-        endDate = datetime.strptime(sys.argv[4], '%Y-%m-%dT%H:%M:%SZ')
+    if len(sys.argv) > 2:
+        numberGridCells_LAT = sys.argv[2]
+        numberGridCells_LONG = sys.argv[3]
+        startDate = datetime.strptime(sys.argv[4], '%Y-%m-%dT%H:%M:%SZ')
+        endDate = datetime.strptime(sys.argv[5], '%Y-%m-%dT%H:%M:%SZ')
     else:
         numberGridCells_LAT = 10
         numberGridCells_LONG = 16
@@ -376,7 +413,7 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate)
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
@@ -387,6 +424,6 @@ if __name__ == '__main__':
 
     mongoClient = MongoClient(mongodb_url)
     endDateString = endDate.strftime('%Y-%m-%dT%H:%M:%SZ')
-    storeInMongo(mongoClient, theEstimate, endDateString, levels, colorBands)
+    storeInMongo(mongoClient, theEstimate, endDateString, levels, colorBands, nowMinusCHLT)
 
     logger.info('new sensor check successful.')
