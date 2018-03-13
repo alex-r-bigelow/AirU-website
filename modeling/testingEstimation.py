@@ -206,7 +206,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # from: http://hplgit.github.io/web4sciapps/doc/pub/._part0013_web4sa_plain.html
     stringFile = StringIO()
 
-    outputdirectory = '/home/airu/AirU-website/svgs'
+    outputdirectory = '/home/airu/AirU-website/svgs_testing'
     anSVGfile = os.path.join(outputdirectory, endDate + '.svg')
 
     plt.figure()
