@@ -322,7 +322,7 @@ def storeInMongo(client, anEstimate, endDate, levels, colorBands, theNowMinusCHL
     zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
     # theEstimates = []
-    theEstimates = []
+    theEstimates = {}
     location = {}
     for i, aZippedEstimate in enumerate(zippedEstimateData):
         header = ('lat', 'long', 'pm25', 'variability')
