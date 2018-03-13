@@ -328,10 +328,10 @@ def storeInMongo(client, anEstimate, endDate, levels, colorBands, theNowMinusCHL
         header = ('lat', 'long', 'pm25', 'variability')
         theEstimate = dict(zip(header, aZippedEstimate))
 
-        location[i] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
+        location[str(i)] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
 
         # theEstimates.append(theEstimate)
-        theEstimates[i] = {'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
+        theEstimates[str(i)] = {'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
 
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
