@@ -323,7 +323,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         if theCollection == 'timeSlicedEstimates_low':
             db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
 
-            oldestEstimation = db.timeSlicedEstimates_high.find().sort({"estimationFor": 1}).limit(1)
+            oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(1)
             print('******* oldestEstimation *****')
             print(oldestEstimation)
             for document in oldestEstimation:
