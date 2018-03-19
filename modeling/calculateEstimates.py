@@ -208,7 +208,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
         print('********** i + collection **********')
         print(i)
         print(collection)
-        
+
         for path in collection.get_paths():
             # coords = path.vertices
 
@@ -252,7 +252,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # binaryFile = bson.BSON.encode({'svg': binaryFile})
 
 
-def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusCHLT):
+def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBands, theNowMinusCHLT):
 
     db = client.airudb
 
@@ -288,16 +288,31 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
     # save the contour svg serialized in the db.
 
     if theNowMinusCHLT:
-        anEstimateSlice = {"estimationFor": currentUTCtime,
+        anEstimateSlice = {"estimationFor": queryTime,
                            "modelVersion": '1.0.0',
                            "numberOfGridCells_LAT": anEstimate[4],
                            "numberOfGridCells_LONG": anEstimate[5],
                            "estimate": theEstimates,
                            "location": location,
-                           # "svgBinary": binaryFile}
                            "contours": contours}
 
-        db.timeSlicedEstimates.insert_one(anEstimateSlice)
+        if theCollection == 'timeSlicedEstimates_high':
+            db.timeSlicedEstimates_high.insert_one(anEstimateSlice)
+        elif theCollection == 'timeSlicedEstimates_low':
+            db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
+
+            oldestEstimation = db.timeSlicedEstimates_high.find().sort({"estimationFor": 1}).limit(1)
+            print('******* oldestEstimation *****')
+            print(oldestEstimation)
+            for document in oldestEstimation:
+                timeDifference = datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ') - document['estimationFor']
+                print('******* timeDifference *****')
+                print(timeDifference)
+                print(timeDifference.total_seconds() / (60 * 60)
+
+                if timeDifference.total_seconds() / (60 * 60) >= characteristicTimeLength:
+                    db.timeSlicedEstimates_high.remove(document)
+
         logger.info('inserted data slice for %s', currentUTCtime_str)
     else:
         # TODO: have two tables, table1 push the estimates for point now()-characteristic length time
@@ -317,10 +332,12 @@ if __name__ == '__main__':
         startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
         endDate = currentUTCtime
         queryTime = endDate
+        collection = 'timeSlicedEstimates_high'
     else:
         startDate = currentUTCtime - timedelta(hours=(2 * characteristicTimeLength))
         endDate = currentUTCtime
         queryTime = endDate - timedelta(hours=characteristicTimeLength)
+        collection = 'timeSlicedEstimates_low'
 
     queryTimeRelative = datetime2Reltime([queryTime], startDate)[0]
     print(queryTimeRelative)
@@ -384,6 +401,6 @@ if __name__ == '__main__':
 
     mongoClient = MongoClient(mongodb_url)
     queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
-    storeInMongo(mongoClient, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT)
+    storeInMongo(mongoClient, collection, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT)
 
     logger.info('new sensor check successful for ' + queryTimeString)
