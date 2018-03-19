@@ -11,7 +11,6 @@ import pytz
 
 from AQ_API import AQGPR
 from AQ_DataQuery_API import AQDataQuery
-# from bson.binary import Binary
 from datetime import datetime, timedelta
 from distutils.util import strtobool
 from influxdb import InfluxDBClient
@@ -50,7 +49,6 @@ def getUTCTime(aTime_dt):
     local_dt = localTimezone.localize(aTime_dt, is_dst=None)  # now local time on server is MST, add that information to the time
     # local_dt = localTimezone.localize(datetime.strptime(aTimeString, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)  # now local time on server is MST, add that information to the time
     utc_dt = local_dt.astimezone(UTCTimezone)
-    # utc_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
     return utc_dt
 
 
@@ -91,18 +89,10 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
             # times.append([int(0)])
             times.append([theQueryTimeRel])
 
-    # print('*******lats******')
-    # print(lats)
-    # print('*******lngs******')
-    # print(lngs)
-    # print('*******times******')
-    # print(times)
-
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
 def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong, start, end, queryTimeRel):
-    # numberOfGridCells1D = 20
 
     numberGridCells_LAT = numberOfLat
     numberGridCells_LONG = numberOfLong
@@ -110,21 +100,10 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, 
     startDate = start
     endDate = end
 
-    # startDate = currentUTCtime - timedelta(days=1)
-    # endDate = currentUTCtime
-
-    # startDate = getUTCTime(start)
-    # endDate = getUTCTime(end)
-
-    # topleftCorner = {'lat': 40.810476, 'lng': -112.001349}
-    # bottomRightCorner = {'lat': 40.598850, 'lng': -111.713403}
-
     bottomLeftCorner = {'lat': 40.598850, 'lng': -112.001349}
     topRightCorner = {'lat': 40.810476, 'lng': -111.713403}
 # TODO is the binnfrequency the way to get the 3 to 6 points?
     data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topRightCorner['lat'], bottomLeftCorner['lng'], bottomLeftCorner['lat'], topRightCorner['lng'])
-
-    # print(data_tr)
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
@@ -146,20 +125,6 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, 
     # meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
     meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRel)
 
-    # long_tr = readCSVFile('data/example_data/LONG_tr.csv')
-    # lat_tr = readCSVFile('data/example_data/LAT_tr.csv')
-    # time_tr = readCSVFile('data/example_data/TIME_tr.csv')
-    # pm2p5_tr = readCSVFile('data/example_data/PM2p5_tr.csv')
-    # long_Q = readCSVFile('data/example_data/LONG_Q.csv')
-    # lat_Q = readCSVFile('data/example_data/LAT_Q.csv')
-    # time_Q = readCSVFile('data/example_data/TIME_Q.csv')
-
-    # long_tr = np.matrix(long_tr)
-    # long_tr = longitudes
-    # lat_tr = np.matrix(lat_tr)
-    # lat_tr = latitudes
-    # time_tr = np.matrix(time_tr)
-    # time_tr = times
     long_Q = np.matrix(meshInfo['lngs'])
     lat_Q = np.matrix(meshInfo['lats'])
     time_Q = np.matrix(meshInfo['times'])
@@ -240,28 +205,23 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     new_contours = []
 
     for i, collection in enumerate(theContours.collections):
-        # print(collection)
         for path in collection.get_paths():
-            # print(path)
-            coords = path.vertices
-            # print(coords)
-            # print(path.codes)
+            # coords = path.vertices
+
             new_contour = {}
             new_contour['path'] = []
             new_contour['level'] = i
             new_contour['k'] = i
 
+            print('********** path **********')
+            print(path)
+
             # prev_coords = None
             for (coords, code_type) in zip(path.vertices, path.codes):
 
-                # '''
-                # if prev_coords is not None and np.allclose(coords, prev_coords):
-                #     continue
-                # '''
-
-                # prev_coords = coords
-
-                # print >>sys.stderr, "coords, code_type:", coords, code_type, i
+                print('********** coords + code type **********')
+                print(coords)
+                print(code_type)
 
                 if code_type == 1:
                     new_contour['path'] += [['M', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
@@ -269,6 +229,8 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
                     new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
 
             new_contours += [new_contour]
+
+    stringFile.close()
 
     return new_contours
 
@@ -278,19 +240,12 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # theSVG = stringFile.getvalue()
     # # theSVG = '<svg' + theSVG.split('<svg')[1]
     #
-    # print(type(theSVG))
     # encodedString = theSVG.decode('utf8')
-    # print(type(encodedString))
     #
     # encodedString = encodedString.encode('utf8')
-    # print(type(encodedString))
     #
     # binaryFile = Binary(encodedString)
     # binaryFile = bson.BSON.encode({'svg': binaryFile})
-    #
-    # stringFile.close()
-    #
-    # return binaryFile
 
 
 def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusCHLT):
