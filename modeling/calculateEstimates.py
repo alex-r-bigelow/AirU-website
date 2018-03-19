@@ -287,18 +287,40 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
 
     # save the contour svg serialized in the db.
 
+    anEstimateSlice = {"estimationFor": queryTime,
+                       "modelVersion": '1.0.0',
+                       "numberOfGridCells_LAT": anEstimate[4],
+                       "numberOfGridCells_LONG": anEstimate[5],
+                       "estimate": theEstimates,
+                       "location": location,
+                       "contours": contours}
+
     if theNowMinusCHLT:
-        anEstimateSlice = {"estimationFor": queryTime,
-                           "modelVersion": '1.0.0',
-                           "numberOfGridCells_LAT": anEstimate[4],
-                           "numberOfGridCells_LONG": anEstimate[5],
-                           "estimate": theEstimates,
-                           "location": location,
-                           "contours": contours}
 
         if theCollection == 'timeSlicedEstimates_high':
             db.timeSlicedEstimates_high.insert_one(anEstimateSlice)
-        elif theCollection == 'timeSlicedEstimates_low':
+        # elif theCollection == 'timeSlicedEstimates_low':
+        #     db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
+        #
+        #     oldestEstimation = db.timeSlicedEstimates_high.find().sort({"estimationFor": 1}).limit(1)
+        #     print('******* oldestEstimation *****')
+        #     print(oldestEstimation)
+        #     for document in oldestEstimation:
+        #         timeDifference = datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ') - document['estimationFor']
+        #         print('******* timeDifference *****')
+        #         print(timeDifference)
+        #         print(timeDifference.total_seconds() / (60 * 60))
+        #
+        #         if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
+        #             db.timeSlicedEstimates_high.remove(document)
+
+        logger.info('inserted data slice for %s', currentUTCtime_str)
+    else:
+        # TODO: have two tables, table1 push the estimates for point now()-characteristic length time
+        # before pushing remove oldest element from
+        # table2 push estimates for point now(), before
+
+        if theCollection == 'timeSlicedEstimates_low':
             db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
 
             oldestEstimation = db.timeSlicedEstimates_high.find().sort({"estimationFor": 1}).limit(1)
@@ -313,12 +335,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
                 if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
                     db.timeSlicedEstimates_high.remove(document)
 
-        logger.info('inserted data slice for %s', currentUTCtime_str)
-    else:
-        # TODO: have two tables, table1 push the estimates for point now()-characteristic length time
-        # before pushing remove oldest element from
-        # table2 push estimates for point now(), before
-        print('nothing there yet')
+        logger.info('inserted data slice for %s', currentUTCtime)
 
 
 if __name__ == '__main__':
