@@ -205,6 +205,10 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     new_contours = []
 
     for i, collection in enumerate(theContours.collections):
+        print('********** i + collection **********')
+        print(i)
+        print(collection)
+        
         for path in collection.get_paths():
             # coords = path.vertices
 
