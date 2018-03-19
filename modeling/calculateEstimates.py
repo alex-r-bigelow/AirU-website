@@ -308,9 +308,9 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
                 timeDifference = datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ') - document['estimationFor']
                 print('******* timeDifference *****')
                 print(timeDifference)
-                print(timeDifference.total_seconds() / (60 * 60)
+                print(timeDifference.total_seconds() / (60 * 60))
 
-                if timeDifference.total_seconds() / (60 * 60) >= characteristicTimeLength:
+                if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
                     db.timeSlicedEstimates_high.remove(document)
 
         logger.info('inserted data slice for %s', currentUTCtime_str)
