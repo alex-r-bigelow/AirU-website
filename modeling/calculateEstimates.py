@@ -195,7 +195,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     plt.axis('off')  # Removes axes
     plt.savefig(stringFile, format="svg")
     theSVG = stringFile.getvalue()
-    print(theSVG)
+    # print(theSVG)
 
     # to save as svg file in directory svgs
     plt.savefig(anSVGfile, format="svg")
@@ -205,9 +205,9 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     new_contours = []
 
     for i, collection in enumerate(theContours.collections):
-        print('********** i + collection **********')
-        print(i)
-        print(collection)
+        # print('********** i + collection **********')
+        # print(i)
+        # print(collection)
 
         for path in collection.get_paths():
             # coords = path.vertices
@@ -217,15 +217,15 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
             new_contour['level'] = i
             new_contour['k'] = i
 
-            print('********** path **********')
-            print(path)
+            # print('********** path **********')
+            # print(path)
 
             # prev_coords = None
             for (coords, code_type) in zip(path.vertices, path.codes):
 
-                print('********** coords + code type **********')
-                print(coords)
-                print(code_type)
+                # print('********** coords + code type **********')
+                # print(coords)
+                # print(code_type)
 
                 if code_type == 1:
                     new_contour['path'] += [['M', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
@@ -358,7 +358,7 @@ if __name__ == '__main__':
     levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
     colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
 
-    print(numberGridCells_LAT)
+    # print(numberGridCells_LAT)
     # print(startDate)
     # print(endDate)
 
