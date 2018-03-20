@@ -312,13 +312,14 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
             print('******* oldestEstimation *****')
             print(oldestEstimation)
             for document in oldestEstimation:
+                documentID = document.get('_id')
                 timeDifference = datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
                 print('******* timeDifference *****')
                 print(timeDifference)
                 print(timeDifference.total_seconds() / (60 * 60))
 
                 if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
-                    db.timeSlicedEstimates_high.remove(document)
+                    db.timeSlicedEstimates_high.delete_one({"_id": documentID})
                     print('********* removed *******')
                     print(document['estimationFor'])
 
