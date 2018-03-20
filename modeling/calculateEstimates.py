@@ -327,7 +327,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
             print('******* oldestEstimation *****')
             print(oldestEstimation)
             for document in oldestEstimation:
-                timeDifference = datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ') - document['estimationFor']
+                timeDifference = datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
                 print('******* timeDifference *****')
                 print(timeDifference)
                 print(timeDifference.total_seconds() / (60 * 60))
