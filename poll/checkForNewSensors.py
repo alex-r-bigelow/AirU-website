@@ -7,27 +7,28 @@ from datetime import datetime, timedelta
 from influxdb import InfluxDBClient
 from pymongo import MongoClient
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-logHandler = handlers.TimedRotatingFileHandler('cronChecker.log', when='H', interval=12, backupCount=3)
+logHandler = handlers.TimedRotatingFileHandler('cronChecker.log', when='D', interval=1, backupCount=3)
 logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
-logger.addHandler(logHandler)
+LOGGER.addHandler(logHandler)
 
 
 def getConfig():
     with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
         return json.loads(configfile.read())
-    logger.info('ConfigError\tProblem reading config file.')
+    LOGGER.info('ConfigError\tProblem reading config file.')
     sys.exit(1)
 
 
 def checkForNewSensors(influxClient, mongoClient):
 
-    logger.info('checking for new sensor.')
+    LOGGER.info('checking for new sensor.')
 
     # now = datetime.now()
     # min10Ago = now - timedelta(minutes=10)
@@ -37,46 +38,46 @@ def checkForNewSensors(influxClient, mongoClient):
     min10Ago = nowUTC - timedelta(minutes=10)
     min10AgoStr = min10Ago.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-    logger.info(min10AgoStr)
+    LOGGER.info(min10AgoStr)
 
     queryInflux = "SELECT ID, LAST(\"PM2.5\") AS pm25 " \
                   "FROM pm25 WHERE time >= '" + min10AgoStr + "' " \
                   "GROUP BY ID" \
 
-    logger.info(queryInflux)
+    LOGGER.info(queryInflux)
     dataLatestPMPerID = influxClient.query(queryInflux, epoch='ms')
     data = dataLatestPMPerID.raw
 
     dataSeries = list(map(lambda x: dict(zip(x['columns'], x['values'][0])), data['series']))
-    logger.info(dataSeries)
+    LOGGER.info(dataSeries)
 
     db = mongoClient.airudb
     # allLiveSensors = db.liveSensors.find()
-    # logger.info(allLiveSensors)
+    # LOGGER.info(allLiveSensors)
 
     # get the schools
     allSchools = [school['macAddress'] for school in db.schools.find()]
-    logger.info(allSchools)
+    LOGGER.info(allSchools)
 
     for anID in dataSeries:
-        logger.info(anID)
+        LOGGER.info(anID)
 
         theID = anID['ID']
         idWithColon = ":".join([theID[i:i + 2] for i in range(0, len(theID), 2)])
-        logger.info(idWithColon)
+        LOGGER.info(idWithColon)
 
         if idWithColon not in allSchools:
-            logger.info('ID %s is not a school', idWithColon)
+            LOGGER.info('ID %s is not a school', idWithColon)
             aSensor = {"macAddress": idWithColon,
                        "createdAt_utc": nowUTC}
 
             foundID = db.liveSensors.find_one({'macAddress': idWithColon})
-            logger.info(foundID)
+            LOGGER.info(foundID)
             if foundID is None:
                 db.liveSensors.insert_one(aSensor)
-                logger.info('sensor %s added', idWithColon)
+                LOGGER.info('sensor %s added', idWithColon)
         else:
-            logger.info('ID %s is a school', idWithColon)
+            LOGGER.info('ID %s is a school', idWithColon)
 
 
 if __name__ == '__main__':
@@ -103,4 +104,4 @@ if __name__ == '__main__':
 
     checkForNewSensors(influxClient, mongoClient)
 
-    logger.info('new sensor check successful.')
+    LOGGER.info('new sensor check successful.')
