@@ -414,7 +414,6 @@ if __name__ == '__main__':
 
         # theGridID = 0
         storeGridMetadata(mongoClient, str(0), 'meshgrid', int(numberGridCells_LAT), int(numberGridCells_LONG), mesh)
-        storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
     else:
         mesh = meshgridInfo['grid']
 
