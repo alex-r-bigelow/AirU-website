@@ -416,6 +416,8 @@ if __name__ == '__main__':
         storeGridMetadata(mongoClient, str(0), 'meshgrid', int(numberGridCells_LAT), int(numberGridCells_LONG), mesh)
     else:
         mesh = meshgridInfo['grid']
+        numberGridCells_LAT = meshgridInfo['numberOfGridCells']['lat']
+        numberGridCells_LONG = meshgridInfo['numberOfGridCells']['long']
 
     levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
     colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
