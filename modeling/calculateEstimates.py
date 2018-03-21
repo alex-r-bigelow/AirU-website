@@ -355,6 +355,9 @@ if __name__ == '__main__':
     nowMinusCHLT = bool(strtobool(sys.argv[1]))
     theGridID = 0
 
+    numberGridCells_LAT = None
+    numberGridCells_LONG = None
+
     if nowMinusCHLT:
         startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
         endDate = currentUTCtime
