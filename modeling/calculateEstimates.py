@@ -92,16 +92,12 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong, start, end, queryTimeRel):
-
-    numberGridCells_LAT = numberOfLat
-    numberGridCells_LONG = numberOfLong
+def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, end, queryTimeRel):
 
     startDate = start
     endDate = end
 
-    bottomLeftCorner = {'lat': 40.598850, 'lng': -112.001349}
-    topRightCorner = {'lat': 40.810476, 'lng': -111.713403}
+
 # TODO is the binnfrequency the way to get the 3 to 6 points?
     data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topRightCorner['lat'], bottomLeftCorner['lng'], bottomLeftCorner['lat'], topRightCorner['lng'])
 
@@ -123,7 +119,8 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, 
     time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
     # meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
-    meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRel)
+    # meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRel)
+    meshInfo = mesh
 
     long_Q = np.matrix(meshInfo['lngs'])
     lat_Q = np.matrix(meshInfo['lats'])
@@ -163,7 +160,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, 
     # the rest uses the default values given by Amir
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr)  # , sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
-    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberGridCells_LAT, numberGridCells_LONG]
+    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1]]
 
 
 def calculateContours(X, Y, Z, endDate, levels, colorBands):
@@ -194,7 +191,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
 
     plt.axis('off')  # Removes axes
     plt.savefig(stringFile, format="svg")
-    theSVG = stringFile.getvalue()
+    # theSVG = stringFile.getvalue()
     # print(theSVG)
 
     # to save as svg file in directory svgs
@@ -252,7 +249,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # binaryFile = bson.BSON.encode({'svg': binaryFile})
 
 
-def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBands, theNowMinusCHLT):
+def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBands, theNowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, gridID):
 
     db = client.airudb
 
@@ -263,23 +260,28 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
     lng_list = np.squeeze(np.asarray(anEstimate[3])).tolist()
 
     # make numpy arrays for the contours
-    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[5], anEstimate[4])
-    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[5], anEstimate[4])
-    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[5], anEstimate[4])
+
+    pmEstimates = np.asarray(anEstimate[0]).reshape(numberGridCells_LONG, numberGridCells_LAT)
+    latQuery = np.asarray(anEstimate[2]).reshape(numberGridCells_LONG, numberGridCells_LAT)
+    longQuery = np.asarray(anEstimate[3]).reshape(numberGridCells_LONG, numberGridCells_LAT)
 
     zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
     # theEstimates = []
     theEstimates = {}
-    location = {}
+    # location = {}
     for i, aZippedEstimate in enumerate(zippedEstimateData):
         header = ('lat', 'long', 'pm25', 'variability')
         theEstimate = dict(zip(header, aZippedEstimate))
 
-        location[str(i)] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
+        theEstimationMetadata = db.estimationMetadata.find_one({"gridID": gridID})
+        if theEstimationMetadata is not None:
 
-        # theEstimates.append(theEstimate)
-        theEstimates[str(i)] = {'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
+            for key, value in theEstimationMetadata['transformedGrid'].iteritems():
+                if value['lat'] == theEstimate['lat'] and value['lngs'] == theEstimate['long']:
+
+                    # location[str(i)] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
+                    theEstimates[str(i)] = {'gridELementID': key, 'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
 
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
@@ -289,10 +291,10 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
 
     anEstimateSlice = {"estimationFor": queryTime,
                        "modelVersion": '1.0.0',
-                       "numberOfGridCells_LAT": anEstimate[4],
-                       "numberOfGridCells_LONG": anEstimate[5],
+                       # "numberOfGridCells_LAT": anEstimate[4],
+                       # "numberOfGridCells_LONG": anEstimate[5],
                        "estimate": theEstimates,
-                       "location": location,
+                       # "location": location,
                        "contours": contours}
 
     if theNowMinusCHLT:
@@ -326,12 +328,32 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         logger.info('inserted data slice for %s', currentUTCtime)
 
 
-if __name__ == '__main__':
+def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
 
-    # TODO have the configuration stored in a JSON file an read from there
+    # transform theMesh which looks like this {'lats': lats, 'lngs': lngs, 'times': times} to {0: {"lat": lats[0], "lngs": lngs[0], "times": times[0]}, ...}
+    transformedMesh = {}
+    numberofElementsInMesh = len(theMesh['lats'])
+    for i in range(numberofElementsInMesh):
+        transformedMesh[str(i)] = {"lat": theMesh['lats'][i], "lngs": theMesh['lngs'][i], "times": theMesh['times'][i]}
+
+    aMetadataElement = {"gridID": gridID,
+                        "metadataType": metadataType,
+                        "numberOfElementsInMesh": numberofElementsInMesh,
+                        "grid": theMesh,
+                        "transformedGrid": transformedMesh,
+                        "numberOfGridCells": {'lat': numberGridCells_LAT, 'long': numberGridCells_LONG}}
+
+    db = client.airudb
+    db.estimationMetadata.insert_one(aMetadataElement)
+
+    logger.info('inserted estimation Metadata %s', gridID)
+
+
+if __name__ == '__main__':
 
     # true means only now()-characteristicLength; false means now() to now()-characteristicLength and to now()-2*characteristicLength
     nowMinusCHLT = bool(strtobool(sys.argv[1]))
+    theGridID = 0
 
     if nowMinusCHLT:
         startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
@@ -354,20 +376,46 @@ if __name__ == '__main__':
         numberGridCells_LONG = sys.argv[3]
         startDate = datetime.strptime(sys.argv[4], '%Y-%m-%dT%H:%M:%SZ')
         endDate = datetime.strptime(sys.argv[5], '%Y-%m-%dT%H:%M:%SZ')
-    else:
-        numberGridCells_LAT = 10
-        numberGridCells_LONG = 16
+    # else:
+    #     numberGridCells_LAT = 10
+    #     numberGridCells_LONG = 16
         # startDate = datetime(2018, 1, 7, 0, 0, 0)
         # endDate = datetime(2018, 1, 11, 0, 0, 0)
 
-    levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
-    colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
-
-    # print(numberGridCells_LAT)
-    # print(startDate)
-    # print(endDate)
+    # geographical area
+    bottomLeftCorner = {'lat': 40.598850, 'lng': -112.001349}
+    topRightCorner = {'lat': 40.810476, 'lng': -111.713403}
 
     config = getConfig()
+
+    mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
+        user=config['MONGO_USER'],
+        password=config['MONGO_PASSWORD'],
+        host=config['MONGO_HOST'],
+        port=config['MONGO_PORT'],
+        database=config['MONGO_DATABASE'])
+
+    mongoClient = MongoClient(mongodb_url)
+    db = mongoClient.airudb
+    meshgridInfo = db.estimationMetadata.find_one({"metadataType": "meshgrid"})
+
+    if meshgridInfo is None:
+
+        if numberGridCells_LAT is None and numberGridCells_LONG is None:
+            numberGridCells_LAT = 10
+            numberGridCells_LONG = 16
+        else:
+            logger.info('problem with numberGridCells_LAT andnumberGridCells_LONG, one of them is not None')
+
+        mesh = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRelative)
+
+        # theGridID = 0
+        storeGridMetadata(mongoClient, str(0), int(numberGridCells_LAT), int(numberGridCells_LONG), 'meshgrid', mesh)
+    else:
+        mesh = meshgridInfo['grid']
+
+    levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
+    colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
 
     # PurpleAir client
     pAirClient = InfluxDBClient(
@@ -395,17 +443,9 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate, queryTimeRelative)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate, queryTimeRelative)
 
-    mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
-        user=config['MONGO_USER'],
-        password=config['MONGO_PASSWORD'],
-        host=config['MONGO_HOST'],
-        port=config['MONGO_PORT'],
-        database=config['MONGO_DATABASE'])
-
-    mongoClient = MongoClient(mongodb_url)
     queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
-    storeInMongo(mongoClient, collection, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT)
+    storeInMongo(mongoClient, collection, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
 
     logger.info('new sensor check successful for ' + queryTimeString)
