@@ -79,20 +79,21 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     lats = []
     lngs = []
     times = []
-    for lng in range(numberGridCellsLONG):
-        longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
+    for aRelativeTime in theQueryTimeRel:
+        for lng in range(numberGridCellsLONG):
+            longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
 
-        for lat in range(numberGridCellsLAT):
-            latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
-            lats.append([float(latitude)])
-            lngs.append([float(longitude)])
-            # times.append([int(0)])
-            times.append([theQueryTimeRel])
+            for lat in range(numberGridCellsLAT):
+                latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
+                lats.append([float(latitude)])
+                lngs.append([float(longitude)])
+                # times.append([int(0)])
+                times.append([aRelativeTime])
 
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, end, queryTimeRel):
+def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, end):
 
     startDate = start
     endDate = end
@@ -369,7 +370,7 @@ if __name__ == '__main__':
         queryTime = endDate - timedelta(hours=characteristicTimeLength)
         collection = 'timeSlicedEstimates_low'
 
-    queryTimeRelative = datetime2Reltime([queryTime], startDate)[0]
+    queryTimeRelative = datetime2Reltime([startDate, endDate], queryTime)
     print(queryTimeRelative)
 
     # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
@@ -400,7 +401,7 @@ if __name__ == '__main__':
 
     mongoClient = MongoClient(mongodb_url)
     db = mongoClient.airudb
-    meshgridInfo = db.estimationMetadata.find_one({"metadataType": "meshgrid"})
+    meshgridInfo = db.estimationMetadata.find_one({"metadataType": collection})
 
     if meshgridInfo is None:
 
@@ -448,7 +449,7 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate, queryTimeRelative)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate)
 
     queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
     storeInMongo(mongoClient, collection, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
