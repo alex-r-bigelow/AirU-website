@@ -413,7 +413,8 @@ if __name__ == '__main__':
         mesh = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRelative)
 
         # theGridID = 0
-        storeGridMetadata(mongoClient, str(0), int(numberGridCells_LAT), int(numberGridCells_LONG), 'meshgrid', mesh)
+        storeGridMetadata(mongoClient, str(0), 'meshgrid', int(numberGridCells_LAT), int(numberGridCells_LONG), mesh)
+        storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
     else:
         mesh = meshgridInfo['grid']
 
