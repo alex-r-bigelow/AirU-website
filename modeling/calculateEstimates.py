@@ -340,7 +340,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         logger.info('inserted data slice for %s', currentUTCtime)
 
 
-def storeGridMetadata(client, int(,) metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
+def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
 
     # transform theMesh which looks like this {'lats': lats, 'lngs': lngs, 'times': times} to {0: {"lat": lats[0], "lngs": lngs[0], "times": times[0]}, ...}
     transformedMesh = {}
@@ -428,7 +428,7 @@ if __name__ == '__main__':
         mesh = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRelative)
 
         # theGridID = 0
-        storeGridMetadata(mongoClient, str(0), collection, int(numberGridCells_LAT), int(numberGridCells_LONG), mesh)
+        storeGridMetadata(mongoClient, 0, collection, int(numberGridCells_LAT), int(numberGridCells_LONG), mesh)
     else:
         mesh = meshgridInfo['grid']
         numberGridCells_LAT = meshgridInfo['numberOfGridCells']['lat']
