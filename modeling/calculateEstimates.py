@@ -24,7 +24,8 @@ LOGGER.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-logHandler = handlers.TimedRotatingFileHandler('cronPMEstimation.log', when='D', interval=1, backupCount=3)
+# logHandler = handlers.TimedRotatingFileHandler('cronPMEstimation.log', when='D', interval=1, backupCount=3)
+logHandler = handlers.RotatingFileHandler('cronPMEstimation.log', maxBytes=5000000, backupCount=5)
 logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
