@@ -276,14 +276,17 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         header = ('lat', 'long', 'pm25', 'variability')
         theEstimate = dict(zip(header, aZippedEstimate))
 
-        theEstimationMetadata = db.estimationMetadata.find_one({"gridID": gridID})
+        theEstimationMetadata = db.estimationMetadata.find_one({"gridID": gridID, "metadataType": theCollection})
         if theEstimationMetadata is not None:
 
             for key, value in theEstimationMetadata['transformedGrid'].iteritems():
                 if value['lat'] == theEstimate['lat'] and value['lngs'] == theEstimate['long']:
+                    print('found a match')
 
                     # location[str(i)] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
                     theEstimates[str(i)] = {'gridELementID': key, 'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
+        else:
+            print('Did not find the appropriate estimation metadata.')
 
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
@@ -373,7 +376,7 @@ if __name__ == '__main__':
 
     # the relative time is always with respect to the start time
     queryTimeRelative = datetime2Reltime([queryTime], startDate)
-    #print(queryTimeRelative)
+    # print(queryTimeRelative)
 
     # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
     # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
