@@ -281,7 +281,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         print('**** theCollection ****')
         print(theCollection)
 
-        theEstimationMetadata = db.estimationMetadata.find_one({"gridID": gridID, "metadataType": theCollection})
+        theEstimationMetadata = db.estimationMetadata.find_one({"gridID": int(gridID), "metadataType": theCollection})
         print(theEstimationMetadata)
 
         if theEstimationMetadata is not None:
@@ -340,7 +340,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         logger.info('inserted data slice for %s', currentUTCtime)
 
 
-def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
+def storeGridMetadata(client, int(,) metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
 
     # transform theMesh which looks like this {'lats': lats, 'lngs': lngs, 'times': times} to {0: {"lat": lats[0], "lngs": lngs[0], "times": times[0]}, ...}
     transformedMesh = {}
@@ -348,7 +348,7 @@ def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberG
     for i in range(numberofElementsInMesh):
         transformedMesh[str(i)] = {"lat": theMesh['lats'][i], "lngs": theMesh['lngs'][i], "times": theMesh['times'][i]}
 
-    aMetadataElement = {"gridID": gridID,
+    aMetadataElement = {"gridID": int(gridID),
                         "metadataType": metadataType,
                         "numberOfElementsInMesh": numberofElementsInMesh,
                         "grid": theMesh,
