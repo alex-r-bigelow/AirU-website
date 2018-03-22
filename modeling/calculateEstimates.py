@@ -287,13 +287,13 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         if theEstimationMetadata is not None:
 
             for key, value in theEstimationMetadata['transformedGrid'].iteritems():
-                print("****** value['lat'][0] and theEstimate['lat'] ******")
-                print(value['lat'][0])
-                print(theEstimate['lat'])
+                # print("****** value['lat'][0] and theEstimate['lat'] ******")
+                # print(value['lat'][0])
+                # print(theEstimate['lat'])
 
-                print("****** value['lngs'][0] and theEstimate['long'] ******")
-                print(value['lngs'][0])
-                print(theEstimate['long'])
+                # print("****** value['lngs'][0] and theEstimate['long'] ******")
+                # print(value['lngs'][0])
+                # print(theEstimate['long'])
 
                 if value['lat'][0] == theEstimate['lat'] and value['lngs'][0] == theEstimate['long']:
                     print('found a match')
@@ -332,19 +332,19 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
             db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
 
             oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(1)
-            print('******* oldestEstimation *****')
-            print(oldestEstimation)
+            # print('******* oldestEstimation *****')
+            # print(oldestEstimation)
             for document in oldestEstimation:
                 documentID = document.get('_id')
                 timeDifference = datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
-                print('******* timeDifference *****')
-                print(timeDifference)
-                print(timeDifference.total_seconds() / (60 * 60))
+                # print('******* timeDifference *****')
+                # print(timeDifference)
+                # print(timeDifference.total_seconds() / (60 * 60))
 
                 if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
                     db.timeSlicedEstimates_high.delete_one({"_id": documentID})
-                    print('********* removed *******')
-                    print(document['estimationFor'])
+                    # print('********* removed *******')
+                    # print(document['estimationFor'])
 
         logger.info('inserted data slice for %s', currentUTCtime)
 
