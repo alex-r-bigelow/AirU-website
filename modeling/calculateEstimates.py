@@ -287,15 +287,15 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         if theEstimationMetadata is not None:
 
             for key, value in theEstimationMetadata['transformedGrid'].iteritems():
-                print("****** value['lat'] and theEstimate['lat'] ******")
-                print(value['lat'])
+                print("****** value['lat'][0] and theEstimate['lat'] ******")
+                print(value['lat'][0])
                 print(theEstimate['lat'])
 
-                print("****** value['lngs'] and theEstimate['long'] ******")
-                print(value['lngs'])
+                print("****** value['lngs'][0] and theEstimate['long'] ******")
+                print(value['lngs'][0])
                 print(theEstimate['long'])
-                
-                if value['lat'] == theEstimate['lat'] and value['lngs'] == theEstimate['long']:
+
+                if value['lat'][0] == theEstimate['lat'] and value['lngs'][0] == theEstimate['long']:
                     print('found a match')
 
                     # location[str(i)] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
