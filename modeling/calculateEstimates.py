@@ -19,15 +19,15 @@ from StringIO import StringIO
 from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 logHandler = handlers.TimedRotatingFileHandler('cronPMEstimation.log', when='D', interval=1, backupCount=3)
 logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
-logger.addHandler(logHandler)
+LOGGER.addHandler(logHandler)
 
 # TIMESTAMP = datetime.now().isoformat()
 currentUTCtime = datetime.utcnow()
@@ -296,13 +296,13 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
                 # print(theEstimate['long'])
 
                 if value['lat'][0] == theEstimate['lat'] and value['lngs'][0] == theEstimate['long']:
-                    print('found a match')
+                    LOGGER.info('found a match')
 
                     # location[str(i)] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
                     theEstimates[str(i)] = {'gridELementID': key, 'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
                     break
         else:
-            print('Did not find the appropriate estimation metadata.')
+            LOGGER.info('Did not find the appropriate estimation metadata.')
 
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
@@ -324,7 +324,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         if theCollection == 'timeSlicedEstimates_high':
             db.timeSlicedEstimates_high.insert_one(anEstimateSlice)
 
-        logger.info('inserted data slice for %s', currentUTCtime_str)
+        LOGGER.info('inserted data slice for %s', currentUTCtime_str)
     else:
         # low variability estimation
 
@@ -346,7 +346,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
                     # print('********* removed *******')
                     # print(document['estimationFor'])
 
-        logger.info('inserted data slice for %s', currentUTCtime)
+        LOGGER.info('inserted data slice for %s', currentUTCtime)
 
 
 def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
@@ -367,7 +367,7 @@ def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberG
     db = client.airudb
     db.estimationMetadata.insert_one(aMetadataElement)
 
-    logger.info('inserted estimation Metadata %s', gridID)
+    LOGGER.info('inserted estimation Metadata %s', gridID)
 
 
 if __name__ == '__main__':
@@ -424,7 +424,7 @@ if __name__ == '__main__':
     db = mongoClient.airudb
     meshgridInfo = db.estimationMetadata.find_one({"metadataType": collection})
 
-    print(meshgridInfo)
+    # print(meshgridInfo)
 
     if meshgridInfo is None:
 
@@ -432,7 +432,7 @@ if __name__ == '__main__':
             numberGridCells_LAT = 10
             numberGridCells_LONG = 16
         else:
-            logger.info('problem with numberGridCells_LAT andnumberGridCells_LONG, one of them is not None')
+            LOGGER.info('problem with numberGridCells_LAT andnumberGridCells_LONG, one of them is not None')
 
         mesh = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRelative)
 
@@ -477,4 +477,4 @@ if __name__ == '__main__':
     queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
     storeInMongo(mongoClient, collection, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
 
-    logger.info('new sensor check successful for ' + queryTimeString)
+    LOGGER.info('successful estimation for ' + queryTimeString)
