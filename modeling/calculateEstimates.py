@@ -276,7 +276,14 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         header = ('lat', 'long', 'pm25', 'variability')
         theEstimate = dict(zip(header, aZippedEstimate))
 
+        print('**** gridID ****')
+        print(gridID)
+        print('**** theCollection ****')
+        print(theCollection)
+
         theEstimationMetadata = db.estimationMetadata.find_one({"gridID": gridID, "metadataType": theCollection})
+        print(theEstimationMetadata)
+
         if theEstimationMetadata is not None:
 
             for key, value in theEstimationMetadata['transformedGrid'].iteritems():
