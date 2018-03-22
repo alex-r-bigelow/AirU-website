@@ -98,7 +98,6 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, 
     startDate = start
     endDate = end
 
-
 # TODO is the binnfrequency the way to get the 3 to 6 points?
     data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topRightCorner['lat'], bottomLeftCorner['lng'], bottomLeftCorner['lat'], topRightCorner['lng'])
 
@@ -109,6 +108,8 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, 
     time_tr = data_tr[3]
     nts = len(time_tr)
     sensorModels = data_tr[4]
+
+    print(time_tr)
 
     pm2p5_tr = findMissings(pm2p5_tr)
     pm2p5_tr = np.matrix(pm2p5_tr, dtype=float)
@@ -370,8 +371,9 @@ if __name__ == '__main__':
         queryTime = endDate - timedelta(hours=characteristicTimeLength)
         collection = 'timeSlicedEstimates_low'
 
-    queryTimeRelative = datetime2Reltime([startDate, endDate], queryTime)
-    print(queryTimeRelative)
+    # the relative time is always with respect to the start time
+    queryTimeRelative = datetime2Reltime([queryTime], startDate)
+    #print(queryTimeRelative)
 
     # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
     # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
