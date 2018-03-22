@@ -405,6 +405,8 @@ if __name__ == '__main__':
     db = mongoClient.airudb
     meshgridInfo = db.estimationMetadata.find_one({"metadataType": collection})
 
+    print(meshgridInfo)
+
     if meshgridInfo is None:
 
         if numberGridCells_LAT is None and numberGridCells_LONG is None:
@@ -416,7 +418,7 @@ if __name__ == '__main__':
         mesh = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRelative)
 
         # theGridID = 0
-        storeGridMetadata(mongoClient, str(0), 'meshgrid', int(numberGridCells_LAT), int(numberGridCells_LONG), mesh)
+        storeGridMetadata(mongoClient, str(0), collection, int(numberGridCells_LAT), int(numberGridCells_LONG), mesh)
     else:
         mesh = meshgridInfo['grid']
         numberGridCells_LAT = meshgridInfo['numberOfGridCells']['lat']
