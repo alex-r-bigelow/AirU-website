@@ -300,6 +300,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
 
                     # location[str(i)] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
                     theEstimates[str(i)] = {'gridELementID': key, 'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
+                    break
         else:
             print('Did not find the appropriate estimation metadata.')
 
