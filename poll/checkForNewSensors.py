@@ -70,7 +70,7 @@ def checkForNewSensors(influxClient, mongoClient):
         if idWithColon not in allSchools:
             LOGGER.info('ID %s is not a school', idWithColon)
             aSensor = {"macAddress": idWithColon,
-                       "createdAt_utc": nowUTC}
+                       "createdAt": nowUTC}
 
             foundID = db.liveSensors.find_one({'macAddress': idWithColon})
             LOGGER.info(foundID)
