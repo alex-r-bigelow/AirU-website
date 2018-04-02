@@ -60,10 +60,10 @@ def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner, t
     lats = []
     lngs = []
     times = []
-    for lng in range(numberGridCells1D):
+    for lng in range(numberGridCells1D + 1):
         longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
 
-        for lat in range(numberGridCells1D):
+        for lat in range(numberGridCells1D + 1):
             latitude = topRightCorner['lat'] + (lat * gridCellSize_lat)
             lats.append([float(latitude)])
             lngs.append([float(longitude)])
@@ -81,10 +81,10 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     lngs = []
     times = []
     for aRelativeTime in theQueryTimeRel:
-        for lng in range(numberGridCellsLONG):
+        for lng in range(numberGridCellsLONG + 1):
             longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
 
-            for lat in range(numberGridCellsLAT):
+            for lat in range(numberGridCellsLAT + 1):
                 latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
                 lats.append([float(latitude)])
                 lngs.append([float(longitude)])
@@ -238,7 +238,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
             new_contours += [new_contour]
 
     # stringFile.close()
-    close()
+    plt.close()
 
     return new_contours
 
@@ -268,9 +268,9 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
 
     # make numpy arrays for the contours
 
-    pmEstimates = np.asarray(anEstimate[0]).reshape(numberGridCells_LONG, numberGridCells_LAT)
-    latQuery = np.asarray(anEstimate[2]).reshape(numberGridCells_LONG, numberGridCells_LAT)
-    longQuery = np.asarray(anEstimate[3]).reshape(numberGridCells_LONG, numberGridCells_LAT)
+    pmEstimates = np.asarray(anEstimate[0]).reshape(numberGridCells_LONG + 1, numberGridCells_LAT + 1)
+    latQuery = np.asarray(anEstimate[2]).reshape(numberGridCells_LONG + 1, numberGridCells_LAT + 1)
+    longQuery = np.asarray(anEstimate[3]).reshape(numberGridCells_LONG + 1, numberGridCells_LAT + 1)
 
     zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
