@@ -169,12 +169,16 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, 
 def calculateContours(X, Y, Z, endDate, levels, colorBands):
 
     # from: http://hplgit.github.io/web4sciapps/doc/pub/._part0013_web4sa_plain.html
-    stringFile = StringIO()
+    # stringFile = StringIO()
 
     outputdirectory = '/home/airu/AirU-website/svgs'
-    anSVGfile = os.path.join(outputdirectory, endDate + '.svg')
+    anSVGfile = os.path.join(outputdirectory, endDate + '.png')
 
     plt.figure()
+    plt.axis('off')  # Removes axes
+    plt.gca().set_position([0, 0, 1, 1])
+    plt.axes().set_frame_on(False)
+    plt.axes().patch.set_visible(False)
     # to set contourf levels, simply add N like so:
     #    # N = 4
     #    # CS = plt.contourf(Z, N)
@@ -192,13 +196,12 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # c = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
     theContours = plt.contourf(X, Y, Z, levels, colors=colorBands)
 
-    plt.axis('off')  # Removes axes
-    plt.savefig(stringFile, format="svg")
+    # plt.savefig(stringFile, format="svg")
     # theSVG = stringFile.getvalue()
     # print(theSVG)
 
     # to save as svg file in directory svgs
-    plt.savefig(anSVGfile, format="svg")
+    plt.savefig(anSVGfile, format="png")
 
     # plt.colorbar(theContours)  # This will give you a legend
 
@@ -234,7 +237,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
 
             new_contours += [new_contour]
 
-    stringFile.close()
+    # stringFile.close()
 
     return new_contours
 
@@ -444,8 +447,10 @@ if __name__ == '__main__':
         numberGridCells_LAT = meshgridInfo['numberOfGridCells']['lat']
         numberGridCells_LONG = meshgridInfo['numberOfGridCells']['long']
 
-    levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
-    colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
+    # levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
+    levels = [0.0, 4.0, 8.0, 12.0, 19.8, 27.6, 35.4, 42.1, 48.7, 55.4, 150.4, 250.4]
+    # colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
+    colorBands = ('#31a354', '#a1d99b', '#e5f5e0', '#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026')
 
     # PurpleAir client
     pAirClient = InfluxDBClient(
