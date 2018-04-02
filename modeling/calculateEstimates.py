@@ -238,6 +238,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
             new_contours += [new_contour]
 
     # stringFile.close()
+    close()
 
     return new_contours
 
