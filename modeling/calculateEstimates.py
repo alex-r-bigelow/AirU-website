@@ -110,7 +110,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, 
     nts = len(time_tr)
     sensorModels = data_tr[4]
 
-    print(time_tr)
+    # print(time_tr)
 
     pm2p5_tr = findMissings(pm2p5_tr)
     pm2p5_tr = np.matrix(pm2p5_tr, dtype=float)
@@ -277,13 +277,13 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
         header = ('lat', 'long', 'pm25', 'variability')
         theEstimate = dict(zip(header, aZippedEstimate))
 
-        print('**** gridID ****')
-        print(gridID)
-        print('**** theCollection ****')
-        print(theCollection)
+        # print('**** gridID ****')
+        # print(gridID)
+        # print('**** theCollection ****')
+        # print(theCollection)
 
         theEstimationMetadata = db.estimationMetadata.find_one({"gridID": int(gridID), "metadataType": theCollection})
-        print(theEstimationMetadata)
+        # print(theEstimationMetadata)
 
         if theEstimationMetadata is not None:
 
