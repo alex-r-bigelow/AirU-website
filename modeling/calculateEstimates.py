@@ -256,7 +256,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # binaryFile = bson.BSON.encode({'svg': binaryFile})
 
 
-def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBands, theNowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, gridID):
+def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, colorBands, theNowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, gridID):
 
     db = client.airudb
 
@@ -341,11 +341,11 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
             for document in oldestEstimation:
                 LOGGER.info('preparing to delete %s', document['estimationFor'])
                 documentID = document.get('_id')
-                timeDifference = datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
+                timeDifference = datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
                 # print('******* timeDifference *****')
                 # print(timeDifference)
                 # print(timeDifference.total_seconds() / (60 * 60))
-                LOGGER.info('querytime is %s', queryTime)
+                LOGGER.info('querytime is %s', endTime)
                 LOGGER.info('time of time slice is %s', document['estimationFor'])
                 LOGGER.info('time difference is %s', timeDifference)
 
@@ -484,6 +484,7 @@ if __name__ == '__main__':
     theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate)
 
     queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
-    storeInMongo(mongoClient, collection, theEstimate, queryTimeString, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
+    endDateTimeString = endDate.strftime('%Y-%m-%dT%H:%M:%SZ')
+    storeInMongo(mongoClient, collection, theEstimate, queryTimeString, endDateTimeString, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
 
     LOGGER.info('successful estimation for ' + queryTimeString)
