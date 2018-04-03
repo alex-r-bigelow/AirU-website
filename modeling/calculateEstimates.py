@@ -315,7 +315,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
 
     # save the contour svg serialized in the db.
 
-    anEstimateSlice = {"estimationFor": queryTime,
+    anEstimateSlice = {"estimationFor": datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ'),
                        "modelVersion": '1.0.0',
                        # "numberOfGridCells_LAT": anEstimate[4],
                        # "numberOfGridCells_LONG": anEstimate[5],
