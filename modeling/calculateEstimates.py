@@ -337,8 +337,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
             db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
 
             oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(25)
-            # print('******* oldestEstimation *****')
-            # print(oldestEstimation)
+
             for document in oldestEstimation:
                 LOGGER.info('preparing to delete %s', document['estimationFor'])
                 documentID = document.get('_id')
@@ -346,6 +345,9 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, levels, colorBand
                 # print('******* timeDifference *****')
                 # print(timeDifference)
                 # print(timeDifference.total_seconds() / (60 * 60))
+                LOGGER.info('querytime is %s', queryTime)
+                LOGGER.info('time of time slice is %s', document['estimationFor'])
+                LOGGER.info('time difference is %s', timeDifference)
 
                 if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
                     db.timeSlicedEstimates_high.delete_one({"_id": documentID})
