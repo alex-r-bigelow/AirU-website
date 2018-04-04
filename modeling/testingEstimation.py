@@ -143,6 +143,12 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, 
     time_tr = datetime2Reltime(time_tr, min(time_tr))
     time_tr = np.repeat(np.matrix(time_tr).T, nLats, axis=0)
 
+    print('***** lat_tr *****')
+    print(lat_tr)
+
+    print('***** long_tr *****')
+    print(long_tr)
+
     # meshInfo = generateQueryMeshGrid(numberOfGridCells1D, topleftCorner, bottomRightCorner)
     meshInfo = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRel)
 
@@ -210,6 +216,10 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     anSVGfile = os.path.join(outputdirectory, endDate + '.svg')
 
     plt.figure()
+    plt.axis('off')  # Removes axes
+    plt.gca().set_position([0, 0, 1, 1])
+    plt.axes().set_frame_on(False)
+    plt.axes().patch.set_visible(False)
     # to set contourf levels, simply add N like so:
     #    # N = 4
     #    # CS = plt.contourf(Z, N)
@@ -227,10 +237,13 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # c = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
     theContours = plt.contourf(X, Y, Z, levels, colors=colorBands)
 
-    plt.axis('off')  # Removes axes
     plt.savefig(stringFile, format="svg")
     theSVG = stringFile.getvalue()
+    print('***** theSVG *******')
     print(theSVG)
+
+    print('***** theContours.collections *******')
+    print(theContours.collections)
 
     # to save as svg file in directory svgs
     plt.savefig(anSVGfile, format="svg")
@@ -242,7 +255,8 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     for i, collection in enumerate(theContours.collections):
         # print(collection)
         for path in collection.get_paths():
-            # print(path)
+            print('***** path *******')
+            print(path)
             coords = path.vertices
             # print(coords)
             # print(path.codes)
