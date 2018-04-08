@@ -322,6 +322,11 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
     latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[5], anEstimate[4])
     longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[5], anEstimate[4])
 
+    print('***** latQuery *****')
+    print(latQuery)
+    print('***** longQuery *****')
+    print(longQuery)
+
     zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
     # theEstimates = []
