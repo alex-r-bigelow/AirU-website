@@ -311,6 +311,11 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
 
     db = client.airudb
 
+    print('***** anEstimate[0] *******')
+    print(anEstimate[0])
+    print('***** anEstimate[3] - longs *******')
+    print(anEstimate[3])
+
     # flatten the matrices to list
     estimates_list = np.squeeze(np.asarray(anEstimate[0])).tolist()
     variability = np.squeeze(np.asarray(anEstimate[1])).tolist()
