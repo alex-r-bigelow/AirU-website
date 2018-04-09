@@ -91,6 +91,10 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
                 # times.append([int(0)])
                 times.append([aRelativeTime])
 
+    # lats = np.linspace(bottomLeftCorner['lat'], topRightCorner['lat'], numberGridCellsLAT + 1)
+    # lngs = np.linspace(bottomLeftCorner['lng'], topRightCorner['lng'], numberGridCellsLONG + 1)
+    # times =
+
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
@@ -336,12 +340,16 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
         if theCollection == 'timeSlicedEstimates_low':
             db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
 
-            oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(2)
+            oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(100)
 
             for document in oldestEstimation:
                 LOGGER.info('preparing to delete %s', document['estimationFor'])
                 documentID = document.get('_id')
-                timeDifference = datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
+                # timeDifference = datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
+                LOGGER.info(datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ')
+                LOGGER.info(document['estimationFor'])
+                timeDifference = datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ') - document['estimationFor']
+                LOGGER.info(timeDifference)
                 # print('******* timeDifference *****')
                 # print(timeDifference)
                 # print(timeDifference.total_seconds() / (60 * 60))
