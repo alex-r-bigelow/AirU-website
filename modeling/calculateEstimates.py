@@ -181,7 +181,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     plt.figure()
     plt.axis('off')  # Removes axes
     plt.gca().set_position([0, 0, 1, 1])
-    plt.axes().set_frame_on(False)
+    # plt.axes().set_frame_on(False)
     plt.axes().patch.set_visible(False)
     # to set contourf levels, simply add N like so:
     #    # N = 4
@@ -346,7 +346,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
                 LOGGER.info('preparing to delete %s', document['estimationFor'])
                 documentID = document.get('_id')
                 # timeDifference = datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
-                LOGGER.info(datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ')
+                LOGGER.info(datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ'))
                 LOGGER.info(document['estimationFor'])
                 timeDifference = datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ') - document['estimationFor']
                 LOGGER.info(timeDifference)
