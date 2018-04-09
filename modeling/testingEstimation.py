@@ -81,15 +81,26 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     lats = []
     lngs = []
     times = []
-    for lng in range(numberGridCellsLONG):
-        longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
+    # for lng in range(numberGridCellsLONG):
+    #     longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
+    #
+    #     for lat in range(numberGridCellsLAT):
+    #         latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
+    #         lats.append([float(latitude)])
+    #         lngs.append([float(longitude)])
+    #         # times.append([int(0)])
+    #         times.append([theQueryTimeRel])
 
-        for lat in range(numberGridCellsLAT):
-            latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
-            lats.append([float(latitude)])
+    for lat in range(numberGridCellsLAT):
+        latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
+
+        for lng in range(numberGridCellsLONG):
+            longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
+
             lngs.append([float(longitude)])
-            # times.append([int(0)])
+            lats.append([float(latitude)])
             times.append([theQueryTimeRel])
+
 
     # print('*******lats******')
     # print(lats)
@@ -323,9 +334,9 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
     lng_list = np.squeeze(np.asarray(anEstimate[3])).tolist()
 
     # make numpy arrays for the contours
-    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[5], anEstimate[4])
-    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[5], anEstimate[4])
-    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[5], anEstimate[4])
+    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[4], anEstimate[5])
+    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[4], anEstimate[5])
+    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[4], anEstimate[5])
 
     print('***** latQuery *****')
     print(latQuery)
