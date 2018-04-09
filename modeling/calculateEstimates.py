@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from distutils.util import strtobool
 from influxdb import InfluxDBClient
 from pymongo import MongoClient
-from StringIO import StringIO
+# from StringIO import StringIO
 from utility_tools import calibrate, datetime2Reltime, findMissings, removeMissings
 
 
@@ -182,7 +182,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     plt.axis('off')  # Removes axes
     plt.gca().set_position([0, 0, 1, 1])
     # plt.axes().set_frame_on(False)
-    plt.axes().patch.set_visible(False)
+    # plt.axes().patch.set_visible(False)
     # to set contourf levels, simply add N like so:
     #    # N = 4
     #    # CS = plt.contourf(Z, N)
@@ -203,9 +203,6 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # plt.savefig(stringFile, format="svg")
     # theSVG = stringFile.getvalue()
     # print(theSVG)
-
-    # to save as svg file in directory svgs
-    plt.savefig(anSVGfile, format="png")
 
     # plt.colorbar(theContours)  # This will give you a legend
 
@@ -240,6 +237,9 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
                     new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
 
             new_contours += [new_contour]
+
+    # to save as svg file in directory svgs
+    plt.savefig(anSVGfile, format="png")
 
     # stringFile.close()
     plt.close()
