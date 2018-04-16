@@ -353,7 +353,7 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
 if __name__ == '__main__':
 
     dateStart = datetime(2018, 3, 7, 00, 00, 00)
-    dateEnd = datetime(2018, 3, 10, 00, 00, 00)
+    dateEnd = datetime(2018, 3, 7, 2, 00, 00)
 
     startDate_UTC = getUTCTime(dateStart)
     endDate_UTC = getUTCTime(dateEnd)
