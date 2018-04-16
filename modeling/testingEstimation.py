@@ -368,7 +368,7 @@ if __name__ == '__main__':
         startDate = someDate - timedelta(hours=characteristicTimeLength)
         endDate = someDate + timedelta(hours=characteristicTimeLength)
         queryTime = someDate
-        queryTimeRelative = datetime2Reltime([queryTime], startDate)[0]
+        queryTimeRelative = datetime2Reltime([queryTime], startDate)
 
         print(startDate, endDate, queryTime, queryTimeRelative)
 
