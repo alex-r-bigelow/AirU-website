@@ -299,9 +299,9 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
     lng_list = np.squeeze(np.asarray(anEstimate[3])).tolist()
 
     # make numpy arrays for the contours
-    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[4], anEstimate[5])
-    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[4], anEstimate[5])
-    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[4], anEstimate[5])
+    pmEstimates = np.asarray(anEstimate[0]).reshape(anEstimate[4] + 1, anEstimate[5] + 1)
+    latQuery = np.asarray(anEstimate[2]).reshape(anEstimate[4] + 1, anEstimate[5] + 1)
+    longQuery = np.asarray(anEstimate[3]).reshape(anEstimate[4] + 1, anEstimate[5] + 1)
 
     print('***** latQuery *****')
     print(latQuery)
