@@ -255,6 +255,10 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
                     new_contour['path'] += [['M', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
                 elif code_type == 2:
                     new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
+                elif code_type == 79:
+                    print(code_type)
+                    print(coords)
+                    new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
 
             new_contours += [new_contour]
 
