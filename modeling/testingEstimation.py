@@ -72,6 +72,8 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
                 # times.append([int(0)])
                 times.append([aRelativeTime])
 
+    return {'lats': lats, 'lngs': lngs, 'times': times}
+
 
 def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong, start, end, queryTimeRel):
     # numberOfGridCells1D = 20
