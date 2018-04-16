@@ -54,26 +54,6 @@ def getUTCTime(aTime_dt):
     return utc_dt
 
 
-def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner, theQueryTimeRel):
-    gridCellSize_lat = abs(bottomLeftCorner['lat'] - topRightCorner['lat']) / numberGridCells1D
-    gridCellSize_lng = abs(bottomLeftCorner['lng'] - topRightCorner['lng']) / numberGridCells1D
-
-    lats = []
-    lngs = []
-    times = []
-    for lng in range(numberGridCells1D):
-        longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
-
-        for lat in range(numberGridCells1D):
-            latitude = topRightCorner['lat'] + (lat * gridCellSize_lat)
-            lats.append([float(latitude)])
-            lngs.append([float(longitude)])
-            # times.append([int(0)])
-            times.append([theQueryTimeRel])
-
-    return {'lats': lats, 'lngs': lngs, 'times': times}
-
-
 def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, bottomLeftCorner, topRightCorner, theQueryTimeRel):
     gridCellSize_lat = abs(bottomLeftCorner['lat'] - topRightCorner['lat']) / numberGridCellsLAT
     gridCellSize_lng = abs(bottomLeftCorner['lng'] - topRightCorner['lng']) / numberGridCellsLONG
@@ -81,35 +61,16 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     lats = []
     lngs = []
     times = []
-    # for lng in range(numberGridCellsLONG):
-    #     longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
-    #
-    #     for lat in range(numberGridCellsLAT):
-    #         latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
-    #         lats.append([float(latitude)])
-    #         lngs.append([float(longitude)])
-    #         # times.append([int(0)])
-    #         times.append([theQueryTimeRel])
-
-    for lat in range(numberGridCellsLAT):
-        latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
-
-        for lng in range(numberGridCellsLONG):
+    for aRelativeTime in theQueryTimeRel:
+        for lng in range(numberGridCellsLONG + 1):
             longitude = bottomLeftCorner['lng'] + (lng * gridCellSize_lng)
 
-            lngs.append([float(longitude)])
-            lats.append([float(latitude)])
-            times.append([theQueryTimeRel])
-
-
-    # print('*******lats******')
-    # print(lats)
-    # print('*******lngs******')
-    # print(lngs)
-    # print('*******times******')
-    # print(times)
-
-    return {'lats': lats, 'lngs': lngs, 'times': times}
+            for lat in range(numberGridCellsLAT + 1):
+                latitude = bottomLeftCorner['lat'] + (lat * gridCellSize_lat)
+                lats.append([float(latitude)])
+                lngs.append([float(longitude)])
+                # times.append([int(0)])
+                times.append([aRelativeTime])
 
 
 def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, numberOfLong, start, end, queryTimeRel):
@@ -229,7 +190,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     plt.figure()
     plt.axis('off')  # Removes axes
     plt.gca().set_position([0, 0, 1, 1])
-    plt.axes().set_frame_on(False)
+    # plt.axes().set_frame_on(False)
     plt.axes().patch.set_visible(False)
     # to set contourf levels, simply add N like so:
     #    # N = 4
@@ -320,7 +281,9 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
 
 def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusCHLT):
 
-    db = client.airudb
+    # db = client.airudb
+
+    anEstimate[0] = [0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,5,5,5,5,0,0,0,0, 0,0,5,5,5,5,0,0,0,0, 0,0,5,5,5,5,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,]
 
     print('***** anEstimate[0] *******')
     print(anEstimate[0])
@@ -360,6 +323,9 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
     contours = calculateContours(latQuery, longQuery, pmEstimates, queryTime, levels, colorBands)
+
+    print('***** contours ******')
+    print(contours)
 
     # save the contour svg serialized in the db.
 
@@ -444,7 +410,7 @@ if __name__ == '__main__':
                'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
                'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-        theEstimate = getEstimate(pAirClient, airUClient, dbs, False, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate, queryTimeRelative)
+        # theEstimate = getEstimate(pAirClient, airUClient, dbs, False, int(numberGridCells_LAT), int(numberGridCells_LONG), startDate, endDate, queryTimeRelative)
 
         mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
             user=config['MONGO_USER'],
