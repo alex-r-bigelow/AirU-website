@@ -178,7 +178,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, numberOfLat, 
     # the rest uses the default values given by Amir
     [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr)  # , sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
 
-    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberGridCells_LAT, numberGridCells_LONG]
+    return [yPred, yVar, x_Q[:, 0], x_Q[:, 1], numberGridCells_LONG, numberGridCells_LAT]
 
 
 def calculateContours(X, Y, Z, endDate, levels, colorBands):
