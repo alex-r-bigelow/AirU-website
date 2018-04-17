@@ -209,32 +209,22 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     new_contours = []
 
     for i, collection in enumerate(theContours.collections):
-        # print('********** i + collection **********')
-        # print(i)
-        # print(collection)
 
         for path in collection.get_paths():
-            # coords = path.vertices
 
             new_contour = {}
             new_contour['path'] = []
             new_contour['level'] = i
             new_contour['k'] = i
 
-            # print('********** path **********')
-            # print(path)
-
-            # prev_coords = None
             for (coords, code_type) in zip(path.vertices, path.codes):
 
-                # print('********** coords + code type **********')
-                # print(coords)
-                # print(code_type)
-
                 if code_type == 1:
-                    new_contour['path'] += [['M', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
+                    new_contour['path'] += [['M', float('{:.5f}'.format(coords[0])), float('{:.5f}'.format(coords[1]))]]
                 elif code_type == 2:
-                    new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
+                    new_contour['path'] += [['L', float('{:.5f}'.format(coords[0])), float('{:.5f}'.format(coords[1]))]]
+                elif code_type == 79:
+                    new_contour['path'] += [['L', float('{:.5f}'.format(coords[0])), float('{:.5f}'.format(coords[1]))]]
 
             new_contours += [new_contour]
 
@@ -245,19 +235,6 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     plt.close()
 
     return new_contours
-
-    # saving the svg part
-    # plt.axis('off')  # Removes axes
-    # plt.savefig(stringFile, format="svg")
-    # theSVG = stringFile.getvalue()
-    # # theSVG = '<svg' + theSVG.split('<svg')[1]
-    #
-    # encodedString = theSVG.decode('utf8')
-    #
-    # encodedString = encodedString.encode('utf8')
-    #
-    # binaryFile = Binary(encodedString)
-    # binaryFile = bson.BSON.encode({'svg': binaryFile})
 
 
 def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, colorBands, theNowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, gridID):
