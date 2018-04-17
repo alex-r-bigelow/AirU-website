@@ -252,15 +252,21 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
                 # print >>sys.stderr, "coords, code_type:", coords, code_type, i
 
                 if code_type == 1:
-                    new_contour['path'] += [['M', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
+                    new_contour['path'] += [['M', float('{:.5f}'.format(coords[0])), float('{:.5f}'.format(coords[1]))]]
                 elif code_type == 2:
-                    new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
+                    new_contour['path'] += [['L', float('{:.5f}'.format(coords[0])), float('{:.5f}'.format(coords[1]))]]
                 elif code_type == 79:
                     print(code_type)
                     print(coords)
-                    new_contour['path'] += [['L', float('{:.3f}'.format(coords[0])), float('{:.3f}'.format(coords[1]))]]
+                    new_contour['path'] += [['L', float('{:.5f}'.format(coords[0])), float('{:.5f}'.format(coords[1]))]]
+
+            print('***** contours ******')
+            print(i)
+            print(new_contour)
 
             new_contours += [new_contour]
+
+
 
     return new_contours
 
@@ -329,9 +335,6 @@ def storeInMongo(client, anEstimate, queryTime, levels, colorBands, theNowMinusC
     # take the estimates and get the contours
     # binaryFile = calculateContours(latQuery, longQuery, pmEstimates)
     contours = calculateContours(latQuery, longQuery, pmEstimates, queryTime, levels, colorBands)
-
-    print('***** contours ******')
-    print(contours)
 
     # save the contour svg serialized in the db.
 
