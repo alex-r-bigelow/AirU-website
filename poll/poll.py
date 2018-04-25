@@ -41,12 +41,12 @@ DAQ_SITES = [{
     'lon': -111.8721,
     'elevation': 1306
     }, {
-    'ID': 'Herriman',
-    'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=h3',
-    'lat': 40.496408,
-    'lon': -112.036305,
-    'elevation': 1534
-    }, {
+    # 'ID': 'Herriman',
+    # 'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=h3',
+    # 'lat': 40.496408,
+    # 'lon': -112.036305,
+    # 'elevation': 1534
+    # }, {
     'ID': 'Bountiful',
     'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=bv',
     'lat': 40.903,
@@ -641,7 +641,7 @@ if __name__ == '__main__':
     )
 
     uploadPurpleAirData(client)
-    uploadDAQAirData(client)
+    # uploadDAQAirData(client)
     uploadMesowestData(client)
 
     sys.stdout.write('%s\tPolling successful.\n' % TIMESTAMP)
