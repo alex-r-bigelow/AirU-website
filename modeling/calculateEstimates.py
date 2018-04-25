@@ -314,7 +314,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
         if theCollection == 'timeSlicedEstimates_low':
             db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
 
-            oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(100)
+            oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(5)
 
             for document in oldestEstimation:
                 LOGGER.info('preparing to delete %s', document['estimationFor'])
