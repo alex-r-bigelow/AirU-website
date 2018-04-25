@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 # import matplotlib.pyplot as pl
 # from NegLLGradient import gradLOONLL
@@ -5,6 +7,8 @@ from negativeLogLikelihood import marginalNegLL  # looNegLL
 from NegLLGradient import gradMNLL
 from gradDescent import gradDescent
 from utility_tools import kerFunc, basisTerms, nchoosek
+
+LOGGER = logging.getLogger(__name__)
 
 
 def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, optSigmaN, basisFnDeg, isARD, isSpatIsot, learnRate, tol, maxIt, effOpt, center, doRegression):
@@ -110,7 +114,8 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
         print sigmaN
 
     if doRegression:
-        print 'Applying the regression model...'
+        # print 'Applying the regression model...'
+        LOGGER.info('Applying the regression model...')
         K = np.matrix(np.zeros((nObs, nObs)))
         KStar = np.matrix(np.zeros((nQuery, nObs)))
         Kss = np.matrix(np.zeros((nQuery, 1)))
@@ -160,7 +165,7 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
 
             # yVar = yVar + (R.T*((H*invKH).I * R)).diagonal()
 
-        print "The program terminates after closing the plots..."
+        # print "The program terminates after closing the plots..."
         # pl.show()
     if (optL or optSigmaF or optSigmaN) and doRegression:
         return [yPred, yVar, L, sigmaF, sigmaN]
