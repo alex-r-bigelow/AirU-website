@@ -69,22 +69,22 @@ def uploadMesowestData(client):
     except requests.exceptions.HTTPError as e:
         # statusCode = e.response.status_code
         LOGGER.error('Problem acquiring Mesowest data;\t%s.' % e, exc_info=True)
-        sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
+        # sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.Timeout as e:
         # Maybe set up for a retry, or continue in a retry loop
         LOGGER.error('Problem acquiring Mesowest data;\t%s.' % e, exc_info=True)
-        sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
+        # sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.TooManyRedirects as e:
         # Tell the user their URL was bad and try a different one
         LOGGER.error('Problem acquiring Mesowest data;\t%s.' % e, exc_info=True)
-        sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
+        # sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.RequestException as e:
         # catastrophic error. bail.
         LOGGER.error('Problem acquiring Mesowest data;\t%s.' % e, exc_info=True)
-        sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
+        # sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
         return []
 
     mesowestData = mesowestData.json()['STATION']
@@ -201,14 +201,14 @@ def uploadMesowestData(client):
                     LOGGER.error('point[tags]%s' % str(point['tags']))
                     LOGGER.error('point[fields]%s' % str(point['fields']))
                     LOGGER.error('%s.' % e)
-                    sys.stderr.write('%s\tInfluxDBClientError\tWriting mesowest data to influxdb lead to a write error.\n' % TIMESTAMP)
-                    sys.stderr.write('%s\tpoint[time]%s\n' % (TIMESTAMP, str(point['time'])))
-                    sys.stderr.write('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
-                    sys.stderr.write('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
-                    sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e))
+                    # sys.stderr.write('%s\tInfluxDBClientError\tWriting mesowest data to influxdb lead to a write error.\n' % TIMESTAMP)
+                    # sys.stderr.write('%s\tpoint[time]%s\n' % (TIMESTAMP, str(point['time'])))
+                    # sys.stderr.write('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
+                    # sys.stderr.write('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
+                    # sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e))
                 else:
-                    LOGGER.error('Mesowest Polling successful.')
-                    sys.stdout.write('%s\tMesowest Polling successful.\n' % TIMESTAMP)
+                    LOGGER.info('Mesowest Polling successful.')
+                    # sys.stdout.write('%s\tMesowest Polling successful.\n' % TIMESTAMP)
 
 
 if __name__ == '__main__':
@@ -225,5 +225,5 @@ if __name__ == '__main__':
 
     uploadMesowestData(client)
 
-    LOGGER.error('Mesowest polling done.')
+    LOGGER.info('Mesowest polling done.')
     # sys.stdout.write('%s\tPolling successful.\n' % TIMESTAMP)
