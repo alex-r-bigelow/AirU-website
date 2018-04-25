@@ -9,6 +9,7 @@ from gradDescent import gradDescent
 from utility_tools import kerFunc, basisTerms, nchoosek
 
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, optSigmaN, basisFnDeg, isARD, isSpatIsot, learnRate, tol, maxIt, effOpt, center, doRegression):
