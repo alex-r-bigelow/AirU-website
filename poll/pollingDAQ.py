@@ -184,17 +184,23 @@ def uploadDAQAirData(client):
 
             # Only include the point if we haven't stored this measurement before
             lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'DAQ'""" % point['tags']['ID'])
-            # print 'LAST POINT'
-            # print lastPoint
+            LOGGER.debug('LAST POINT')
+            LOGGER.debug(point['tags']['ID'])
+            LOGGER.debug(lastPoint)
             if len(lastPoint) > 0:
                 lastPoint = lastPoint.get_points().next()
                 # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
-                # print point['time']
+                LOGGER.debug(lastPoint['time'])
                 lastPointParsed = datetime.strptime(lastPoint['time'], '%Y-%m-%dT%H:%M:%SZ')
+                LOGGER.debug(lastPointParsed)
                 lastPointLocalized = pytz.utc.localize(lastPointParsed, is_dst=None)
+                LOGGER.debug(lastPointLocalized)
+                LOGGER.debug('the point time')
+                LOGGER.debug(point['time'])
                 # print lastPointLocalized
                 # if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
                 if point['time'] <= lastPointLocalized:
+                    LOGGER.debug('point not included')
                     # if point['time'] <= parser.parse(lastPoint['time']):
                     # print 'POINT NOT INCLUDED'
                     continue
