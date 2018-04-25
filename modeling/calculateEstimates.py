@@ -350,10 +350,8 @@ def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberG
                         "metadataType": metadataType,
                         "numberOfElementsInMesh": numberofElementsInMesh,
                         "grid": theMesh,
-                        "bottomLeftCorner_LAT": theBottomLeftCorner['lat'],
-                        "bottomLeftCorner_LONG": theBottomLeftCorner['lng'],
-                        "topRightCorner_LAT": theTopRightCorner['lat'],
-                        "topRightCorner_LONG": theTopRightCorner['lng'],
+                        "bottomLeftCorner": theBottomLeftCorner,
+                        "topRightCorner": theTopRightCorner,
                         "transformedGrid": transformedMesh,
                         "numberOfGridCells": {'lat': numberGridCells_LAT, 'long': numberGridCells_LONG}}
 
@@ -448,6 +446,8 @@ if __name__ == '__main__':
         mesh = meshgridInfo['grid']
         numberGridCells_LAT = meshgridInfo['numberOfGridCells']['lat']
         numberGridCells_LONG = meshgridInfo['numberOfGridCells']['long']
+        bottomLeftCorner = meshgridInfo['bottomLeftCorner']
+        topRightCorner = meshgridInfo['topRightCorner']
 
     # levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
     levels = [0.0, 4.0, 8.0, 12.0, 19.8, 27.6, 35.4, 42.1, 48.7, 55.4, 150.4, 250.4]
