@@ -418,7 +418,7 @@ if __name__ == '__main__':
     #     startDate = datetime(2018, 1, 7, 0, 0, 0)
     #     endDate = datetime(2018, 1, 11, 0, 0, 0)
 
-    config = getConfig('/../config/', 'config.json')
+    config = getConfig('../config/', 'config.json')
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
