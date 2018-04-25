@@ -39,27 +39,14 @@ currentUTCtime_str = currentUTCtime.isoformat()
 
 # getting the config file
 def getConfig(aPath, fileName):
-    # with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
+
     configPath = os.path.join(sys.path[0], aPath)
     fullPath = os.path.join(configPath, fileName)
-
-    print('** path ****')
-    print(configPath)
-    print(fullPath)
 
     with open(fullPath, 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % currentUTCtime_str)
     sys.exit(1)
-
-
-# def getUTCTime(aTime_dt):
-#     localTimezone = pytz.timezone('MST')
-#     UTCTimezone = pytz.timezone('UTC')
-#     local_dt = localTimezone.localize(aTime_dt, is_dst=None)  # now local time on server is MST, add that information to the time
-#     # local_dt = localTimezone.localize(datetime.strptime(aTimeString, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)  # now local time on server is MST, add that information to the time
-#     utc_dt = local_dt.astimezone(UTCTimezone)
-#     return utc_dt
 
 
 def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner, theQueryTimeRel):
@@ -107,13 +94,13 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, end):
+def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, end, theBottomLeftCorner, theTopRightCorner):
 
     startDate = start
     endDate = end
 
 # TODO is the binnfrequency the way to get the 3 to 6 points?
-    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, topRightCorner['lat'], bottomLeftCorner['lng'], bottomLeftCorner['lat'], topRightCorner['lng'])
+    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, theTopRightCorner['lat'], theBottomLeftCorner['lng'], theBottomLeftCorner['lat'], theTopRightCorner['lng'])
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
@@ -249,8 +236,6 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
 def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, colorBands, theNowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, gridID):
 
     db = client.airudb
-
-    # endDateTimeString = endTime.strftime('%Y-%m-%dT%H:%M:%SZ')
 
     # flatten the matrices to list
     estimates_list = np.squeeze(np.asarray(anEstimate[0])).tolist()
@@ -495,7 +480,7 @@ if __name__ == '__main__':
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate, bottomLeftCorner, topRightCorner)
 
     storeInMongo(mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
 
