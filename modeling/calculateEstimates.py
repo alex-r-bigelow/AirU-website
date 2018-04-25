@@ -43,6 +43,10 @@ def getConfig(aPath, fileName):
     configPath = os.path.join(sys.path[0], aPath)
     fullPath = os.path.join(configPath, fileName)
 
+    print('** path ****')
+    print(configPath)
+    print(fullPath)
+
     with open(fullPath, 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % currentUTCtime_str)
