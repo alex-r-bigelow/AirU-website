@@ -353,7 +353,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
         LOGGER.info('inserted data slice for %s', currentUTCtime)
 
 
-def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh):
+def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh, theBottomLeftCorner, theTopRightCorner):
 
     # transform theMesh which looks like this {'lats': lats, 'lngs': lngs, 'times': times} to {0: {"lat": lats[0], "lngs": lngs[0], "times": times[0]}, ...}
     transformedMesh = {}
@@ -365,10 +365,10 @@ def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberG
                         "metadataType": metadataType,
                         "numberOfElementsInMesh": numberofElementsInMesh,
                         "grid": theMesh,
-                        "bottomLeftCorner_LAT": bottomLeftCorner['lat'],
-                        "bottomLeftCorner_LONG": bottomLeftCorner['lng'],
-                        "topRightCorner_LAT": topRightCorner['lat'],
-                        "topRightCorner_LONG": topRightCorner['lng'],
+                        "bottomLeftCorner_LAT": theBottomLeftCorner['lat'],
+                        "bottomLeftCorner_LONG": theBottomLeftCorner['lng'],
+                        "topRightCorner_LAT": theTopRightCorner['lat'],
+                        "topRightCorner_LONG": theTopRightCorner['lng'],
                         "transformedGrid": transformedMesh,
                         "numberOfGridCells": {'lat': numberGridCells_LAT, 'long': numberGridCells_LONG}}
 
