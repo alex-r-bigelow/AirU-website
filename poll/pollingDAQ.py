@@ -221,6 +221,7 @@ def uploadDAQAirData(client):
 
             try:
                 client.write_points([point])
+                LOGGER.info('data point for %s stored' % str(point['time']))
             except InfluxDBClientError as e:
                 LOGGER.error('InfluxDBClientError\tWriting DAQ data to influxdb lead to a write error.' % TIMESTAMP, exc_info=True)
                 LOGGER.error('point[time]%s' % str(point['time']))
