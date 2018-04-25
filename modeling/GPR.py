@@ -8,8 +8,8 @@ from NegLLGradient import gradMNLL
 from gradDescent import gradDescent
 from utility_tools import kerFunc, basisTerms, nchoosek
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+# LOGGER = logging.getLogger(__name__)
+# LOGGER.setLevel(logging.INFO)
 
 
 def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, optSigmaN, basisFnDeg, isARD, isSpatIsot, learnRate, tol, maxIt, effOpt, center, doRegression):
@@ -116,7 +116,7 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
 
     if doRegression:
         # print 'Applying the regression model...'
-        LOGGER.info('Applying the regression model...')
+        # LOGGER.info('Applying the regression model...')
         K = np.matrix(np.zeros((nObs, nObs)))
         KStar = np.matrix(np.zeros((nQuery, nObs)))
         Kss = np.matrix(np.zeros((nQuery, 1)))
