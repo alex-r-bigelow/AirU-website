@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
-import pytz
+# import pytz
 
 from AQ_API import AQGPR
 from AQ_DataQuery_API import AQDataQuery
@@ -34,23 +34,28 @@ LOGGER.addHandler(logHandler)
 currentUTCtime = datetime.utcnow()
 currentUTCtime_str = currentUTCtime.isoformat()
 
-characteristicTimeLength = 7.5732
+# characteristicTimeLength = 7.5732
 
 
-def getConfig():
-    with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
+# getting the config file
+def getConfig(aPath, fileName):
+    # with open(sys.path[0] + '/../config/config.json', 'r') as configfile:
+    configPath = os.path.join(sys.path[0], aPath)
+    fullPath = os.path.join(configPath, fileName)
+
+    with open(fullPath, 'r') as configfile:
         return json.loads(configfile.read())
     sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % currentUTCtime_str)
     sys.exit(1)
 
 
-def getUTCTime(aTime_dt):
-    localTimezone = pytz.timezone('MST')
-    UTCTimezone = pytz.timezone('UTC')
-    local_dt = localTimezone.localize(aTime_dt, is_dst=None)  # now local time on server is MST, add that information to the time
-    # local_dt = localTimezone.localize(datetime.strptime(aTimeString, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)  # now local time on server is MST, add that information to the time
-    utc_dt = local_dt.astimezone(UTCTimezone)
-    return utc_dt
+# def getUTCTime(aTime_dt):
+#     localTimezone = pytz.timezone('MST')
+#     UTCTimezone = pytz.timezone('UTC')
+#     local_dt = localTimezone.localize(aTime_dt, is_dst=None)  # now local time on server is MST, add that information to the time
+#     # local_dt = localTimezone.localize(datetime.strptime(aTimeString, '%Y-%m-%dT%H:%M:%SZ'), is_dst=None)  # now local time on server is MST, add that information to the time
+#     utc_dt = local_dt.astimezone(UTCTimezone)
+#     return utc_dt
 
 
 def generateQueryMeshGrid(numberGridCells1D, bottomLeftCorner, topRightCorner, theQueryTimeRel):
@@ -176,7 +181,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # stringFile = StringIO()
 
     outputdirectory = '/home/airu/AirU-website/svgs'
-    anSVGfile = os.path.join(outputdirectory, endDate + '.png')
+    anSVGfile = os.path.join(outputdirectory, endDate.strftime('%Y-%m-%dT%H:%M:%SZ') + '.png')
 
     plt.figure()
     plt.axis('off')  # Removes axes
@@ -241,6 +246,8 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
 
     db = client.airudb
 
+    # endDateTimeString = endTime.strftime('%Y-%m-%dT%H:%M:%SZ')
+
     # flatten the matrices to list
     estimates_list = np.squeeze(np.asarray(anEstimate[0])).tolist()
     variability = np.squeeze(np.asarray(anEstimate[1])).tolist()
@@ -296,7 +303,8 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
 
     # save the contour svg serialized in the db.
 
-    anEstimateSlice = {"estimationFor": datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ'),
+    # anEstimateSlice = {"estimationFor": datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ'),
+    anEstimateSlice = {"estimationFor": queryTime,
                        "modelVersion": '1.0.0',
                        # "numberOfGridCells_LAT": anEstimate[4],
                        # "numberOfGridCells_LONG": anEstimate[5],
@@ -323,14 +331,14 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
                 LOGGER.info('preparing to delete %s', document['estimationFor'])
                 documentID = document.get('_id')
                 # timeDifference = datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ') - datetime.strptime(document['estimationFor'], '%Y-%m-%dT%H:%M:%SZ')
-                LOGGER.info(datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ'))
+                LOGGER.info(endTime)
                 LOGGER.info(document['estimationFor'])
-                timeDifference = datetime.strptime(endTime, '%Y-%m-%dT%H:%M:%SZ') - document['estimationFor']
+                timeDifference = endTime - document['estimationFor']
                 LOGGER.info(timeDifference)
                 # print('******* timeDifference *****')
                 # print(timeDifference)
                 # print(timeDifference.total_seconds() / (60 * 60))
-                LOGGER.info('querytime is %s', endTime)
+                LOGGER.info('querytime is %s', endTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
                 LOGGER.info('time of time slice is %s', document['estimationFor'])
                 LOGGER.info('time difference is %s', timeDifference)
 
@@ -353,6 +361,10 @@ def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberG
                         "metadataType": metadataType,
                         "numberOfElementsInMesh": numberofElementsInMesh,
                         "grid": theMesh,
+                        "bottomLeftCorner_LAT": bottomLeftCorner['lat'],
+                        "bottomLeftCorner_LONG": bottomLeftCorner['lng'],
+                        "topRightCorner_LAT": topRightCorner['lat'],
+                        "topRightCorner_LONG": topRightCorner['lng'],
                         "transformedGrid": transformedMesh,
                         "numberOfGridCells": {'lat': numberGridCells_LAT, 'long': numberGridCells_LONG}}
 
@@ -366,21 +378,24 @@ if __name__ == '__main__':
 
     # true means only now()-characteristicLength; false means now() to now()-characteristicLength and to now()-2*characteristicLength
     nowMinusCHLT = bool(strtobool(sys.argv[1]))
-    theGridID = 0
 
-    numberGridCells_LAT = None
-    numberGridCells_LONG = None
+    # take the modeling parameter from the config file
+    modellingConfig = getConfig('/../config/', 'modellingConfig.json')
 
+    characteristicTimeLength = modellingConfig['characteristicTimeLength']
+    theGridID = modellingConfig['currentGridVersion']
+
+    # depending on high or low uncertainty argument generate start, end and query time
     if nowMinusCHLT:
         startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
         endDate = currentUTCtime
         queryTime = endDate
-        collection = 'timeSlicedEstimates_high'
+        collection = modellingConfig['metadataType_highUncertainty']
     else:
         startDate = currentUTCtime - timedelta(hours=(2 * characteristicTimeLength))
         endDate = currentUTCtime
         queryTime = endDate - timedelta(hours=characteristicTimeLength)
-        collection = 'timeSlicedEstimates_low'
+        collection = modellingConfig['metadataType_lowUncertainty']
 
     # the relative time is always with respect to the start time
     queryTimeRelative = datetime2Reltime([queryTime], startDate)
@@ -388,22 +403,18 @@ if __name__ == '__main__':
 
     # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
     # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
-    if len(sys.argv) > 2:
-        numberGridCells_LAT = sys.argv[2]
-        numberGridCells_LONG = sys.argv[3]
-        startDate = datetime.strptime(sys.argv[4], '%Y-%m-%dT%H:%M:%SZ')
-        endDate = datetime.strptime(sys.argv[5], '%Y-%m-%dT%H:%M:%SZ')
+    # if len(sys.argv) > 2:
+    #     numberGridCells_LAT = sys.argv[2]
+    #     numberGridCells_LONG = sys.argv[3]
+    #     startDate = datetime.strptime(sys.argv[4], '%Y-%m-%dT%H:%M:%SZ')
+    #     endDate = datetime.strptime(sys.argv[5], '%Y-%m-%dT%H:%M:%SZ')
     # else:
     #     numberGridCells_LAT = 10
     #     numberGridCells_LONG = 16
-        # startDate = datetime(2018, 1, 7, 0, 0, 0)
-        # endDate = datetime(2018, 1, 11, 0, 0, 0)
+    #     startDate = datetime(2018, 1, 7, 0, 0, 0)
+    #     endDate = datetime(2018, 1, 11, 0, 0, 0)
 
-    # geographical area
-    bottomLeftCorner = {'lat': 40.598850, 'lng': -112.001349}
-    topRightCorner = {'lat': 40.810476, 'lng': -111.713403}
-
-    config = getConfig()
+    config = getConfig('/../config/', 'config.json')
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
@@ -414,22 +425,36 @@ if __name__ == '__main__':
 
     mongoClient = MongoClient(mongodb_url)
     db = mongoClient.airudb
-    meshgridInfo = db.estimationMetadata.find_one({"metadataType": collection})
+
+    # query estimationMetadata table if already modeling parameters for the combination of metadataType and gridID exist
+    # metadataType provides information about high or low uncertainty, bascially gives a description keyword
+    # gridID describes the iteration number
+    meshgridInfo = db.estimationMetadata.find_one({"metadataType": collection, "gridID": theGridID})
 
     # print(meshgridInfo)
 
     if meshgridInfo is None:
 
-        if numberGridCells_LAT is None and numberGridCells_LONG is None:
-            numberGridCells_LAT = 10
-            numberGridCells_LONG = 16
-        else:
-            LOGGER.info('problem with numberGridCells_LAT andnumberGridCells_LONG, one of them is not None')
+        # if numberGridCells_LAT is None and numberGridCells_LONG is None:
+        #     # numberGridCells_LAT = 10
+        #     # numberGridCells_LONG = 16
+        #     # numberGridCells_LAT = 35    # = ((40.810476-40.598850)/(-111.713403 -- 112.001349)) * 16 * 3
+        #     # numberGridCells_LONG = 48   # = 16 * 3
+        #     LOGGER.info('problem with numberGridCells_LAT and numberGridCells_LONG, both are None')
+        # else:
+        #     LOGGER.info('problem with numberGridCells_LAT and numberGridCells_LONG, one of them is not None')
+
+        # geographical area
+        bottomLeftCorner = {'lat': modellingConfig['bottomLeftCorner_LAT'], 'lng': modellingConfig['bottomLeftCorner_LONG']}
+        topRightCorner = {'lat': modellingConfig['topRightCorner_LAT'], 'lng': modellingConfig['topRightCorner_LONG']}
+
+        numberGridCells_LAT = modellingConfig['numberGridCells_LAT']
+        numberGridCells_LONG = modellingConfig['numberGridCells_LONG']
 
         mesh = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRelative)
 
         # theGridID = 0
-        storeGridMetadata(mongoClient, 0, collection, int(numberGridCells_LAT), int(numberGridCells_LONG), mesh)
+        storeGridMetadata(mongoClient, theGridID, collection, int(numberGridCells_LAT), int(numberGridCells_LONG), mesh, bottomLeftCorner, topRightCorner)
     else:
         mesh = meshgridInfo['grid']
         numberGridCells_LAT = meshgridInfo['numberOfGridCells']['lat']
@@ -468,8 +493,6 @@ if __name__ == '__main__':
 
     theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate)
 
-    queryTimeString = queryTime.strftime('%Y-%m-%dT%H:%M:%SZ')
-    endDateTimeString = endDate.strftime('%Y-%m-%dT%H:%M:%SZ')
-    storeInMongo(mongoClient, collection, theEstimate, queryTimeString, endDateTimeString, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
+    storeInMongo(mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
 
-    LOGGER.info('successful estimation for ' + queryTimeString)
+    LOGGER.info('successful estimation for ' + queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
