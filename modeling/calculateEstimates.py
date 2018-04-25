@@ -384,7 +384,7 @@ if __name__ == '__main__':
     nowMinusCHLT = bool(strtobool(sys.argv[1]))
 
     # take the modeling parameter from the config file
-    modellingConfig = getConfig('/../config/', 'modellingConfig.json')
+    modellingConfig = getConfig('./../config/', 'modellingConfig.json')
 
     characteristicTimeLength = modellingConfig['characteristicTimeLength']
     theGridID = modellingConfig['currentGridVersion']
