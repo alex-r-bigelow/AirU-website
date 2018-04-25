@@ -108,20 +108,20 @@ def uploadDAQAirData(client):
             daqData = requests.get(daqSites['dataFeed'])
             daqData.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            LOGGER.error('%s\tProblem acquiring DAQ data (HTTPError);\t%s.\n' % (TIMESTAMP, e), exc_info=True)
-            sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
+            LOGGER.error('Problem acquiring DAQ data (HTTPError);\t%s.' % e, exc_info=True)
+            # sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
             continue
         except requests.exceptions.Timeout as e:
-            LOGGER.error('%s\tProblem acquiring DAQ data (Timeout);\t%s.\n' % (TIMESTAMP, e), exc_info=True)
-            sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
+            LOGGER.error('Problem acquiring DAQ data (Timeout);\t%s.' % e, exc_info=True)
+            # sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
             continue
         except requests.exceptions.TooManyRedirects as e:
-            LOGGER.error('%s\tProblem acquiring DAQ data (TooManyRedirects);\t%s.\n' % (TIMESTAMP, e), exc_info=True)
-            sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
+            LOGGER.error('Problem acquiring DAQ data (TooManyRedirects);\t%s.' % e, exc_info=True)
+            # sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
             continue
         except requests.exceptions.RequestException as e:
-            LOGGER.error('%s\tProblem acquiring DAQ data (RequestException);\t%s.\n' % (TIMESTAMP, e), exc_info=True)
-            sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
+            LOGGER.error('Problem acquiring DAQ data (RequestException);\t%s.' % e, exc_info=True)
+            # sys.stderr.write('%s\tProblem acquiring DAQ data;\t%s.\n' % (TIMESTAMP, e))
             continue
 
         daqData = daqData.content
@@ -222,19 +222,19 @@ def uploadDAQAirData(client):
             try:
                 client.write_points([point])
             except InfluxDBClientError as e:
-                LOGGER.error('%s\tInfluxDBClientError\tWriting DAQ data to influxdb lead to a write error.\n' % TIMESTAMP, exc_info=True)
-                LOGGER.error('%s\tpoint[time]%s\n' % (TIMESTAMP, str(point['time'])))
-                LOGGER.error('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
-                LOGGER.error('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
-                LOGGER.error('%s\t%s.\n' % (TIMESTAMP, e))
-                sys.stderr.write('%s\tInfluxDBClientError\tWriting DAQ data to influxdb lead to a write error.\n' % TIMESTAMP)
-                sys.stderr.write('%s\tpoint[time]%s\n' % (TIMESTAMP, str(point['time'])))
-                sys.stderr.write('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
-                sys.stderr.write('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
-                sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e))
+                LOGGER.error('InfluxDBClientError\tWriting DAQ data to influxdb lead to a write error.' % TIMESTAMP, exc_info=True)
+                LOGGER.error('point[time]%s' % str(point['time']))
+                LOGGER.error('point[tags]%s' % str(point['tags']))
+                LOGGER.error('point[fields]%s' % str(point['fields']))
+                LOGGER.error('%s.' % e)
+                # sys.stderr.write('%s\tInfluxDBClientError\tWriting DAQ data to influxdb lead to a write error.\n' % TIMESTAMP)
+                # sys.stderr.write('%s\tpoint[time]%s\n' % (TIMESTAMP, str(point['time'])))
+                # sys.stderr.write('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
+                # sys.stderr.write('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
+                # sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e))
             else:
-                LOGGER.info('%s\tDAQ Polling successful.\n' % TIMESTAMP)
-                sys.stdout.write('%s\tDAQ Polling successful.\n' % TIMESTAMP)
+                LOGGER.info('DAQ Polling successful.')
+                # sys.stdout.write('%s\tDAQ Polling successful.\n' % TIMESTAMP)
 
 
 if __name__ == '__main__':
@@ -251,4 +251,4 @@ if __name__ == '__main__':
 
     uploadDAQAirData(client)
 
-    LOGGER.info('%s\tDAQ Polling done.\n' % TIMESTAMP)
+    LOGGER.info('DAQ Polling done.')

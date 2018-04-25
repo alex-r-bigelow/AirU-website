@@ -642,6 +642,6 @@ if __name__ == '__main__':
 
     uploadPurpleAirData(client)
     # uploadDAQAirData(client)
-    uploadMesowestData(client)
+    # uploadMesowestData(client)
 
     sys.stdout.write('%s\tPolling successful.\n' % TIMESTAMP)
