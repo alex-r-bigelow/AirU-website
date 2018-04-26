@@ -127,7 +127,7 @@ def uploadDAQAirData(client):
         daqData = daqData.content
         soup = BeautifulSoup(daqData, "html5lib")
 
-        for measurement in soup.findAll('data'):
+        for measurement in soup.findAll('data')[0:20]:
 
             point = {
                 # 'measurement': 'airQuality_DAQ',
@@ -200,11 +200,11 @@ def uploadDAQAirData(client):
                 LOGGER.debug(point['time'])
                 # print lastPointLocalized
                 # if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
-                if point['time'] <= lastPointLocalized:
-                    LOGGER.debug('point not included')
-                    # if point['time'] <= parser.parse(lastPoint['time']):
-                    # print 'POINT NOT INCLUDED'
-                    continue
+                # if point['time'] <= lastPointLocalized:
+                #     LOGGER.debug('point not included')
+                #     # if point['time'] <= parser.parse(lastPoint['time']):
+                #     # print 'POINT NOT INCLUDED'
+                #     continue
 
             # Convert all the fields to floats
             for standardKey, daqKey in DAQ_FIELDS.iteritems():
