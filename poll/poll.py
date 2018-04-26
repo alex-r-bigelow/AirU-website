@@ -640,7 +640,7 @@ if __name__ == '__main__':
         verify_ssl=True
     )
 
-    uploadPurpleAirData(client)
+    # uploadPurpleAirData(client)
     # uploadDAQAirData(client)
     # uploadMesowestData(client)
 
