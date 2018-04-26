@@ -192,6 +192,8 @@ def uploadPurpleAirData(client):
             continue
 
         purpleAirDataSecondaryFeed = purpleAirDataSecondary.json()['feeds']
+        if not purpleAirDataSecondaryFeed:
+            continue
 
         # go through the primary feed data
         for idx, aMeasurement in enumerate(purpleAirDataPrimaryFeed):
