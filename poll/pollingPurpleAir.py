@@ -264,7 +264,7 @@ def uploadPurpleAirData(client):
 
             try:
                 client.write_points([point])
-                LOGGER.info('data point for %s and ID= %s stored' % (str(point['time'], str(point['tags']['ID']))))
+                LOGGER.info('data point for %s and ID= %s stored' % (str(point['time']), str(point['tags']['ID'])))
             except InfluxDBClientError as e:
                 LOGGER.error('InfluxDBClientError\tWriting Purple Air data to influxdb lead to a write error.')
                 LOGGER.error('point[time]%s' % str(point['time']))
