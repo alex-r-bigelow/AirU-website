@@ -13,12 +13,12 @@ from influxdb import InfluxDBClient
 TIMESTAMP = datetime.now().isoformat()
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+LOGGER.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - [%(funcName)s:%(lineno)d] - %(levelname)s - %(message)s')
 
 logHandler = handlers.RotatingFileHandler('purpleAirPoller.log', maxBytes=5000000, backupCount=5)
-logHandler.setLevel(logging.INFO)
+logHandler.setLevel(logging.DEBUG)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
@@ -208,10 +208,18 @@ def uploadPurpleAirData(client):
             point['time'] = timePrimary
             # print point['time']
 
-            # go through the second feed's fields
+            LOGGER.debug('idx then aMeasurement')
+            LOGGER.debug(idx)
+            LOGGER.debug(aMeasurement)
+
+            # go through the primary feed's fields
             for standardKey, purpleKey in PURPLE_AIR_FIELDS_PRI_FEED.iteritems():
                 if purpleKey in aMeasurement.keys():
                     point['fields'][standardKey] = aMeasurement[purpleKey]
+
+            LOGGER.debug('purpleAirDataSecondaryFeed')
+            LOGGER.debug(purpleAirDataSecondaryFeed)
+            LOGGER.debug(purpleAirDataSecondaryFeed[idx])
 
             # go through the second feed's fields
             for standardKey, purpleKey in PURPLE_AIR_FIELDS_SEC_FEED.iteritems():
