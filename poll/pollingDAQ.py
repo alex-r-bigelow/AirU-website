@@ -130,7 +130,8 @@ def uploadDAQAirData(client):
         for measurement in soup.findAll('data'):
 
             point = {
-                'measurement': 'airQuality_DAQ',
+                # 'measurement': 'airQuality_DAQ',
+                'measurement': 'airQuality',
                 'fields': {},
                 'tags': {
                     'Sensor Source': 'DAQ'

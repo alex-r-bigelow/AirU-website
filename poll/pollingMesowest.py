@@ -93,7 +93,8 @@ def uploadMesowestData(client):
     for aMesowestStation in mesowestData:
 
         point = {
-            'measurement': 'airQuality_Mesowest',
+            # 'measurement': 'airQuality_Mesowest',
+            'measurement': 'airQuality',
             'fields': {},
             'tags': {
                 'Sensor Source': 'Mesowest'
