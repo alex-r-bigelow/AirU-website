@@ -13,12 +13,12 @@ from influxdb import InfluxDBClient
 TIMESTAMP = datetime.now().isoformat()
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - [%(funcName)s:%(lineno)d] - %(levelname)s - %(message)s')
 
 logHandler = handlers.RotatingFileHandler('purpleAirPoller.log', maxBytes=5000000, backupCount=5)
-logHandler.setLevel(logging.DEBUG)
+logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
