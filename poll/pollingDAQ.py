@@ -14,12 +14,12 @@ from influxdb import InfluxDBClient
 TIMESTAMP = datetime.now().isoformat()
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - [%(funcName)s:%(lineno)d] - %(levelname)s - %(message)s')
 
 logHandler = handlers.RotatingFileHandler('daqPoller.log', maxBytes=5000000, backupCount=5)
-logHandler.setLevel(logging.DEBUG)
+logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
@@ -229,7 +229,7 @@ def uploadDAQAirData(client):
 
             try:
                 client.write_points([point])
-                LOGGER.info('data point for %s stored' % str(point['time']))
+                LOGGER.info('data point for %s and ID=%s stored' % (str(point['time']), str(point['tags']['ID'])))
             except InfluxDBClientError as e:
                 LOGGER.error('InfluxDBClientError\tWriting DAQ data to influxdb lead to a write error.' % TIMESTAMP, exc_info=True)
                 LOGGER.error('point[time]%s' % str(point['time']))

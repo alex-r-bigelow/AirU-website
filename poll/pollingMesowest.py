@@ -196,7 +196,7 @@ def uploadMesowestData(client):
             if notNoneValue:
                 try:
                     client.write_points([point])
-                    LOGGER.info('data point for %s stored' % str(point['time']))
+                    LOGGER.info('data point for %s and ID=%s stored' % (str(point['time']), str(point['tags']['ID'])))
                 except InfluxDBClientError as e:
                     LOGGER.error('InfluxDBClientError\tWriting mesowest data to influxdb lead to a write error.', exc_info=True)
                     LOGGER.error('point[time]%s' % str(point['time']))
