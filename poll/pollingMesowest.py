@@ -61,7 +61,7 @@ MESOWEST_TAGS = {
 def uploadMesowestData(client):
 
     # the recent argument is in minutes
-    mesowestURL = 'http://api.mesowest.net/v2/stations/timeseries?recent=15&token=demotoken&stid=mtmet,wbb,NAA,MSI01,UFD10,UFD11&vars=wind_speed,air_temp,solar_radiation,wind_gust,relative_humidity,wind_direction,pressure,ozone_concentration,altimeter,PM_25_concentration,sensor_error_code,clear_sky_solar_radiation,internal_relative_humidity,air_flow_temperature'
+    mesowestURL = 'http://api.mesowest.net/v2/stations/timeseries?recent=600&token=demotoken&stid=mtmet,wbb,NAA,MSI01,UFD10,UFD11&vars=wind_speed,air_temp,solar_radiation,wind_gust,relative_humidity,wind_direction,pressure,ozone_concentration,altimeter,PM_25_concentration,sensor_error_code,clear_sky_solar_radiation,internal_relative_humidity,air_flow_temperature'
 
     try:
         mesowestData = requests.get(mesowestURL)
@@ -172,10 +172,10 @@ def uploadMesowestData(client):
                 lastPointLocalized = pytz.utc.localize(lastPointParsed, is_dst=None)
                 # print lastPointLocalized
                 # if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
-                if pytz.utc.localize(point['time']) <= lastPointLocalized:
-                    # if point['time'] <= parser.parse(lastPoint['time']):
-                    # print 'POINT NOT INCLUDED'
-                    continue
+                # if pytz.utc.localize(point['time']) <= lastPointLocalized:
+                #     # if point['time'] <= parser.parse(lastPoint['time']):
+                #     # print 'POINT NOT INCLUDED'
+                #     continue
 
             for standardKey, purpleKey in MESOWEST_FIELDS.iteritems():
                 mesowestFieldValue = point['fields'].get(standardKey)
