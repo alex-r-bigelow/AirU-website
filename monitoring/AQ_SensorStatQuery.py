@@ -15,9 +15,10 @@ from pymongo import MongoClient
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s - [%(funcName)s:%(lineno)d] - %(levelname)s - %(message)s')
 
-logHandler = handlers.TimedRotatingFileHandler('sensorMonitoring.log', when='D', interval=1, backupCount=3)
+# logHandler = handlers.TimedRotatingFileHandler('sensorMonitoring.log', when='D', interval=1, backupCount=3)
+logHandler = handlers.RotatingFileHandler('sensorMonitoring.log', maxBytes=5000000, backupCount=3)
 logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
