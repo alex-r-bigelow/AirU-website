@@ -76,13 +76,14 @@ def getMACToCheck(partOfSchoolProject):
     for aSensor in db.macToCustomSensorID.find():
         theMAC = ''.join(aSensor['macAddress'].split(':'))
         sensorHolder = aSensor['sensorHolder']
+        pmSensorID = aSensor['customSensorID']
 
         if partOfSchoolProject:
             if aSensor['schoolProject']:
-                macs[theMAC] = {'sensorHolder': sensorHolder}
+                macs[theMAC] = {'sensorHolder': sensorHolder, 'pmSensorID': pmSensorID}
         else:
             if not aSensor['schoolProject']:
-                macs[theMAC] = {'sensorHolder': sensorHolder}
+                macs[theMAC] = {'sensorHolder': sensorHolder, 'pmSensorID': pmSensorID}
 
         LOGGER.info(theMAC)
         LOGGER.info(sensorHolder)
@@ -114,7 +115,7 @@ def saveMonitoringDataToInflux(influxClient, data):
 
     try:
         influxClient.write_points([point])
-        LOGGER.info('data point for ID= %s stored' % (str(point['tags']['ID'])))
+        LOGGER.info('data point for MAC= %s stored' % (str(point['tags']['sensorMACAdress'])))
     except InfluxDBClientError as e:
         LOGGER.error('InfluxDBClientError\tWriting Purple Air data to influxdb lead to a write error.')
         LOGGER.error('point[tags]%s' % str(point['tags']))
@@ -319,7 +320,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, airUClient, airUMonito
         appendToCSVFile(filePathSolution, [anID, int(theBatch), macs[anID]['sensorHolder'], theEmail, airULatitudes[i], airULongitudes[i], queryStatus, status, timestamp[0]['time'].split('.')[0]])
 
         # write the data to influxdb
-        theData = {'ID': anID, 'macAddress': macs[anID]['sensorHolder'], 'status': status, 'latitude': airULatitudes[i], 'longitude': airULongitudes[i]}
+        theData = {'ID': macs[anID]['pmSensorID'], 'macAddress': anID, 'status': status, 'latitude': airULatitudes[i], 'longitude': airULongitudes[i]}
         saveMonitoringDataToInflux(airUMonitoringClient, theData)
 
     return theMessage
