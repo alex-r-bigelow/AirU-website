@@ -8,6 +8,7 @@ import sys
 
 # from datetime import datetime
 from influxdb import InfluxDBClient
+from influxdb.exceptions import InfluxDBClientError
 from pymongo import MongoClient
 
 
@@ -91,7 +92,39 @@ def getMACToCheck(partOfSchoolProject):
     return macs
 
 
-def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient):
+def saveMonitoringDataToInflux(influxClient, data):
+
+    # parsing status data
+    theStatus = data['status']
+
+    if theStatus == '-->OFFLINE':
+        theStatus = 'offline'
+    elif theStatus == 'Failed':
+        theStatus = 'failed'
+
+    # creating the dict to be stored in influx
+    point = {'measurement': 'sensorStatus',
+             'fields': {'status': theStatus},
+             'tags': {'pmSensorID': data['ID'],
+                      'sensorMACAdress': data['macAddress'],
+                      'latitude': data['latitude'],
+                      'longitude': data['longitude'],
+                      }
+             }
+
+    try:
+        influxClient.write_points([point])
+        LOGGER.info('data point for ID= %s stored' % (str(point['tags']['ID'])))
+    except InfluxDBClientError as e:
+        LOGGER.error('InfluxDBClientError\tWriting Purple Air data to influxdb lead to a write error.')
+        LOGGER.error('point[tags]%s' % str(point['tags']))
+        LOGGER.error('point[fields]%s' % str(point['fields']))
+        LOGGER.error('%s.' % e)
+    else:
+        LOGGER.info('Monitoring data successfully stored.')
+
+
+def runMonitoring(config, timeFrame, isSchool, borderBox, airUClient, airUMonitoringClient):
 
     outputDirectory = '/home/poller'
 
@@ -285,25 +318,9 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient
 
         appendToCSVFile(filePathSolution, [anID, int(theBatch), macs[anID]['sensorHolder'], theEmail, airULatitudes[i], airULongitudes[i], queryStatus, status, timestamp[0]['time'].split('.')[0]])
 
-    # for i, anID in enumerate(pAirUniqueIDs):
-    #     result = pAirClient.query('SELECT "pm2.5 (ug/m^3)" FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= now()-' +
-    #                               str(timeFrame) + 's AND ID = \'' + anID + '\';')
-    #     result = list(result.get_points())
-    #     nFail = 0
-    #     nOff = 0
-    #     for res in result:
-    #         if res['pm2.5 (ug/m^3)'] is None:
-    #             nOff += 1
-    #         elif res['pm2.5 (ug/m^3)'] <= 0:
-    #             nFail += 1
-    #     nTotal = len(result)
-    #     nFine = nTotal - nFail - nOff
-    #     status = ('Offline' if (res['pm2.5 (ug/m^3)'] is None) else ('Failed' if res['pm2.5 (ug/m^3)'] <= 0 else 'Online'))
-    #     theMessage = theMessage + '%-12s' % anID + '\t' + '%-12s' % pAirSensorModels[i] + '\t' + '%-11s' % pAirLatitudes[i] + '\t' \
-    #                             + '%-13s' % pAirLongitudes[i] \
-    #                             + '\t' + format(str(nOff) + '/' + str(nFail) + '/' + str(nFine) + ' (' + str(nTotal) + ')', '^30') + '\t' + status + '\n'
-
-    # theMessage = theMessage + emailFooter
+        # write the data to influxdb
+        theData = {'ID': anID, 'macAddress': macs[anID]['sensorHolder'], 'status': status, 'latitude': airULatitudes[i], 'longitude': airULongitudes[i]}
+        saveMonitoringDataToInflux(airUMonitoringClient, theData)
 
     return theMessage
 
@@ -335,15 +352,6 @@ if __name__ == "__main__":
     # Reading the config file
     config = getConfig()
 
-    # Purple Air client
-    pAirClient = InfluxDBClient(config['INFLUX_HOST'],
-                                config['INFLUX_PORT'],
-                                config['INFLUX_MONITORING_USERNAME'],
-                                config['INFLUX_MONITORING_PASSWORD'],
-                                config['PURPLE_AIR_DB'],
-                                ssl=True,
-                                verify_ssl=True)
-
     # airU client
     airUClient = InfluxDBClient(config['INFLUX_HOST'],
                                 config['INFLUX_PORT'],
@@ -353,7 +361,16 @@ if __name__ == "__main__":
                                 ssl=True,
                                 verify_ssl=True)
 
-    theRun = runMonitoring(config, timeFrame, isSchool, borderBox, pAirClient, airUClient)
+    # airU monitoring client (own database)
+    airUMonitoringClient = InfluxDBClient(config['INFLUX_HOST'],
+                                          config['INFLUX_PORT'],
+                                          config['INFLUX_MONITORING_USERNAME'],
+                                          config['INFLUX_MONITORING_PASSWORD'],
+                                          config['AIRU_MONITORING_DB'],
+                                          ssl=True,
+                                          verify_ssl=True)
+
+    theRun = runMonitoring(config, timeFrame, isSchool, borderBox, airUClient, airUMonitoringClient)
 
     # needed as this is used to put the text into the email!!!
     print(theRun)
