@@ -72,6 +72,10 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     # Creating the time stamps using the start date, end date, and the binning frequency
     tPartsNT = 500
     datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds=tPartsNT * binFreq))     # 125 days??
+
+    print('******** datePartitiion *********')
+    print(datePartitions)
+
     nt = (len(datePartitions)-1)*500 + \
     (datetime.strptime(datePartitions[-1],'%Y-%m-%dT%H:%M:%SZ')-\
     datetime.strptime(datePartitions[-2],'%Y-%m-%dT%H:%M:%SZ')).total_seconds()/binFreq
