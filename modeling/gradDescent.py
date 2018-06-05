@@ -1,7 +1,7 @@
 import numpy as np
 # import matplotlib.pyplot as pl
 
-def gradDescent(gradFun,Fun,theta0,optList,tol,gamma0,maxIt,plotObj):
+def gradDescent(Fun,theta0,optList,tol,gamma0,maxIt,plotObj):
 # Finds the theta values that minimizes the objective function Fun
 #
 # gradFun: a function that calculates gradients of the objective functions with respect to theta and stores it in a 1D numpy matrix
@@ -17,7 +17,7 @@ def gradDescent(gradFun,Fun,theta0,optList,tol,gamma0,maxIt,plotObj):
     err=1
     it = 0
 
-    obj = Fun(theta0)
+    obj, grad = Fun(theta0)
     print 'Objective = ' + str(obj)
 
 #     if plotObj:
@@ -29,15 +29,18 @@ def gradDescent(gradFun,Fun,theta0,optList,tol,gamma0,maxIt,plotObj):
 # #        fig.canvas.draw()
 # #        pl.show()
 
-
-    while err>tol and it<=maxIt:
+    thetaConverged = False
+    while err>tol and it<=maxIt and (not thetaConverged):
         it += 1
         gamma = gamma0
-        grad  = gradFun(theta.tolist()[0])
+        #grad  = gradFun(theta.tolist()[0])
         # theta[0] = theta[0]
         # theta[1] = theta[1] - gamma * grad[1]
-        theta = theta - gamma * np.select([optList], [grad.T])
-        obj_n = Fun(theta.tolist()[0])
+        delta = gamma * np.select([optList], [grad.T])
+        thetaChangeRate = abs(delta)/theta
+        
+        theta = theta - delta
+        obj_n, grad = Fun(theta.tolist()[0])
 #         if plotObj:
 #             pl.plot(it,obj_n,'bo',markersize=8)
 #             pl.pause(0.05)
@@ -47,5 +50,10 @@ def gradDescent(gradFun,Fun,theta0,optList,tol,gamma0,maxIt,plotObj):
         err = abs(obj-obj_n)
         obj = obj_n
         print 'it #'+str(it)+ ': Objective change = ' + str(err)
+        thetaConverged = True
+        for i in range(len(theta)):
+            if optList[i] and thetaChangeRate[0,i]>0.001:
+                thetaConverged = False;
+                break;
 
     return theta.tolist()[0]

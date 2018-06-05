@@ -89,16 +89,16 @@ def gradMNLL(x,y,L,sigmaF,sigmaN,optL,optSigmaF,optSigmaN,basisFnDeg,isARD,isSpa
                 if basisFnDeg>=0:
                     gradNLL[j,0] = gradNLL[j, 0]\
                     - basisFnGradTerms(invAH,HinvA,np.matrix(dKdL[:,:,j]),invKy[:,t],invKH,invA)
-    if optSigmaF:
-        gradNLL[nL,0] = gradNLL[nL,0] - 0.5*np.trace(term*dKdSF)
-        if basisFnDeg>=0:
-            gradNLL[nL,0] = gradNLL[nL,0]\
-            - basisFnGradTerms(invAH,HinvA,dKdSF,invKy[:,t],invKH,invA)
-    if optSigmaN:
-        gradNLL[nL+1,0] = gradNLL[nL+1,0] - 0.5*np.trace(term*dKdSN)
-        if basisFnDeg>=0:
-            gradNLL[nL+1,0] = gradNLL[nL+1,0]\
-            - basisFnGradTerms(invAH,HinvA,dKdSN,invKy[:,t],invKH,invA)
+        if optSigmaF:
+            gradNLL[nL,0] = gradNLL[nL,0] - 0.5*np.trace(term*dKdSF)
+            if basisFnDeg>=0:
+                gradNLL[nL,0] = gradNLL[nL,0]\
+                - basisFnGradTerms(invAH,HinvA,dKdSF,invKy[:,t],invKH,invA)
+        if optSigmaN:
+            gradNLL[nL+1,0] = gradNLL[nL+1,0] - 0.5*np.trace(term*dKdSN)
+            if basisFnDeg>=0:
+                gradNLL[nL+1,0] = gradNLL[nL+1,0]\
+                - basisFnGradTerms(invAH,HinvA,dKdSN,invKy[:,t],invKH,invA)
 
     return gradNLL
     

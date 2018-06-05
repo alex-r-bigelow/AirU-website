@@ -10,12 +10,17 @@ from scipy.linalg import lu
 
 
 # Kernel Function definition
-def kerFunc(x1, x2, sigmaF, L):
+def kerFunc(x1, x2, sigmaF, L, kerType):
     nL = len(L)
-    sum = 0.0
-    for i in range(nL):
-        sum = sum + ((x1[0, i] - x2[0, i])**2) / (2 * float(L[i])**2)
-    K = sigmaF**2 * np.exp(-sum)
+    if kerType=="SqExp":
+        sum=0.0
+        for i in range(nL):
+            sum = sum + ((x1[0, i]-x2[0, i])**2)/(2*float(L[i])**2)
+        K = sigmaF**2 * np.exp(-sum)
+    elif kerType=="Exp":
+        K = sigmaF**2 * np.exp(-np.linalg.norm((x1[0,:2]-x2[0,:2])/L[:2]))
+        for i in range(2,nL):
+            K *= np.exp(-np.linalg.norm((x1[0,i]-x2[0,i])/L[i]))
     return K
 
 

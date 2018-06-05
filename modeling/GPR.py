@@ -19,6 +19,7 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
     assert(x_tr.shape[0] >= x_tr.shape[1]), 'The independent variables should be in the columns, and the observations in the rows'
     assert(xQuery.shape[0] >= xQuery.shape[1]), 'The independent variables should be in the columns, and the tests in the rows'
 
+    kerType = 'Exp'
     nL = len(L)
     # conditioning related to ARD mode and/or spatially isotropic case
     if isARD:
@@ -98,11 +99,11 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
 
         theta0 = L + [sigmaF, sigmaN]
         # logFun = lambda theta: looNegLL(x_tr,y_tr,theta[0:nL],theta[nL],theta[nL+1],effOpt,basisFnDeg,isARD,isSpatIsot)
-        logFun = lambda theta: marginalNegLL(x_tr, y_tr, theta[0:nL], theta[nL], theta[nL + 1], basisFnDeg, isARD)
+        logNgradLogFun = lambda theta: marginalNegLL(x_tr, y_tr, theta[0:nL], theta[nL], theta[nL + 1], optL, optSigmaF, optSigmaN, basisFnDeg, isARD, isSpatIsot, kerType, True)
         # using gradient descent
         # gradLogFun = lambda theta: gradLOONLL(x_tr,y_tr,theta[0:nL],theta[nL],theta[nL+1],optL,optSigmaF,optSigmaN,basisFnDeg,isARD,isSpatIsot)
-        gradLogFun = lambda theta: gradMNLL(x, y, theta[0:nL], theta[nL], theta[nL + 1], optL, optSigmaF, optSigmaN, basisFnDeg, isARD, isSpatIsot)
-        theta = gradDescent(gradLogFun, logFun, theta0, [optL] * nL + [optSigmaF, optSigmaN], tol, learnRate, maxIt, True)
+        #gradLogFun = lambda theta: gradMNLL(x, y, theta[0:nL], theta[nL], theta[nL + 1], optL, optSigmaF, optSigmaN, basisFnDeg, isARD, isSpatIsot)
+        theta = gradDescent(logNgradLogFun, theta0, [optL] * nL + [optSigmaF, optSigmaN], tol, learnRate, maxIt, True)
         # using SGD
         # gradLogFun = lambda theta,x,y: gradLOONLL(x,y,theta[0:nL],theta[nL],theta[nL+1],optL,optSigmaF,optSigmaN,isARD,isSpatIsot)
         # gradLogFun = lambda theta,x,y: gradMNLL(x,y,theta[0:nL],theta[nL],theta[nL+1],optL,optSigmaF,optSigmaN,isARD,isSpatIsot)
@@ -129,14 +130,14 @@ def gpRegression(x, y, xQuery, x_tr, y_tr, sigmaF, optSigmaF, L, optL, sigmaN, o
 
         for i in range(nObs):
             for j in range(nObs):
-                K[i, j] = kerFunc(x[i, :], x[j, :], sigmaF, L) + sigmaN**2 * delta[i, j]
+                K[i, j] = kerFunc(x[i, :], x[j, :], sigmaF, L, kerType) + sigmaN**2 * delta[i, j]
             for j in range(nQuery):
-                KStar[j, i] = kerFunc(xQuery[j, :], x[i, :], sigmaF, L)
+                KStar[j, i] = kerFunc(xQuery[j, :], x[i, :], sigmaF, L, kerType)
             if basisFnDeg >= 0:
                 H[:, i] = basisTerms(x[i, :], basisFnDeg, 1, [])
 
         for i in range(nQuery):
-            Kss[i, 0] = kerFunc(xQuery[i, :], xQuery[i, :], sigmaF, L)  # + sigmaN^2;
+            Kss[i, 0] = kerFunc(xQuery[i, :], xQuery[i, :], sigmaF, L, kerType)  # + sigmaN^2;
 
             if basisFnDeg >= 0:
                 HStar[:, i] = basisTerms(xQuery[i, :], basisFnDeg, 1, [])
