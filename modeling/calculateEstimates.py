@@ -171,8 +171,9 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     # from: http://hplgit.github.io/web4sciapps/doc/pub/._part0013_web4sa_plain.html
     # stringFile = StringIO()
 
-    outputdirectory = '/home/airu/AirU-website/svgs'
-    anSVGfile = os.path.join(outputdirectory, endDate.strftime('%Y-%m-%dT%H:%M:%SZ') + '.png')
+    # # creating the fileName of contour file
+    # outputdirectory = '/home/airu/AirU-website/svgs'
+    # anSVGfile = os.path.join(outputdirectory, endDate.strftime('%Y-%m-%dT%H:%M:%SZ') + '.png')
 
     plt.figure()
     plt.axis('off')  # Removes axes
@@ -225,7 +226,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
             new_contours += [new_contour]
 
     # to save as svg file in directory svgs
-    plt.savefig(anSVGfile, format="png")
+    # plt.savefig(anSVGfile, format="png")  # stopped saving the contour file on server
 
     # stringFile.close()
     plt.close()
