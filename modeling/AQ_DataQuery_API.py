@@ -70,8 +70,12 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     # )
 
     # Creating the time stamps using the start date, end date, and the binning frequency
-    datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds=500 * binFreq))     # 125 days??
-
+    tPartsNT = 500
+    datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds=tPartsNT * binFreq))     # 125 days??
+    nt = (len(datePartitions)-1)*500 + \
+    (datetime.strptime(datePartitions[-1],'%Y-%m-%dT%H:%M:%SZ')-\
+    datetime.strptime(datePartitions[-2],'%Y-%m-%dT%H:%M:%SZ')).total_seconds()/binFreq
+    nt = int(nt)
     # print('******** datePartitiion *********')
     # print(datePartitions)
 
@@ -159,13 +163,26 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
             result = list(result.get_points())
 
             if anID == pAirUniqueIDs[0]:
-                for row in result:
-                    t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
-                    times += [t]
-                    data.append([row['mean']])
+                if not result:
+                    for i in range(min(tPartsNT, nt-nres)):
+                        data.append([None])
+                    t = datetime.strptime(initialDate, '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
+                    et = datetime.strptime(anEndDate, '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
+                    while(t<et):
+                        times += [t]
+                        t += timedelta(seconds=binFreq)
+                else:
+                    for row in result:
+                        t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
+                        times += [t]
+                        data.append([row['mean']])
             else:
-                for i in range(len(result)):
-                    data[i + nres] += [result[i]['mean']]
+                if not result:
+                    for i in range(min(tPartsNT, nt-nres)):
+                        data[i+nres] += [None]
+                else:
+                    for i in range(len(result)):
+                        data[i + nres] += [result[i]['mean']]
 
         for anID in airUUniqueIDs:
             # print 'SELECT * FROM airQuality WHERE "Sensor Source" = \'Purple Air\' AND time >= ' + initialDate + ' AND time <= ' + anEndDate + ';'
@@ -175,18 +192,31 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
                                       'group by time(' + str(binFreq) + 's);')
             result = list(result.get_points())
             if len(pAirUniqueIDs) == 0 and anID == airUUniqueIDs[0]:        # TODO does that line make sense
-                for idx, row in enumerate(result):
-                    t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
-                    times += [t]
-                    data.append([row['mean']])
+                if not result:
+                    for i in range(min(tPartsNT, nt-nres)):
+                        data.append([None])
+                    t = datetime.strptime(initialDate, '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
+                    et = datetime.strptime(anEndDate, '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
+                    while(t<et):
+                        times += [t]
+                        t += timedelta(seconds=binFreq)
+                else:
+                    for idx, row in enumerate(result):
+                        t = datetime.strptime(row['time'], '%Y-%m-%dT%H:%M:%SZ') - timedelta(hours=7)
+                        times += [t]
+                        data.append([row['mean']])
 
             else:
-                for i in range(len(result)):
-                    rowMeanValue = result[i]['mean']
-                    data[i + nres] += [rowMeanValue]
+                if not result:
+                    for i in range(min(tPartsNT, nt-nres)):
+                        data[i+nres] += [None]
+                else:
+                    for i in range(len(result)):
+                        rowMeanValue = result[i]['mean']
+                        data[i + nres] += [rowMeanValue]
 
         initialDate = anEndDate
-        nres += len(result)
+        nres += tPartsNT
 
     IDs = pAirUniqueIDs + airUUniqueIDs
 
