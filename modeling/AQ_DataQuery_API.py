@@ -76,9 +76,12 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     print('******** datePartitiion *********')
     print(datePartitions)
 
-    nt = (len(datePartitions)-1)*500 + \
-    (datetime.strptime(datePartitions[-1],'%Y-%m-%dT%H:%M:%SZ')-\
-    datetime.strptime(datePartitions[-2],'%Y-%m-%dT%H:%M:%SZ')).total_seconds()/binFreq
+    if len(datePartitions)>1:
+        nt = (len(datePartitions)-1)*500 + \
+        (datetime.strptime(datePartitions[-1],'%Y-%m-%dT%H:%M:%SZ')-\
+        datetime.strptime(datePartitions[-2],'%Y-%m-%dT%H:%M:%SZ')).total_seconds()/binFreq
+    else:
+        nt = (datetime.strptime(datePartitions[-1],'%Y-%m-%dT%H:%M:%SZ')-startDate).total_seconds()/binFreq
     nt = int(nt)
     # print('******** datePartitiion *********')
     # print(datePartitions)
