@@ -244,43 +244,25 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
     lng_list = np.squeeze(np.asarray(anEstimate[3])).tolist()
 
     # make numpy arrays for the contours
-
     pmEstimates = np.asarray(anEstimate[0]).reshape(numberGridCells_LONG + 1, numberGridCells_LAT + 1)
     latQuery = np.asarray(anEstimate[2]).reshape(numberGridCells_LONG + 1, numberGridCells_LAT + 1)
     longQuery = np.asarray(anEstimate[3]).reshape(numberGridCells_LONG + 1, numberGridCells_LAT + 1)
 
     zippedEstimateData = zip(lat_list, lng_list, estimates_list, variability)
 
-    # theEstimates = []
     theEstimates = {}
-    # location = {}
     for i, aZippedEstimate in enumerate(zippedEstimateData):
         header = ('lat', 'long', 'pm25', 'variability')
         theEstimate = dict(zip(header, aZippedEstimate))
 
-        # print('**** gridID ****')
-        # print(gridID)
-        # print('**** theCollection ****')
-        # print(theCollection)
-
         theEstimationMetadata = db.estimationMetadata.find_one({"gridID": int(gridID), "metadataType": theCollection})
-        # print(theEstimationMetadata)
 
         if theEstimationMetadata is not None:
 
             for key, value in theEstimationMetadata['transformedGrid'].iteritems():
-                # print("****** value['lat'][0] and theEstimate['lat'] ******")
-                # print(value['lat'][0])
-                # print(theEstimate['lat'])
-
-                # print("****** value['lngs'][0] and theEstimate['long'] ******")
-                # print(value['lngs'][0])
-                # print(theEstimate['long'])
-
                 if value['lat'][0] == theEstimate['lat'] and value['lngs'][0] == theEstimate['long']:
                     LOGGER.info('found a match')
 
-                    # location[str(i)] = {'lat': theEstimate['lat'], 'long': theEstimate['long']}
                     theEstimates[str(i)] = {'gridELementID': key, 'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
                     break
         else:
@@ -292,7 +274,6 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
 
     # save the contour svg serialized in the db.
 
-    # anEstimateSlice = {"estimationFor": datetime.strptime(queryTime, '%Y-%m-%dT%H:%M:%SZ'),
     anEstimateSlice = {"estimationFor": queryTime,
                        "modelVersion": '1.0.0',
                        # "numberOfGridCells_LAT": anEstimate[4],
@@ -307,7 +288,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
         if theCollection == 'timeSlicedEstimates_high':
             db.timeSlicedEstimates_high.insert_one(anEstimateSlice)
 
-        LOGGER.info('inserted data slice for %s', currentUTCtime_str)
+        LOGGER.info('inserted data slice for %s into %s', (currentUTCtime_str, theCollection))
     else:
         # low variability estimation
 
