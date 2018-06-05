@@ -289,7 +289,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
         if theCollection == 'timeSlicedEstimates_high':
             db.timeSlicedEstimates_high.insert_one(anEstimateSlice)
 
-        LOGGER.info('inserted data slice for %s into %s', (currentUTCtime_str, theCollection))
+        LOGGER.info('inserted data slice for %s into %s', currentUTCtime_str, theCollection)
     else:
         # low variability estimation
 
