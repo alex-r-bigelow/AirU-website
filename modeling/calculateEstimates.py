@@ -100,7 +100,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, 
     endDate = end
 
 # TODO is the binnfrequency the way to get the 3 to 6 points?
-    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 6, theTopRightCorner['lat'], theBottomLeftCorner['lng'], theBottomLeftCorner['lat'], theTopRightCorner['lng'])
+    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600 * 2, theTopRightCorner['lat'], theBottomLeftCorner['lng'], theBottomLeftCorner['lat'], theTopRightCorner['lng'])
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
