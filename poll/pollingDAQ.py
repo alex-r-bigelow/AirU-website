@@ -83,7 +83,11 @@ DAQ_FIELDS = {
     # 'pm1.0 (ug/m^3)': 'pm1',
     'pm10.0 (ug/m^3)': 'pm10',
     'Wind direction (compass degree)': 'wind_direction',
-    'Wind speed (m/s)': 'wind_speed'
+    'Wind speed (m/s)': 'wind_speed',
+    'NOx (ppm)': 'nox',
+    'NO2 (ppm)': 'no2',
+    'CO (ppm)': 'co',
+    'Solar radiation (W/m**2)': 'solar_radiation'
 }
 
 DAQ_TAGS = {
