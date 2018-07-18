@@ -76,7 +76,11 @@ def uploadPurpleAirData(client):
         # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
 
-    purpleAirData = purpleAirData.json()['results']
+    try:
+        purpleAirData = purpleAirData.json()['results']
+    except ValueError as e:
+        LOGGER.error('Not able to decode the json object;\t%s.' % e, exc_info=True)
+        return []
 
     for station in purpleAirData:
         # print station
