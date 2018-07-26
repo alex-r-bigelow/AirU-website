@@ -31,11 +31,8 @@ logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
-# TIMESTAMP = datetime.now().isoformat()
 currentUTCtime = datetime.utcnow()
-currentUTCtime_str = currentUTCtime.isoformat()
-
-# characteristicTimeLength = 7.5732
+# currentUTCtime_str = currentUTCtime.isoformat()
 
 
 # getting the config file
@@ -46,7 +43,7 @@ def getConfig(aPath, fileName):
 
     with open(fullPath, 'r') as configfile:
         return json.loads(configfile.read())
-    sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % currentUTCtime_str)
+    sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % currentUTCtime.isoformat())
     sys.exit(1)
 
 
@@ -87,10 +84,6 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
                 lngs.append([float(longitude)])
                 # times.append([int(0)])
                 times.append([aRelativeTime])
-
-    # lats = np.linspace(bottomLeftCorner['lat'], topRightCorner['lat'], numberGridCellsLAT + 1)
-    # lngs = np.linspace(bottomLeftCorner['lng'], topRightCorner['lng'], numberGridCellsLONG + 1)
-    # times =
 
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
@@ -291,7 +284,7 @@ def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTim
         if theCollection == configForModelling['metadataType_highUncertainty']:
             db[theCollection].insert_one(anEstimateSlice)
 
-        LOGGER.info('inserted data slice for %s into %s', currentUTCtime_str, theCollection)
+        LOGGER.info('inserted data slice for %s into %s', queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'), theCollection)
     else:
         # low variability estimation
 
@@ -322,7 +315,7 @@ def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTim
                     db[configForModelling['metadataType_highUncertainty']].delete_one({"_id": documentID})
                     LOGGER.info('deleted %s', document['estimationFor'])
 
-        LOGGER.info('inserted data slice for %s', currentUTCtime)
+        LOGGER.info('inserted data slice for %s', queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
 
 def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh, theBottomLeftCorner, theTopRightCorner):
@@ -353,7 +346,8 @@ def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("highUncertainty", help="true means only now() to now()-characteristicLength, false means now() to now()-characteristicLength and to now()-2*characteristicLength")
     # parser.add_argument("--debugging", help="true means debugging")
-    parser.add_argument("--debugging", help="name of config file")
+    parser.add_argument("-d", "--debugging", help="name of config file")
+    parser.add_argument("-q", "--querytime", help="query time for estimation with format: %Y-%m-%dT%H:%M:%SZ")
 
     args = parser.parse_args()
 
@@ -361,13 +355,16 @@ def main(args):
     # false means now() to now()-characteristicLength and to now()-2*characteristicLength
     nowMinusCHLT = bool(strtobool(args.highUncertainty))
 
+    theQueryTime = currentUTCtime
+
     # take the modeling parameter from the config file
     modellingConfig = getConfig('../config/', 'modellingConfig.json')
 
-    if args.debugging:
+    if args.debugging and args.querytime:
         # debugging = bool(strtobool(args.debugging))
 
         debuggingModelligConfigFileName = args.debugging
+        theQueryTime = datetime.strptime(args.querytime, '%Y-%m-%dT%H:%M:%SZ')
 
         # debugging flag, if true, store data into dbs made for debugging, also allows to add another config file
         if debuggingModelligConfigFileName != '':
@@ -391,13 +388,13 @@ def main(args):
 
     # depending on high or low uncertainty argument generate start time, end time and query time
     if nowMinusCHLT:
-        startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
-        endDate = currentUTCtime
+        startDate = theQueryTime - timedelta(hours=characteristicTimeLength)
+        endDate = theQueryTime
         queryTime = endDate
         collection = modellingConfig['metadataType_highUncertainty']
     else:
-        startDate = currentUTCtime - timedelta(hours=(2 * characteristicTimeLength))
-        endDate = currentUTCtime
+        startDate = theQueryTime - timedelta(hours=(2 * characteristicTimeLength))
+        endDate = theQueryTime
         queryTime = endDate - timedelta(hours=characteristicTimeLength)
         collection = modellingConfig['metadataType_lowUncertainty']
 
