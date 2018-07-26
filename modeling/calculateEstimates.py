@@ -318,7 +318,7 @@ def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTim
                 LOGGER.info('time of time slice is %s', document['estimationFor'])
                 LOGGER.info('time difference is %s', timeDifference)
 
-                if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
+                if (timeDifference.total_seconds() / (60 * 60)) >= configForModelling['characteristicTimeLength']:
                     db[configForModelling['metadataType_highUncertainty']].delete_one({"_id": documentID})
                     LOGGER.info('deleted %s', document['estimationFor'])
 
@@ -374,17 +374,12 @@ def main(args):
             LOGGER.info('modelling config file is %s', debuggingModelligConfigFileName)
             modellingConfig = getConfig('../config/', debuggingModelligConfigFileName)
 
-
-
     # nowMinusCHLT = bool(strtobool(sys.argv[1]))
-
-
 
     # # DEBUGGING CODE PIECE
     # debugging = bool(strtobool(sys.argv[2]))
     # if len(sys.argv) > 3:
     #
-
 
     # if debugging:
     #     if debuggingModelligConfigFileName != '':
