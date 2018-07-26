@@ -315,7 +315,7 @@ def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTim
                     db[configForModelling['metadataType_highUncertainty']].delete_one({"_id": documentID})
                     LOGGER.info('deleted %s', document['estimationFor'])
 
-        LOGGER.info('inserted data slice for %s', queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        LOGGER.info('inserted data slice for %s into %s', queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'), theCollection)
 
 
 def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberGridCells_LONG, theMesh, theBottomLeftCorner, theTopRightCorner):
@@ -347,7 +347,7 @@ def main(args):
     parser.add_argument("highUncertainty", help="true means only now() to now()-characteristicLength, false means now() to now()-characteristicLength and to now()-2*characteristicLength")
     # parser.add_argument("--debugging", help="true means debugging")
     parser.add_argument("-d", "--debugging", help="name of config file")
-    parser.add_argument("-q", "--querytime", help="query time for estimation with format: %Y-%m-%dT%H:%M:%SZ")
+    parser.add_argument("-q", "--querytime", help="query time (UTC) for estimation with format: %Y-%m-%dT%H:%M:%SZ")
 
     args = parser.parse_args()
 
@@ -475,7 +475,7 @@ def main(args):
 
     storeInMongo(modellingConfig, mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG)
 
-    LOGGER.info('successful estimation for ' + queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
+    LOGGER.info('successful estimation of %s for %s', collection, queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
 
 if __name__ == '__main__':
