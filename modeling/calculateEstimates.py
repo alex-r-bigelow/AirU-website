@@ -1,3 +1,4 @@
+import argparse
 import json
 import logging
 import logging.handlers as handlers
@@ -347,25 +348,48 @@ def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberG
     LOGGER.info('inserted estimation Metadata %s', gridID)
 
 
-if __name__ == '__main__':
+def main(args):
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("highUncertainty", help="true means only now() to now()-characteristicLength, false means now() to now()-characteristicLength and to now()-2*characteristicLength")
+    # parser.add_argument("--debugging", help="true means debugging")
+    parser.add_argument("--debugging", help="name of config file")
+
+    args = parser.parse_args()
 
     # true means only now()-characteristicLength;
     # false means now() to now()-characteristicLength and to now()-2*characteristicLength
-    nowMinusCHLT = bool(strtobool(sys.argv[1]))
+    nowMinusCHLT = bool(strtobool(args.highUncertainty))
 
     # take the modeling parameter from the config file
     modellingConfig = getConfig('../config/', 'modellingConfig.json')
 
-    # DEBUGGING CODE PIECE
-    debugging = bool(strtobool(sys.argv[2]))
-    if len(sys.argv) > 3:
-        debuggingModelligConfigFileName = sys.argv[3]
+    if args.debugging:
+        # debugging = bool(strtobool(args.debugging))
 
-    # debugging flag, if true, store data into dbs made for debugging, also allows to add another config file
-    if debugging:
+        debuggingModelligConfigFileName = args.debugging
+
+        # debugging flag, if true, store data into dbs made for debugging, also allows to add another config file
         if debuggingModelligConfigFileName != '':
             LOGGER.info('modelling config file is %s', debuggingModelligConfigFileName)
             modellingConfig = getConfig('../config/', debuggingModelligConfigFileName)
+
+
+
+    # nowMinusCHLT = bool(strtobool(sys.argv[1]))
+
+
+
+    # # DEBUGGING CODE PIECE
+    # debugging = bool(strtobool(sys.argv[2]))
+    # if len(sys.argv) > 3:
+    #
+
+
+    # if debugging:
+    #     if debuggingModelligConfigFileName != '':
+    #         LOGGER.info('modelling config file is %s', debuggingModelligConfigFileName)
+    #         modellingConfig = getConfig('../config/', debuggingModelligConfigFileName)
 
     characteristicTimeLength = modellingConfig['characteristicTimeLength']
     theGridID = modellingConfig['currentGridVersion']
@@ -460,3 +484,8 @@ if __name__ == '__main__':
     storeInMongo(modellingConfig, mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG)
 
     LOGGER.info('successful estimation for ' + queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+
+if __name__ == '__main__':
+
+    main(sys.argv[1:])
