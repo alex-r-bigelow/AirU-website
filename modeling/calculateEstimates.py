@@ -358,7 +358,9 @@ if __name__ == '__main__':
 
     # DEBUGGING CODE PIECE
     debugging = bool(strtobool(sys.argv[2]))
-    debuggingModelligConfigFileName = sys.argv[3]
+    if len(sys.argv) > 3:
+        debuggingModelligConfigFileName = sys.argv[3]
+
     # debugging flag, if true, store data into dbs made for debugging, also allows to add another config file
     if debugging:
         if debuggingModelligConfigFileName != '':
