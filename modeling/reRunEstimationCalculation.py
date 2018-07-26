@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 
 def main(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("startQuerytime", help="start query time (UTC) for estimation with format: %Y-%m-%dT%H:%M:%SZ")
-    parser.add_argument("endQuerytime", help="end query time (UTC) for estimation with format: %Y-%m-%dT%H:%M:%SZ")
+    parser.add_argument("startQuerytime", help="start query time (UTC) for estimation with format: \%Y-\%m-\%dT\%H:\%M:\%SZ")
+    parser.add_argument("endQuerytime", help="end query time (UTC) for estimation with format: \%Y-\%m-\%dT\%H:\%M:\%SZ")
     parser.add_argument("interval", help="interval until next estimate calculation in seconds")
 
     args = parser.parse_args(args)
@@ -17,7 +17,7 @@ def main(args):
     interval = timedelta(seconds=args.interval)
 
     while startQuerytime < endQuerytime:
-        calculateEstimates.main(['false', '--d', 'modellingConfig_debugging.json', '-q', '2018-07-26T16:00:00'])
+        calculateEstimates.main(['false', '--d', 'modellingConfig_debugging.json', '-q', '2018-07-26T16:00:00Z'])
         startQuerytime += interval
 
 
