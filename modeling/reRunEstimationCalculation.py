@@ -4,13 +4,13 @@ import sys
 from datetime import datetime, timedelta
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("startQuerytime", help="start query time (UTC) for estimation with format: %Y-%m-%dT%H:%M:%SZ")
     parser.add_argument("endQuerytime", help="end query time (UTC) for estimation with format: %Y-%m-%dT%H:%M:%SZ")
     parser.add_argument("interval", help="interval until next estimate calculation in seconds")
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     startQuerytime = datetime.strptime(args.startQuerytime, '%Y-%m-%dT%H:%M:%SZ')
     endQuerytime = datetime.strptime(args.endQuerytime, '%Y-%m-%dT%H:%M:%SZ')

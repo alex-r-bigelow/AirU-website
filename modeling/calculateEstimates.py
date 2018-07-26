@@ -349,7 +349,7 @@ def main(args):
     parser.add_argument("-d", "--debugging", help="name of config file")
     parser.add_argument("-q", "--querytime", help="query time (UTC) for estimation with format: %Y-%m-%dT%H:%M:%SZ")
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     # true means only now()-characteristicLength;
     # false means now() to now()-characteristicLength and to now()-2*characteristicLength
