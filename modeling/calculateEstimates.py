@@ -288,7 +288,7 @@ def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTim
 
         # if theCollection == 'timeSlicedEstimates_high':
         if theCollection == configForModelling['metadataType_highUncertainty']:
-            db.getCollection(theCollection).insert_one(anEstimateSlice)
+            db[theCollection].insert_one(anEstimateSlice)
 
         LOGGER.info('inserted data slice for %s into %s', currentUTCtime_str, theCollection)
     else:
@@ -297,10 +297,10 @@ def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTim
         # remove estimates from the high uncertainty db that are too old
         # if theCollection == 'timeSlicedEstimates_low':
         if theCollection == configForModelling['metadataType_lowUncertainty']:
-            db.getCollection(theCollection).insert_one(anEstimateSlice)
+            db[theCollection].insert_one(anEstimateSlice)
 
             # oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(5)
-            oldestEstimation = db.getCollection(configForModelling['metadataType_highUncertainty']).find().sort("estimationFor", 1).limit(5)
+            oldestEstimation = db[(configForModelling['metadataType_highUncertainty'])].find().sort("estimationFor", 1).limit(5)
 
             for document in oldestEstimation:
                 LOGGER.info('preparing to delete %s', document['estimationFor'])
@@ -318,7 +318,7 @@ def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTim
                 LOGGER.info('time difference is %s', timeDifference)
 
                 if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
-                    db.getCollection(configForModelling['metadataType_highUncertainty']).delete_one({"_id": documentID})
+                    db[configForModelling['metadataType_highUncertainty']].delete_one({"_id": documentID})
                     LOGGER.info('deleted %s', document['estimationFor'])
 
         LOGGER.info('inserted data slice for %s', currentUTCtime)
