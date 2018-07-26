@@ -234,7 +234,7 @@ def calculateContours(X, Y, Z, endDate, levels, colorBands):
     return new_contours
 
 
-def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, colorBands, theNowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, gridID):
+def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTime, endTime, levels, colorBands, theNowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG):
 
     db = client.airudb
 
@@ -256,13 +256,13 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
         header = ('lat', 'long', 'pm25', 'variability')
         theEstimate = dict(zip(header, aZippedEstimate))
 
-        theEstimationMetadata = db.estimationMetadata.find_one({"gridID": int(gridID), "metadataType": theCollection})
+        theEstimationMetadata = db.estimationMetadata.find_one({"gridID": int(configForModelling['currentGridVersion']), "metadataType": theCollection})
 
         if theEstimationMetadata is not None:
 
             for key, value in theEstimationMetadata['transformedGrid'].iteritems():
                 if value['lat'][0] == theEstimate['lat'] and value['lngs'][0] == theEstimate['long']:
-                    LOGGER.info('found a match')
+                    # LOGGER.info('found a match')
 
                     theEstimates[str(i)] = {'gridELementID': key, 'pm25': theEstimate['pm25'], 'variability': theEstimate['variability']}
                     break
@@ -286,17 +286,21 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
     if theNowMinusCHLT:
         # high variability estimation
 
-        if theCollection == 'timeSlicedEstimates_high':
-            db.timeSlicedEstimates_high.insert_one(anEstimateSlice)
+        # if theCollection == 'timeSlicedEstimates_high':
+        if theCollection == configForModelling['metadataType_highUncertainty']:
+            db.getCollection(theCollection).insert_one(anEstimateSlice)
 
         LOGGER.info('inserted data slice for %s into %s', currentUTCtime_str, theCollection)
     else:
         # low variability estimation
 
-        if theCollection == 'timeSlicedEstimates_low':
-            db.timeSlicedEstimates_low.insert_one(anEstimateSlice)
+        # remove estimates from the high uncertainty db that are too old
+        # if theCollection == 'timeSlicedEstimates_low':
+        if theCollection == configForModelling['metadataType_lowUncertainty']:
+            db.getCollection(theCollection).insert_one(anEstimateSlice)
 
-            oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(5)
+            # oldestEstimation = db.timeSlicedEstimates_high.find().sort("estimationFor", 1).limit(5)
+            oldestEstimation = db.getCollection(configForModelling['metadataType_highUncertainty']).find().sort("estimationFor", 1).limit(5)
 
             for document in oldestEstimation:
                 LOGGER.info('preparing to delete %s', document['estimationFor'])
@@ -314,7 +318,7 @@ def storeInMongo(client, theCollection, anEstimate, queryTime, endTime, levels, 
                 LOGGER.info('time difference is %s', timeDifference)
 
                 if (timeDifference.total_seconds() / (60 * 60)) >= characteristicTimeLength:
-                    db.timeSlicedEstimates_high.delete_one({"_id": documentID})
+                    db.getCollection(configForModelling['metadataType_highUncertainty']).delete_one({"_id": documentID})
                     LOGGER.info('deleted %s', document['estimationFor'])
 
         LOGGER.info('inserted data slice for %s', currentUTCtime)
@@ -345,16 +349,26 @@ def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberG
 
 if __name__ == '__main__':
 
-    # true means only now()-characteristicLength; false means now() to now()-characteristicLength and to now()-2*characteristicLength
+    # true means only now()-characteristicLength;
+    # false means now() to now()-characteristicLength and to now()-2*characteristicLength
     nowMinusCHLT = bool(strtobool(sys.argv[1]))
 
     # take the modeling parameter from the config file
     modellingConfig = getConfig('../config/', 'modellingConfig.json')
 
+    # DEBUGGING CODE PIECE
+    debugging = bool(strtobool(sys.argv[2]))
+    debuggingModelligConfigFileName = sys.argv[3]
+    # debugging flag, if true, store data into dbs made for debugging, also allows to add another config file
+    if debugging:
+        if debuggingModelligConfigFileName != '':
+            LOGGER.info('modelling config file is %s', debuggingModelligConfigFileName)
+            modellingConfig = getConfig('../config/', debuggingModelligConfigFileName)
+
     characteristicTimeLength = modellingConfig['characteristicTimeLength']
     theGridID = modellingConfig['currentGridVersion']
 
-    # depending on high or low uncertainty argument generate start, end and query time
+    # depending on high or low uncertainty argument generate start time, end time and query time
     if nowMinusCHLT:
         startDate = currentUTCtime - timedelta(hours=characteristicTimeLength)
         endDate = currentUTCtime
@@ -369,19 +383,6 @@ if __name__ == '__main__':
     # the relative time is always with respect to the start time
     queryTimeRelative = datetime2Reltime([queryTime], startDate)
     # print(queryTimeRelative)
-
-    # python modeling/calculateEstimates.py gridCellsLat gridCellsLong startDate endDate
-    # python modeling/calculateEstimates.py 10 16 %Y-%m-%dT%H:%M:%SZ %Y-%m-%dT%H:%M:%SZ
-    # if len(sys.argv) > 2:
-    #     numberGridCells_LAT = sys.argv[2]
-    #     numberGridCells_LONG = sys.argv[3]
-    #     startDate = datetime.strptime(sys.argv[4], '%Y-%m-%dT%H:%M:%SZ')
-    #     endDate = datetime.strptime(sys.argv[5], '%Y-%m-%dT%H:%M:%SZ')
-    # else:
-    #     numberGridCells_LAT = 10
-    #     numberGridCells_LONG = 16
-    #     startDate = datetime(2018, 1, 7, 0, 0, 0)
-    #     endDate = datetime(2018, 1, 11, 0, 0, 0)
 
     config = getConfig('../config/', 'config.json')
 
@@ -404,15 +405,6 @@ if __name__ == '__main__':
 
     if meshgridInfo is None:
 
-        # if numberGridCells_LAT is None and numberGridCells_LONG is None:
-        #     # numberGridCells_LAT = 10
-        #     # numberGridCells_LONG = 16
-        #     # numberGridCells_LAT = 35    # = ((40.810476-40.598850)/(-111.713403 -- 112.001349)) * 16 * 3
-        #     # numberGridCells_LONG = 48   # = 16 * 3
-        #     LOGGER.info('problem with numberGridCells_LAT and numberGridCells_LONG, both are None')
-        # else:
-        #     LOGGER.info('problem with numberGridCells_LAT and numberGridCells_LONG, one of them is not None')
-
         # geographical area
         bottomLeftCorner = {'lat': modellingConfig['bottomLeftCorner_LAT'], 'lng': modellingConfig['bottomLeftCorner_LONG']}
         topRightCorner = {'lat': modellingConfig['topRightCorner_LAT'], 'lng': modellingConfig['topRightCorner_LONG']}
@@ -422,7 +414,6 @@ if __name__ == '__main__':
 
         mesh = generateQueryMeshVariableGrid(numberGridCells_LAT, numberGridCells_LONG, bottomLeftCorner, topRightCorner, queryTimeRelative)
 
-        # theGridID = 0
         storeGridMetadata(mongoClient, theGridID, collection, int(numberGridCells_LAT), int(numberGridCells_LONG), mesh, bottomLeftCorner, topRightCorner)
     else:
         mesh = meshgridInfo['grid']
@@ -464,6 +455,6 @@ if __name__ == '__main__':
 
     theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate, bottomLeftCorner, topRightCorner)
 
-    storeInMongo(mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG, theGridID)
+    storeInMongo(modellingConfig, mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG)
 
     LOGGER.info('successful estimation for ' + queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
