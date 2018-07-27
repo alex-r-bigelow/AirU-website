@@ -6,12 +6,13 @@ var router = express.Router();
 //   res.sendFile(path.join(__dirname, 'views/fileUploader.html'));
 // });
 
-router.get('/uploader', function(req, res, next) {
+router.get('/', function(req, res, next) {
   res.render('fileUploader');
 });
 
 
 router.post('/upload', function(req, res){
+    console.log('found upload!!!!!')
 
   // create an incoming form object
   var form = new formidable.IncomingForm();
@@ -20,11 +21,16 @@ router.post('/upload', function(req, res){
   form.multiples = true;
 
   // store all uploads in the /uploads directory
-  form.uploadDir = path.join(__dirname, '/uploads');
+  // form.uploadDir = path.join(__dirname, '/files/updates');
+  // form.uploadDir = path.join(__dirname, '/updates');
+  form.uploadDir = path.join(__dirname, 'updates');
+  console.log('found upload!!!!!')
 
   // every time a file has been uploaded successfully,
   // rename it to it's orignal name
   form.on('file', function(field, file) {
+      console.log(field)
+      console.log(file)
     fs.rename(file.path, path.join(form.uploadDir, file.name));
   });
 
@@ -42,3 +48,6 @@ router.post('/upload', function(req, res){
   form.parse(req);
 
 });
+
+
+module.exports = router;

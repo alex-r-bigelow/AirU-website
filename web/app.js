@@ -47,7 +47,7 @@ app.use(function(req, res, next) {
 
 app.use('/', index);
 app.use('/sensors', sensors);
-// app.use('/upload', uploader);
+app.use('/uploader', uploader);
 
 // var Category = app.resource = restful.model('category', mongoose.Schema({
 //   cat_name: String,

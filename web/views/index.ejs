@@ -3,125 +3,88 @@
   <head>
     <meta charset="UTF-8">
     <title>Map</title>
-    <link rel="stylesheet" href="./css/map.css"/>
-    <link rel="stylesheet" href="./css/leaflet-sidebar.css"/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
+    <link rel="stylesheet" type="text/css" href="css/map.css"/>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js" integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log==" crossorigin=""></script>
-    <script src='https://api.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.css' rel='stylesheet' />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-easybutton@2.0.0/src/easy-button.css">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- <script src="https://unpkg.com/leaflet-easybutton@2.0.0/src/easy-button.js"></script> -->
-    <script src="./js/leaflet-sidebar.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   </head>
   <body>
-      <body>
-  		<div id="sidebar" class="sidebar collapsed">
-  			<!-- Nav tabs -->
-  			<div class="sidebar-tabs">
-  				<ul role="tablist">
-  					<li><a href="#Q1" role="tab">Q1</a></li>
-  					<li><a href="#Q2" role="tab">Q2</a></li>
-  					<li><a href="#Q3" role="tab">Q3</i></a></li>
-  					<!-- <li class="disabled"><a href="#messages" role="tab"><i class="fa fa-envelope"></i></a></li> -->
-  					<!-- <li><a href="https://github.com/Turbo87/sidebar-v2" role="tab" target="_blank"><i class="fa fa-github"></i></a></li> -->
-  				</ul>
+        <div id='container'>
+            <div id='detailsBar'></div>
+            <!-- the map -->
+            <div id='slc'></div>
 
-  				<ul role="tablist">
-  					<li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
-  				</ul>
-  			</div>
 
-  			<!-- Tab panes -->
-  			<div class="sidebar-content">
-  				<div class="sidebar-pane" id="Q1">
-  					<h1 class="sidebar-header">
-  						Why not use EPA classification color map?
-  						<span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
-  					</h1>
+        </div>
 
-  					<p>This would be a more explanative piece that explains why we are not using the EPA classification color map.</p>
-  				</div>
-
-  				<div class="sidebar-pane" id="Q2">
-  					<h1 class="sidebar-header">
-  						Influence of elevation on air quality?
-  						<span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
-  					</h1>
-
-  					<p>
-  						<ul>
-  							<li>See landmarks (markers); see current location, which is a selected or searched location.</li>
-  							<li>Algorithm takes current location and fits an approximately east-west line through the current location and landmarks</li>
-  						</ul>
-  					</p>
-  				</div>
-
-  				<div class="sidebar-pane" id="Q3">
-  					<h1 class="sidebar-header">
-  						Compare with bad air quality days?
-  						<span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
-  					</h1>
-
-  					<p>
-  						This view is all about comparing to bad AQ days.
-  						<ul>
-  							<li>Current location where same location for bad air days;</li>
-  							<li>landmarks with current AQ, compared to pas bad air days</li>
-  						</ul>
-  					</p>
-  				</div>
-
-  				<!-- <div class="sidebar-pane" id="profile">
-  					<h1 class="sidebar-header">Profile<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-  				</div>
-
-  				<div class="sidebar-pane" id="messages">
-  					<h1 class="sidebar-header">Messages<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-  				</div>
-
-  				<div class="sidebar-pane" id="settings">
-  					<h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-  				</div> -->
-  			</div>
-  		</div>
-
-  		<!-- the map -->
-  		<div id='slc'></div>
 
   		<script>
-
-  			var accessToken = 'pk.eyJ1Ijoib3NjYXJpbnNsYyIsImEiOiJjajZ3bG5kbnUxN2h3Mnd1aDdlOTJ6ZnUzIn0.fLYowxdcPCmZSLt51mG8tw';
   			var slcPosition = [40.758701, -111.876183];
   			var homeMarker = [40.779821, -111.877877];
   			var slcMap = L.map('slc', {
   				center: slcPosition,
   				zoom: 13,
-  				trackResize: true
+  		// 		trackResize: true
   			});
 
+            // var osmUrl = 'http://{s}.tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png';
+            // var osmAttrib = '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 
-  			L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-  				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            var osmUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}';
+            var osmAttrib = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>';
+            var mapboxID = 'mapbox.streets';
+            var accessToken = 'pk.eyJ1Ijoib3NjYXJpbnNsYyIsImEiOiJjajZ3bG5kbnUxN2h3Mnd1aDdlOTJ6ZnUzIn0.fLYowxdcPCmZSLt51mG8tw';
+
+  			L.tileLayer(osmUrl, {
+  				attribution: osmAttrib,
   				maxZoom: 18,
-  				id: 'mapbox.light',
-  				accessToken: accessToken
+                id: mapboxID,
+                accessToken: accessToken
   			}).addTo(slcMap);
 
-  			var marker = L.marker(homeMarker).addTo(slcMap);
-  			marker.bindPopup("<b>This is my home</b><br>What could I show here.");
+
+            // suggest here: https://github.com/Leaflet/Leaflet/issues/1266
+            // map always show when window is resized
+            $(window).on("resize", function () {
+                $("#slc").width($(window).width());
+                slcMap.invalidateSize();
+            }).trigger("resize");
+
+  	// 		var marker = L.marker(homeMarker).addTo(slcMap);
+  	// 		marker.bindPopup("<b>This is my home</b><br>What could I show here.");
+
+            var allUtahIDs = [];
+
+            $.ajax({
+                url: 'https://air.eng.utah.edu:8086/query',
+                data: {
+                    db: 'defaultdb',
+                    q: 'SHOW TAG VALUES FROM airQuality WITH KEY = "ID"'
+                },
+                success: function (response) {
+                    console.log(response)
+                    var allUtahIDs = response.results[0].series[0].values.map(function(d) {
+                        return d[1];
+                    });
+
+                    // response = response.results[0].series.map(function (d) {
+                    //     return d.tags; //pulls out tag to clean up data for distance finding
+                    // });
+
+                    //closest needs to be sensor info, not distance to closest sensor
+                    // var closest = findDistance(response, mark); //returns closest sensor using distance equation
+                    // callback(closest);
+                },
+                error: function () {
+                    console.warn(arguments);
+                }
+            });
 
 
-  			// L.easyButton({
-  			// 	states: [{
-  			// 		icon: '<span class="star">Why color map not using EPA classifcation color map?</span>',
-  			// 		onClick: function(){ alert('you just clicked the html entity \&starf;'); },
-  			// 		position: 'bottomright',
-  			// 	}]
-  			// }).addTo(slcMap);
-
-  			var sidebar = L.control.sidebar('sidebar').addTo(slcMap);
 
   		</script>
+
   </body>
 </html>

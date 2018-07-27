@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import pytz
 import sys
 import requests
@@ -86,37 +87,8 @@ def writeLoggingDataToFile(fileName, data):
 
 
 def getDualStationsWithPartner():
-    # try:
-    #     purpleAirData = urllib2.urlopen("https://map.purpleair.org/json").read()
-    # except urllib2.URLError, e:
-    #     sys.stderr.write('%s\tProblem acquiring PurpleAir data; their server appears to be down.\n' % TIMESTAMP)
-    #     sys.stderr.write('%s\t%s.\n' % TIMESTAMP, e.reason)
-    #
-    # purpleAirData = unicode(purpleAirData, 'ISO-8859-1')
-    # purpleAirData = json.loads(purpleAirData)['results']
 
-    # try:
-    #     purpleAirData = requests.get("https://map.purpleair.org/json")
-    #     purpleAirData.raise_for_status()
-    # except requests.exceptions.HTTPError as e:
-    #     sys.stderr.write('%s\tProblem acquiring PurpleAir data; HTTP error.\n' % TIMESTAMP)
-    #     # sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
-    # except requests.exceptions.Timeout as e:
-    #     # Maybe set up for a retry, or continue in a retry loop
-    #     sys.stderr.write('%s\tProblem acquiring PurpleAir data; timeout error.\n' % TIMESTAMP)
-    #     # sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
-    # except requests.exceptions.TooManyRedirects as e:
-    #     # Tell the user their URL was bad and try a different one
-    #     sys.stderr.write('%s\tProblem acquiring PurpleAir data; URL was bad.\n' % TIMESTAMP)
-    #     # sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
-    # except requests.exceptions.RequestException as e:
-    #     # catastrophic error. bail.
-    #     sys.stderr.write('%s\tProblem acquiring PurpleAir data; catastrophic error.\n' % TIMESTAMP)
-    #     # sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e.reason))
-    #     sys.exit(1)
-    #
-    # purpleAirData = purpleAirData.json()['results']
-
+    logging.info('get the dual stations with partner')
     purpleAirData = getPurpleAirJSON()
 
     noParentStations = []
@@ -124,7 +96,7 @@ def getDualStationsWithPartner():
     # the ones that have a parent --> download parent and child
     stationsToDownload = []
     for station in purpleAirData:
-        # print station
+        logging.debug('a sensor: %s', station)
 
         # simplified bbox from:
         # https://gist.github.com/mishari/5ecfccd219925c04ac32
@@ -138,18 +110,16 @@ def getDualStationsWithPartner():
         # log = specifies east-west position
 
         if station['THINGSPEAK_PRIMARY_ID_READ_KEY'] is None:
-            # print station['ID']
+            logging.info('The THINGSPEAK_PRIMARY_ID_READ_KEY is None')
             continue
 
         if station['Lat'] is None or station['Lon'] is None:
-            # logging.info('latitude or longitude is None')
+            logging.info('latitude or longitude is None')
             continue
 
         if not((float(station['Lon']) < float(utahBbox['top'])) and (float(station['Lon']) > float(utahBbox['bottom']))) or not((float(station['Lat']) > float(utahBbox['left'])) and(float(station['Lat']) < float(utahBbox['right']))):
-            # logging.info('Not in Utah')
+            logging.info('station is not in Utah')
             continue
-
-        # print 'ID: ' + str(station['ID']) + ' ' + 'parentID: ' + str(station['ParentID']) + ' ' + station['THINGSPEAK_PRIMARY_ID'] + ' ' + station['Lat'] + ' ' + station['Lon']
 
         aStation = {'ID': station['ID'], 'parentID': station['ParentID'], 'THINGSPEAK_PRIMARY_ID': station['THINGSPEAK_PRIMARY_ID'], 'THINGSPEAK_PRIMARY_ID_READ_KEY': station['THINGSPEAK_PRIMARY_ID_READ_KEY']}
 
