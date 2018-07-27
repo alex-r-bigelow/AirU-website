@@ -14,7 +14,7 @@ def main(args):
 
     startQuerytime = datetime.strptime(args.startQuerytime, '%Y-%m-%dT%H:%M:%SZ')
     endQuerytime = datetime.strptime(args.endQuerytime, '%Y-%m-%dT%H:%M:%SZ')
-    interval = timedelta(seconds=int(args.interval))
+    interval = timedelta(seconds=args.interval)
 
     while startQuerytime < endQuerytime:
         calculateEstimates.main(['false', '--d', 'modellingConfig_debugging.json', '-q', startQuerytime.stftime('%Y-%m-%dT%H:%M:%SZ')])
