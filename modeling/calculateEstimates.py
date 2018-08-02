@@ -93,7 +93,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, 
     startDate = start
     endDate = end
 
-    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 120, theTopRightCorner['lat'], theBottomLeftCorner['lng'], theBottomLeftCorner['lat'], theTopRightCorner['lng'])
+    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600*2, theTopRightCorner['lat'], theBottomLeftCorner['lng'], theBottomLeftCorner['lat'], theTopRightCorner['lng'])
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
