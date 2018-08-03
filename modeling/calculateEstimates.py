@@ -88,12 +88,14 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, characteristicLength_space, characteristicLength_time, mesh, start, end, theBottomLeftCorner, theTopRightCorner):
+def getEstimate(purpleAirClient, airuClient, theDBs, characteristicLength_space, characteristicLength_time, mesh, start, end, theBottomLeftCorner, theTopRightCorner, binFrequency):
 
     startDate = start
     endDate = end
 
-    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, 3600*2, theTopRightCorner['lat'], theBottomLeftCorner['lng'], theBottomLeftCorner['lat'], theTopRightCorner['lng'])
+    # for 4h characteristicLength => 3600 * 2
+    # for 1/6h characteristicLength => 120
+    data_tr = AQDataQuery(purpleAirClient, airuClient, theDBs, startDate, endDate, binFrequency, theTopRightCorner['lat'], theBottomLeftCorner['lng'], theBottomLeftCorner['lat'], theTopRightCorner['lng'])
 
     pm2p5_tr = data_tr[0]
     long_tr = data_tr[1]
@@ -385,6 +387,7 @@ def main(args):
 
     characteristicTimeLength = modellingConfig['characteristicTimeLength']
     characteristicSpaceLength = modellingConfig['characteristicSpaceLength']
+    binFrequency = modellingConfig['binFrequency']
     theGridID = modellingConfig['currentGridVersion']
 
     # depending on high or low uncertainty argument generate start time, end time and query time
@@ -472,7 +475,7 @@ def main(args):
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, characteristicSpaceLength, characteristicTimeLength, mesh, startDate, endDate, bottomLeftCorner, topRightCorner)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, characteristicSpaceLength, characteristicTimeLength, mesh, startDate, endDate, bottomLeftCorner, topRightCorner, binFrequency)
 
     storeInMongo(modellingConfig, mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG)
 
