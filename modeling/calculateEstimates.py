@@ -88,7 +88,7 @@ def generateQueryMeshVariableGrid(numberGridCellsLAT, numberGridCellsLONG, botto
     return {'lats': lats, 'lngs': lngs, 'times': times}
 
 
-def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, end, theBottomLeftCorner, theTopRightCorner):
+def getEstimate(purpleAirClient, airuClient, theDBs, characteristicLength_space, characteristicLength_time, mesh, start, end, theBottomLeftCorner, theTopRightCorner):
 
     startDate = start
     endDate = end
@@ -154,7 +154,8 @@ def getEstimate(purpleAirClient, airuClient, theDBs, nowMinusCHLT, mesh, start, 
     # isRegression = True
 
     # the rest uses the default values given by Amir
-    [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr)  # , sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
+    # [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr)  # , sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
+    [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0=10, L0=[characteristicLength_space, characteristicLength_time], sigmaN=4.2, basisFnDeg=1, isTrain=False, isRegression=True)
 
     return [yPred, yVar, x_Q[:, 0], x_Q[:, 1]]
 
@@ -383,6 +384,7 @@ def main(args):
     #         modellingConfig = getConfig('../config/', debuggingModelligConfigFileName)
 
     characteristicTimeLength = modellingConfig['characteristicTimeLength']
+    characteristicSpaceLength = modellingConfig['characteristicSpaceLength']
     theGridID = modellingConfig['currentGridVersion']
 
     # depending on high or low uncertainty argument generate start time, end time and query time
@@ -470,7 +472,7 @@ def main(args):
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
-    theEstimate = getEstimate(pAirClient, airUClient, dbs, nowMinusCHLT, mesh, startDate, endDate, bottomLeftCorner, topRightCorner)
+    theEstimate = getEstimate(pAirClient, airUClient, dbs, characteristicSpaceLength, characteristicTimeLength, mesh, startDate, endDate, bottomLeftCorner, topRightCorner)
 
     storeInMongo(modellingConfig, mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG)
 
