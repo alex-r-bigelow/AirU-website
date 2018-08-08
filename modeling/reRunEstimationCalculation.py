@@ -1,9 +1,12 @@
 import argparse
 import calculateEstimates
+import json
 import logging
 import logging.handlers as handlers
+import os
 import sys
 import time
+
 from datetime import datetime, timedelta
 
 LOGGER = logging.getLogger(__name__)
@@ -18,7 +21,21 @@ logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
 
+# getting the config file
+def getConfig(aPath, fileName):
+
+    configPath = os.path.join(sys.path[0], aPath)
+    fullPath = os.path.join(configPath, fileName)
+
+    with open(fullPath, 'r') as configfile:
+        return json.loads(configfile.read())
+    sys.stderr.write('ConfigError\tProblem reading config file.\n')
+    sys.exit(1)
+
+
 def main(args):
+    debuggingConfigFile = 'modellingConfig_debugging.json'
+
     parser = argparse.ArgumentParser()
     parser.add_argument("startQuerytime", help="start query time (UTC) for estimation with format: \%Y-\%m-\%dT\%H:\%M:\%SZ")
     parser.add_argument("endQuerytime", help="end query time (UTC) for estimation with format: \%Y-\%m-\%dT\%H:\%M:\%SZ")
@@ -30,18 +47,27 @@ def main(args):
     endQuerytime = datetime.strptime(args.endQuerytime, '%Y-%m-%dT%H:%M:%SZ')
     interval = timedelta(seconds=int(args.interval))
 
-    while startQuerytime < endQuerytime:
+    modellingConfig = getConfig('../config/', debuggingConfigFile)
+    characteristicTimeLength = modellingConfig['characteristicTimeLength']
+
+    # shift the start and end time because startQuerytime is actually not the actual query timebut the end of the window
+    startQuerytime = startQuerytime + timedelta(hours=characteristicTimeLength)
+    endQuerytime = endQuerytime + timedelta(hours=characteristicTimeLength)
+
+    while startQuerytime <= endQuerytime:
         LOGGER.info('START timstep: %s', startQuerytime.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
         start = time.time()
 
-        calculateEstimates.main(['false', '--d', 'modellingConfig_debugging.json', '-q', startQuerytime.strftime('%Y-%m-%dT%H:%M:%SZ')])
-        startQuerytime += interval
+        calculateEstimates.main(['false', '--d', debuggingConfigFile, '-q', startQuerytime.strftime('%Y-%m-%dT%H:%M:%SZ')])
 
         end = time.time()
+        diff = end - start
 
-        LOGGER.info('*********** Time to calculate estimate: {}', format(end - start))
+        LOGGER.info('*********** Time to calculate estimate: {}', format(diff))
         LOGGER.info('Finished timestep: %s', startQuerytime.strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+        startQuerytime += interval
 
 
 if __name__ == '__main__':
