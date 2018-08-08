@@ -51,15 +51,15 @@ def main(args):
     characteristicTimeLength = modellingConfig['characteristicTimeLength']
 
     # shift the start and end time because startQuerytime is actually not the actual query timebut the end of the window
-    startQuerytime = startQuerytime + timedelta(hours=characteristicTimeLength)
-    endQuerytime = endQuerytime + timedelta(hours=characteristicTimeLength)
+    start_upperEstimationBound = startQuerytime + timedelta(hours=characteristicTimeLength)
+    end_upperEstimationBound = endQuerytime + timedelta(hours=characteristicTimeLength)
 
-    while startQuerytime <= endQuerytime:
+    while start_upperEstimationBound <= end_upperEstimationBound:
         LOGGER.info('START timstep: %s', startQuerytime.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
         start = time.time()
 
-        calculateEstimates.main(['false', '--d', debuggingConfigFile, '-q', startQuerytime.strftime('%Y-%m-%dT%H:%M:%SZ')])
+        calculateEstimates.main(['false', '--d', debuggingConfigFile, '-q', start_upperEstimationBound.strftime('%Y-%m-%dT%H:%M:%SZ')])
 
         end = time.time()
         diff = end - start
@@ -68,6 +68,7 @@ def main(args):
         LOGGER.info('Finished timestep: %s', startQuerytime.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
         startQuerytime += interval
+        start_upperEstimationBound = startQuerytime + timedelta(hours=characteristicTimeLength)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
+import time
 # import pytz
 
 from AQ_API import AQGPR
@@ -345,6 +346,8 @@ def storeGridMetadata(client, gridID, metadataType, numberGridCells_LAT, numberG
 
 def main(args):
 
+    start01 = time.time()
+
     parser = argparse.ArgumentParser()
     parser.add_argument("highUncertainty", help="true means only now() to now()-characteristicLength, false means now() to now()-characteristicLength and to now()-2*characteristicLength")
     # parser.add_argument("--debugging", help="true means debugging")
@@ -385,6 +388,7 @@ def main(args):
     #         LOGGER.info('modelling config file is %s', debuggingModelligConfigFileName)
     #         modellingConfig = getConfig('../config/', debuggingModelligConfigFileName)
 
+    # characteristicTimeLength is given in seconds
     characteristicTimeLength = modellingConfig['characteristicTimeLength']
     characteristicSpaceLength = modellingConfig['characteristicSpaceLength']
     binFrequency = modellingConfig['binFrequency']
@@ -392,14 +396,14 @@ def main(args):
 
     # depending on high or low uncertainty argument generate start time, end time and query time
     if nowMinusCHLT:
-        startDate = theQueryTime - timedelta(hours=characteristicTimeLength)
+        startDate = theQueryTime - timedelta(seconds=characteristicTimeLength)
         endDate = theQueryTime
         queryTime = endDate
         collection = modellingConfig['metadataType_highUncertainty']
     else:
-        startDate = theQueryTime - timedelta(hours=(2 * characteristicTimeLength))
+        startDate = theQueryTime - timedelta(seconds=(2 * characteristicTimeLength))
         endDate = theQueryTime
-        queryTime = endDate - timedelta(hours=characteristicTimeLength)
+        queryTime = endDate - timedelta(seconds=characteristicTimeLength)
         collection = modellingConfig['metadataType_lowUncertainty']
 
     # the relative time is always with respect to the start time
@@ -407,6 +411,12 @@ def main(args):
     # print(queryTimeRelative)
 
     config = getConfig('../config/', 'config.json')
+
+    end01 = time.time()
+    diff01 = end01 - start01
+    LOGGER.info('initial phase took %s', diff01)
+
+    start02 = time.time()
 
     mongodb_url = 'mongodb://{user}:{password}@{host}:{port}/{database}'.format(
         user=config['MONGO_USER'],
@@ -444,6 +454,10 @@ def main(args):
         bottomLeftCorner = meshgridInfo['bottomLeftCorner']
         topRightCorner = meshgridInfo['topRightCorner']
 
+    end02 = time.time()
+    diff02 = end02 - start02
+    LOGGER.info('grid generation phase took %s', diff02)
+
     # levels = [0.0, 12.0, 35.4, 55.4, 150.4, 250.4]
     levels = [0.0, 4.0, 8.0, 12.0, 19.8, 27.6, 35.4, 42.1, 48.7, 55.4, 150.4, 250.4]
     # colorBands = ('#a6d96a', '#ffffbf', '#fdae61', '#d7191c', '#bd0026', '#a63603')
@@ -475,9 +489,21 @@ def main(args):
            'airu_lat_measurement': config['INFLUX_AIRU_LATITUDE_MEASUREMENT'],
            'airu_long_measurement': config['INFLUX_AIRU_LONGITUDE_MEASUREMENT']}
 
+    start03 = time.time()
+
     theEstimate = getEstimate(pAirClient, airUClient, dbs, characteristicSpaceLength, characteristicTimeLength, mesh, startDate, endDate, bottomLeftCorner, topRightCorner, binFrequency)
 
+    end03 = time.time()
+    diff03 = end03 - start03
+    LOGGER.info('estimation phase took %s', diff03)
+
+    start04 = time.time()
+
     storeInMongo(modellingConfig, mongoClient, collection, theEstimate, queryTime, endDate, levels, colorBands, nowMinusCHLT, numberGridCells_LAT, numberGridCells_LONG)
+
+    end04 = time.time()
+    diff04 = end04 - start04
+    LOGGER.info('generating contour and storing data phase took %s', diff04)
 
     LOGGER.info('successful estimation of %s for %s', collection, queryTime.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
