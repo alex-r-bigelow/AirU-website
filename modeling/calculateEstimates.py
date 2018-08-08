@@ -158,7 +158,7 @@ def getEstimate(purpleAirClient, airuClient, theDBs, characteristicLength_space,
 
     # the rest uses the default values given by Amir
     # [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr)  # , sigmaF0, L0, sigmaN, basisFnDeg, isTrain, isRegression)
-    [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0=10, L0=[characteristicLength_space, characteristicLength_time], sigmaN=4.2, basisFnDeg=1, isTrain=False, isRegression=True)
+    [yPred, yVar] = AQGPR(x_Q, x_tr, pm2p5_tr, sigmaF0=10, L0=[characteristicLength_space, characteristicLength_time/3600.0], sigmaN=4.2, basisFnDeg=1, isTrain=False, isRegression=True)
 
     return [yPred, yVar, x_Q[:, 0], x_Q[:, 1]]
 
@@ -314,7 +314,7 @@ def storeInMongo(configForModelling, client, theCollection, anEstimate, queryTim
                 LOGGER.info('time of time slice is %s', document['estimationFor'])
                 LOGGER.info('time difference is %s', timeDifference)
 
-                if (timeDifference.total_seconds() / (60 * 60)) >= configForModelling['characteristicTimeLength']:
+                if (timeDifference.total_seconds()) >= configForModelling['characteristicTimeLength']:
                     db[configForModelling['metadataType_highUncertainty']].delete_one({"_id": documentID})
                     LOGGER.info('deleted %s', document['estimationFor'])
 
