@@ -71,10 +71,7 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
 
     # Creating the time stamps using the start date, end date, and the binning frequency
     tPartsNT = 500
-    datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds=tPartsNT * binFreq))     # 125 days??
-
-    print('******** datePartitiion *********')
-    print(datePartitions)
+    datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds=tPartsNT * binFreq))
 
     if len(datePartitions)>1:
         nt = (len(datePartitions)-1)*500 + \
@@ -83,8 +80,6 @@ def AQDataQuery(pAirClient, airUClient, dbs, startDate, endDate, binFreq=3600, m
     else:
         nt = (datetime.strptime(datePartitions[-1],'%Y-%m-%dT%H:%M:%SZ')-startDate).total_seconds()/binFreq
     nt = int(nt)
-    # print('******** datePartitiion *********')
-    # print(datePartitions)
 
     pAirUniqueIDs = []
     latitudes = []
