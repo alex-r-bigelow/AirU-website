@@ -67,7 +67,7 @@ def main(args):
         end = time.time()
         diff = end - start
 
-        LOGGER.info('*********** Time to calculate estimate: {}', format(diff))
+        LOGGER.info('*********** Time to calculate estimate: {}'.format(diff))
         LOGGER.info('Finished timestep: %s', startQuerytime.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
         startQuerytime += interval
