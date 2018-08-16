@@ -88,7 +88,8 @@ DAQ_FIELDS = {
     'NO2 (ppm)': 'no2',
     'CO (ppm)': 'co',
     'Solar radiation (W/m**2)': 'solar_radiation',
-    'Ozon concentration (ppb)': 'ozone'
+    'Ozon concentration (ppb)': 'ozone',
+    'SO2 (ppb)': 'so2'
 }
 
 DAQ_TAGS = {
