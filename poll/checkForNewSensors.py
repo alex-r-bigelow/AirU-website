@@ -46,18 +46,14 @@ def checkForNewSensors(influxClient, mongoClient):
     # LOGGER.info(min10AgoStr)
     LOGGER.info(min24hAgoStr)
 
-    # query only for the ID is enough, do not need their last PM value
-    # queryInflux = "SELECT ID, LAST(\"PM2.5\") AS pm25 " \
-    #               "FROM pm25 WHERE time >= '" + min24hAgoStr + "' " \
-    #               "GROUP BY ID" \
-    queryInflux = "SELECT ID " \
+    queryInflux = "SELECT ID, LAST(\"PM2.5\") AS pm25 " \
                   "FROM pm25 WHERE time >= '" + min24hAgoStr + "' " \
                   "GROUP BY ID" \
 
     LOGGER.info(queryInflux)
     dataLatestPMPerID = influxClient.query(queryInflux, epoch='ms')
     data = dataLatestPMPerID.raw
-    LOGGER.info(data)
+    # LOGGER.info(data)
 
     dataSeries = list(map(lambda x: dict(zip(x['columns'], x['values'][0])), data['series']))
     LOGGER.info(dataSeries)
