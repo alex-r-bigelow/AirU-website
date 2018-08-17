@@ -57,6 +57,7 @@ def checkForNewSensors(influxClient, mongoClient):
     LOGGER.info(queryInflux)
     dataLatestPMPerID = influxClient.query(queryInflux, epoch='ms')
     data = dataLatestPMPerID.raw
+    LOGGER.info(data)
 
     dataSeries = list(map(lambda x: dict(zip(x['columns'], x['values'][0])), data['series']))
     LOGGER.info(dataSeries)
