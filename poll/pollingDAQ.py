@@ -38,31 +38,32 @@ LOGGER.addHandler(logHandler)
 # (1380 North 200 West, Bountiful; Lat: 40.903; Long: -111.8845)
 # Magna (Met only) http://air.utah.gov/xmlFeed.php?id=mg
 # (2935 South 8560 West, Magna, UT; Lat: 40.7068; Long: -112.0947)
-DAQ_SITES = [{
-    'ID': 'Rose Park',
-    'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=rp',
-    'lat': 40.7955,
-    'lon': -111.9309,
-    'elevation': 1295,
-    }, {
-    'ID': 'Hawthorne',
-    'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=slc',
-    'lat': 40.7343,
-    'lon': -111.8721,
-    'elevation': 1306
-    }, {
-    'ID': 'Bountiful',
-    'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=bv',
-    'lat': 40.903,
-    'lon': -111.8845,
-    'elevation': None
-    }, {
-    'ID': 'Magna (Met only)',
-    'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=mg',
-    'lat': 40.7068,
-    'lon': -112.0947,
-    'elevation': None
-}]
+DAQ_SITES = [{'ID': 'Rose Park',
+              'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=rp',
+              'lat': 40.7955,
+              'lon': -111.9309,
+              'elevation': 1295},
+             {'ID': 'Hawthorne',
+              'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=slc',
+              'lat': 40.7343,
+              'lon': -111.8721,
+              'elevation': 1306},
+             {'ID': 'Bountiful',
+              'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=bv',
+              'lat': 40.903,
+              'lon': -111.8845,
+              'elevation': 1309},
+             {'ID': 'Copperview',
+              'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=cv',
+              'lat': 40.597772,
+              'lon': -111.894959,
+              'elevation': 1343}
+             # {'ID': 'Magna (Met only)',
+             # 'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=mg',
+             # 'lat': 40.7068,
+             # 'lon': -112.0947,
+             # 'elevation': None
+             ]
 
 # TODO: pull historical data; the url format is:
 # https://thingspeak.com/channels/194967/feed.json?offset=0&start=2010-01-01%2000:00:00&end=2017-03-01%2000:00:00
