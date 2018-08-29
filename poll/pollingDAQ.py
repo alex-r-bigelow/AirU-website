@@ -91,7 +91,7 @@ DAQ_FIELDS = {
     'Solar radiation (W/m**2)': 'solar_radiation',
     'Ozon concentration (ppb)': 'ozone',
     'SO2 (ppb)': 'so2',
-    'Barometric pressure (mmHG)': 'bp'
+    'Pressure (Pa)': 'bp'     # bp = Barometric pressure (mmHG)
 }
 
 DAQ_TAGS = {
@@ -234,6 +234,11 @@ def uploadDAQAirData(client):
             tmpField = point['fields'].get('Temp (*C)')
             if tmpField is not None:
                 point['fields']['Temp (*C)'] = (tmpField - 32) * 5 / 9
+
+            # convert the barometric pressure in mmHg to Pa
+            bpField = point['fields'].get('Pressure (Pa)')
+            if bpField is not None:
+                point['fields']['Pressure (Pa)'] = bpField * 133.322387415
 
             try:
                 client.write_points([point])
