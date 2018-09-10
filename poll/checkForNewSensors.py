@@ -96,7 +96,7 @@ def checkForNewSensors(influxClient, mongoClient):
                        "createdAt": nowUTC}
 
             db.liveSensors.insert_one(aSensor)
-            LOGGER.info('sensor %s added', toDelete)
+            LOGGER.info('sensor %s added', toInsert)
 
     # for anID in dataSeries:
     #     LOGGER.info(anID)
