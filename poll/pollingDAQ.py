@@ -57,7 +57,12 @@ DAQ_SITES = [{'ID': 'Rose Park',
               'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=cv',
               'lat': 40.597772,
               'lon': -111.894959,
-              'elevation': 1343}
+              'elevation': 1343},
+             {'ID': 'Herriman',
+              'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=h3',
+              'lat': 40.496408,
+              'lon': -112.036305,
+              'elevation': 1530}
              # {'ID': 'Magna (Met only)',
              # 'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=mg',
              # 'lat': 40.7068,
