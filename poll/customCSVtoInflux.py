@@ -32,7 +32,7 @@ def readCSVFile(fileName):
     """ read csv file and ouput it as a list"""
 
     data = []
-    with open(fileName, 'ab') as csvFile:
+    with open(fileName, 'rb') as csvFile:
         csvReader = csv.reader(csvFile, delimiter=',')
         next(csvReader)
         for row in csvReader:
