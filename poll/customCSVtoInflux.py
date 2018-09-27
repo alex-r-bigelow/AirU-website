@@ -36,9 +36,9 @@ def readCSVFile(fileName):
         csvReader = csv.reader(csvFile, delimiter=',')
         next(csvReader)
         for row in csvReader:
-            aTime = row['time']
-            anID = row['entity_id']
-            aValue = row['value']
+            aTime = row[0]
+            anID = row[1]
+            aValue = row[3]
 
             LOGGER.info(aTime)
             LOGGER.info(anID)
