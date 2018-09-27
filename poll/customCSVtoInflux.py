@@ -77,7 +77,7 @@ if __name__ == '__main__':
         8086,
         config['pollingUsername'],
         config['pollingPassword'],
-        'JimmIndoorPaper',
+        'JimmyIndoorPaper',
         ssl=True,
         verify_ssl=True
     )
