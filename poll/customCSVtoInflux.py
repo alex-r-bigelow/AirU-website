@@ -62,7 +62,7 @@ def pushDataToInfluxDB(client, aData):
 
         point['time'] = aRow[0]
         point['tags']['entity_id'] = aRow[1]
-        point['fields']['pm25'] = aRow[3]
+        point['fields']['pm25'] = aRow[2]
 
         LOGGER.info(point)
 
