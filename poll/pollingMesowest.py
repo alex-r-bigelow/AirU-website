@@ -87,7 +87,13 @@ def uploadMesowestData(client):
         # sys.stderr.write('%s\tProblem acquiring Mesowest data;\t%s.\n' % (TIMESTAMP, e))
         return []
 
-    mesowestData = mesowestData.json()['STATION']
+    # check of json data has the key 'STATION', if not get out
+    mesowestJSONData = mesowestData.json()
+    if 'STATION' in mesowestJSONData:
+        mesowestData = mesowestJSONData['STATION']
+    else:
+        LOGGER.info('No STATION key in the JSON file.')
+        return []
 
     # go through the stations
     for aMesowestStation in mesowestData:
