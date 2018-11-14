@@ -93,9 +93,13 @@ def uploadPurpleAirData(client):
             'bottom': -114.053932189941,
             'top': -109.041069030762
         }
+
+        # check if all the thingspeak ids are available, if not go to the next station
+        if 'THINGSPEAK_PRIMARY_ID' not in station or 'THINGSPEAK_PRIMARY_ID_READ_KEY' not in station or 'THINGSPEAK_SECONDARY_ID' not in station or 'THINGSPEAK_SECONDARY_ID_READ_KEY' not in station:
+            continue
+
         # lat = specifies north-south position
         # log = specifies east-west position
-
         if station['Lat'] is None or station['Lon'] is None:
             # logging.info('latitude or longitude is None')
             continue
