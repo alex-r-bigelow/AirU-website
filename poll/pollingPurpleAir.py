@@ -88,10 +88,10 @@ def uploadPurpleAirData(client):
         LOGGER.error('Not able to decode the json object;\t%s.' % e, exc_info=True)
         return []
 
-
-
     for station in purpleAirData:
-        # print station
+
+        if station['DEVICE_LOCATIONTYPE'] == 'inside':
+            continue
 
         # simplified bbox from:
         # https://gist.github.com/mishari/5ecfccd219925c04ac32
