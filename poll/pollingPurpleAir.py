@@ -91,6 +91,7 @@ def uploadPurpleAirData(client):
     for station in purpleAirData:
 
         if station['DEVICE_LOCATIONTYPE'] == 'inside':
+            LOGGER.info('Sensor is located inside, dont store it\'s data')
             continue
 
         # simplified bbox from:
