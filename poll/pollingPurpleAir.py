@@ -77,10 +77,18 @@ def uploadPurpleAirData(client):
         return []
 
     try:
-        purpleAirData = purpleAirData.json()['results']
+        purpleAirData = purpleAirData.json()
+    except:
+        LOGGER.error('JSON parsing error.')
+        return []
+
+    try:
+        purpleAirData = purpleAirData['results']
     except ValueError as e:
         LOGGER.error('Not able to decode the json object;\t%s.' % e, exc_info=True)
         return []
+
+
 
     for station in purpleAirData:
         # print station
@@ -252,6 +260,10 @@ def uploadPurpleAirData(client):
             # collisions with other data sources
             point['tags']['ID'] = idTag
             # print point['tags']['ID']
+
+            # get the dual sensor 2nd sensor a Sensor Model instead of null
+            if station['ParentID'] is not None:
+                point['tags']['Sensor Model'] = 'PMS5003'
 
             # Only include the point if we haven't stored this measurement before
             lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % point['tags']['ID'])
