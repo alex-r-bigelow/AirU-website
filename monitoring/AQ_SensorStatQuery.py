@@ -322,7 +322,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, airUClient, airUMonito
 
         # write the data to influxdb
         theData = {'ID': macs[anID]['pmSensorID'], 'macAddress': anID, 'status': status, 'latitude': airULatitudes[i], 'longitude': airULongitudes[i]}
-        saveMonitoringDataToInflux(airUMonitoringClient, theData)
+        # saveMonitoringDataToInflux(airUMonitoringClient, theData)
 
     return theMessage
 
