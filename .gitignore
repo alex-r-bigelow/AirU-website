@@ -2,3 +2,4 @@
 config/config.json
 modeling/Wei_Data_API/config.json
 modeling/Wei_Data_API/queriedData10min.csv
+modellingConfig.json
