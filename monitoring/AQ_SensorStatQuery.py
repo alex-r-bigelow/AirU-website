@@ -158,6 +158,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, airUClient, airUMonito
 
     # sorts the MACs
     tmpIDs.sort(key=lambda aMAC: aMAC.encode('utf-8'))
+    LOGGER.info(tmpIDs)
 
     # Querying the coordinates and model of each sensor in the queried geographic area
     airUUniqueIDs = []
@@ -186,6 +187,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, airUClient, airUMonito
                             + '%-30s' % 'offline/failure/online (total)' + '\t' \
                             + '%-10s' % 'current status' + '\t' \
                             + '%-20s' % 'timestamp last data value' + '\n'
+
     appendToCSVFile(filePathSolution, ['ID', 'batch', 'Sensor Holder', 'email', 'latitude', 'longitude', 'offline/failure/online (total)', 'current status', 'timestamp last data value'])
 
     theMessage = theMessage + '%-15s' % '------------' + '\t' \
@@ -321,7 +323,7 @@ def runMonitoring(config, timeFrame, isSchool, borderBox, airUClient, airUMonito
         appendToCSVFile(filePathSolution, [anID, int(theBatch), macs[anID]['sensorHolder'], theEmail, airULatitudes[i], airULongitudes[i], queryStatus, status, timestamp[0]['time'].split('.')[0]])
 
         # write the data to influxdb
-        theData = {'ID': macs[anID]['pmSensorID'], 'macAddress': anID, 'status': status, 'latitude': airULatitudes[i], 'longitude': airULongitudes[i]}
+        # theData = {'ID': macs[anID]['pmSensorID'], 'macAddress': anID, 'status': status, 'latitude': airULatitudes[i], 'longitude': airULongitudes[i]}
         # saveMonitoringDataToInflux(airUMonitoringClient, theData)
 
     return theMessage
@@ -374,7 +376,10 @@ if __name__ == "__main__":
 
     theRun = runMonitoring(config, timeFrame, isSchool, borderBox, airUClient, airUMonitoringClient)
 
+    LOGGER.info(theRun)
+    LOGGER.info('got through the monitoring')
+
     # needed as this is used to put the text into the email!!!
     print(theRun)
-    LOGGER.info(theRun)
+
     LOGGER.info('Monitoring successfull. Is school: ' + str(isSchool))
