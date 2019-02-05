@@ -25,19 +25,7 @@ LOGGER.addHandler(logHandler)
 
 # logging.basicConfig(filename='poller.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
 
-# Rose Park: http://air.utah.gov/xmlFeed.php?id=rp
-# (1354 West Goodwin Avenue, SLC; Lat: 40.7955; Long: -111.9309;
-# Elevation (m): 1295 )
-# Hawthorne http://air.utah.gov/xmlFeed.php?id=slc
-# (1675 South 600 East, SLC; Lat: 40.7343; Long: -111.8721;
-# Elevation (m): 1306)
-# Herriman http://air.utah.gov/xmlFeed.php?id=h3    DOES NOT GIVE PM data anymore
-# (14058 Mirabella Drive, Herriman; Lat:40.496408; Long: -112.036305;
-# Elevation (m): 1534)
-# Bountiful http://air.utah.gov/xmlFeed.php?id=bv
-# (1380 North 200 West, Bountiful; Lat: 40.903; Long: -111.8845)
-# Magna (Met only) http://air.utah.gov/xmlFeed.php?id=mg
-# (2935 South 8560 West, Magna, UT; Lat: 40.7068; Long: -112.0947)
+# Data source: http://www.airmonitoring.utah.gov/network/Counties.htm
 DAQ_SITES = [{'ID': 'Rose Park',
               'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=rp',
               'lat': 40.7955,
@@ -62,12 +50,17 @@ DAQ_SITES = [{'ID': 'Rose Park',
               'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=h3',
               'lat': 40.496408,
               'lon': -112.036305,
-              'elevation': 1530}
-             # {'ID': 'Magna (Met only)',
-             # 'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=mg',
-             # 'lat': 40.7068,
-             # 'lon': -112.0947,
-             # 'elevation': None
+              'elevation': 1530},
+             {'ID': 'Magna',
+              'dataFeed': 'https://air.utah.gov/csvFeed.php?id=ma',
+              'lat': 40.711330,
+              'lon': -112.110688,
+              'elevation': 1305},
+             {'ID': 'NearRoad',
+              'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=h3',
+              'lat': 40.661106,
+              'lon': -111.903178,
+              'elevation': 1298}
              ]
 
 # TODO: pull historical data; the url format is:
@@ -163,15 +156,11 @@ def uploadDAQAirData(client):
             utc_dt = local_dt.astimezone(pytz.utc)
             point['time'] = utc_dt
 
-            # print point['time']
-
             # Attach the tags - values about the station that shouldn't change
             for standardKey, daqKey in DAQ_TAGS.iteritems():
                 daqTag = daqSites.get(daqKey)
                 if daqTag is not None:
                     point['tags'][standardKey] = daqTag
-
-            # print point['tags']
 
             # check if there is a pm value
             if measurement.find('pm25'):
@@ -185,7 +174,6 @@ def uploadDAQAirData(client):
                     point['fields'][standardPM25Key] = theValue
                 else:
                     # if there is no pm value do not store
-                    # print 'no pm value'
                     break
 
             for standardKey, daqKey in DAQ_FIELDS.iteritems():
@@ -202,22 +190,21 @@ def uploadDAQAirData(client):
             LOGGER.debug('LAST POINT')
             LOGGER.debug(point['tags']['ID'])
             LOGGER.debug(lastPoint)
+
             if len(lastPoint) > 0:
                 lastPoint = lastPoint.get_points().next()
-                # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
                 LOGGER.debug(lastPoint['time'])
+
                 lastPointParsed = datetime.strptime(lastPoint['time'], '%Y-%m-%dT%H:%M:%SZ')
                 LOGGER.debug(lastPointParsed)
+
                 lastPointLocalized = pytz.utc.localize(lastPointParsed, is_dst=None)
                 LOGGER.debug(lastPointLocalized)
                 LOGGER.debug('the point time')
                 LOGGER.debug(point['time'])
-                # print lastPointLocalized
-                # if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
+
                 if point['time'] <= lastPointLocalized:
                     LOGGER.debug('point not included')
-                    # if point['time'] <= parser.parse(lastPoint['time']):
-                    # print 'POINT NOT INCLUDED'
                     continue
 
             # Convert all the fields to floats
@@ -234,8 +221,7 @@ def uploadDAQAirData(client):
             if windSpeedField is not None:
                 point['fields']['Wind speed (m/s)'] = windSpeedField * (1609.344 / 3600)
 
-            # Convert the daq deg F to deg C
-            # print point['fields']
+            # Convert the DAQ deg F to deg C
             tmpField = point['fields'].get('Temp (*C)')
             if tmpField is not None:
                 point['fields']['Temp (*C)'] = (tmpField - 32) * 5 / 9
