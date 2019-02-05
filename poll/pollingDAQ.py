@@ -19,7 +19,7 @@ LOGGER.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - [%(funcName)s:%(lineno)d] - %(levelname)s - %(message)s')
 
 logHandler = handlers.RotatingFileHandler('daqPoller.log', maxBytes=5000000, backupCount=5)
-logHandler.setLevel(logging.INFO)
+logHandler.setLevel(logging.ERROR)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
@@ -57,7 +57,7 @@ DAQ_SITES = [{'ID': 'Rose Park',
               'lon': -112.110688,
               'elevation': 1305},
              {'ID': 'NearRoad',
-              'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=h3',
+              'dataFeed': 'http://air.utah.gov/xmlFeed.php?id=nr',
               'lat': 40.661106,
               'lon': -111.903178,
               'elevation': 1298}
