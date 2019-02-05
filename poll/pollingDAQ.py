@@ -251,6 +251,9 @@ def uploadDAQAirData(client):
 
 
 if __name__ == '__main__':
+
+    LOGGER.info('DAQ Polling started')
+
     config = getConfig()
     client = InfluxDBClient(
         'air.eng.utah.edu',
