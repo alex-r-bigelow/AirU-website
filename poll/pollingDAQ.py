@@ -19,7 +19,7 @@ LOGGER.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - [%(funcName)s:%(lineno)d] - %(levelname)s - %(message)s')
 
 logHandler = handlers.RotatingFileHandler('daqPoller.log', maxBytes=5000000, backupCount=5)
-logHandler.setLevel(logging.ERROR)
+logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
