@@ -93,7 +93,7 @@ def uploadPurpleAirData(client):
     # go through all the stations
     for station in purpleAirData:
 
-        if station['DEVICE_LOCATIONTYPE'] == 'inside':
+        if station.get('DEVICE_LOCATIONTYPE') == 'inside':
             LOGGER.info('Sensor is located inside, dont store it\'s data')
             continue
 
@@ -245,10 +245,10 @@ def uploadPurpleAirData(client):
                 # if parentID = null then we have channel A --> field6=temp and field7=Humidity
                 # if parentID != null then we have channel B --> field6!=temp and field7!=Humidity --> do not take field6/7
                 if purpleKey in aMeasurement.keys():
-                    if station['ParentID'] is None and purpleKey in ['field6', 'field7', 'field8']:
+                    if station.get('ParentID') is None and purpleKey in ['field6', 'field7', 'field8']:
                         # Channel A
                         point['fields'][standardKey] = aMeasurement[purpleKey]
-                    elif station['ParentID'] is not None and purpleKey in ['field8']:
+                    elif station.get('ParentID') is not None and purpleKey in ['field8']:
                         # Channel B
                         point['fields'][standardKey] = aMeasurement[purpleKey]
 
@@ -279,7 +279,7 @@ def uploadPurpleAirData(client):
             # print point['tags']['ID']
 
             # get the dual sensor 2nd sensor a Sensor Model instead of null
-            if station['ParentID'] is not None:
+            if station.get('ParentID') is not None:
                 point['tags']['Sensor Model'] = 'PMS5003'
 
             # Only include the point if we haven't stored this measurement before
