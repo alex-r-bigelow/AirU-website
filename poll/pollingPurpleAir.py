@@ -29,6 +29,11 @@ def getConfig():
     sys.stderr.write('%s\tConfigError\tProblem reading config file.\n' % TIMESTAMP)
     sys.exit(1)
 
+# info about PurpleAir Channel A and Channel B: https://docs.google.com/document/d/15ijz94dXJ-YAZLi9iZ_RaBwrZ4KtYeCy08goGBwnbCU/edit
+
+# Channel A (ParentID==None) will be stored in influxdb with PM2.5, temperature and humidity
+# Channel B (ParentID!=None) will be stored in influxdb with only PM2.5, but not temperature and not humidity
+
 
 # the fields are always the same, therefore hardcoded them,
 # according to Adrian Dybwad
@@ -56,30 +61,27 @@ PURPLE_AIR_TAGS = {
 
 # new values are generated every 8sec by purple air
 def uploadPurpleAirData(client):
+
     try:
         purpleAirData = requests.get("https://map.purpleair.org/json")
         purpleAirData.raise_for_status()
     except requests.exceptions.HTTPError as e:
         LOGGER.error('Problem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.' % e, exc_info=True)
-        # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.Timeout as e:
         LOGGER.error('Problem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.' % e)
-        # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.TooManyRedirects as e:
         LOGGER.error('Problem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.' % e)
-        # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
     except requests.exceptions.RequestException as e:
         LOGGER.error('Problem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.' % e)
-        # sys.stderr.write('%s\tProblem acquiring PurpleAir data (https://map.purpleair.org/json);\t%s.\n' % (TIMESTAMP, e))
         return []
 
     try:
         purpleAirData = purpleAirData.json()
-    except:
-        LOGGER.error('JSON parsing error.')
+    except Exception, e:
+        LOGGER.error('JSON parsing error. \t%s' % e, exc_info=True)
         return []
 
     try:
@@ -88,6 +90,7 @@ def uploadPurpleAirData(client):
         LOGGER.error('Not able to decode the json object;\t%s.' % e, exc_info=True)
         return []
 
+    # go through all the stations
     for station in purpleAirData:
 
         if station['DEVICE_LOCATIONTYPE'] == 'inside':
@@ -105,6 +108,7 @@ def uploadPurpleAirData(client):
 
         # check if all the thingspeak ids are available, if not go to the next station
         if 'THINGSPEAK_PRIMARY_ID' not in station or 'THINGSPEAK_PRIMARY_ID_READ_KEY' not in station or 'THINGSPEAK_SECONDARY_ID' not in station or 'THINGSPEAK_SECONDARY_ID_READ_KEY' not in station:
+            LOGGER.info('Sensor is missing one of the Thingspeak ids or keys.')
             continue
 
         # lat = specifies north-south position
@@ -128,15 +132,19 @@ def uploadPurpleAirData(client):
         # to get pm2.5, humidity and temperature Thingspeak primary feed
         primaryID = station['THINGSPEAK_PRIMARY_ID']
         primaryIDReadKey = station['THINGSPEAK_PRIMARY_ID_READ_KEY']
-        # print(primaryID)
-
-        theID = str(station.get('ID'))
-        # print(theID)
 
         if primaryID is None or primaryIDReadKey is None:
             # if one of the two is missing pm value cannot be gathered
             # logging.info('primaryID or primaryIDReadKey is None')
             continue
+
+        theID = str(station.get('ID'))
+        # print(theID)
+
+        # temp and humidity not gotten from thingspeak
+        station.get('temp_f')
+
+        station.get('humidity')
 
         # because we poll every 5min, and purple Air has a new value roughly every 1min 10sec, to be safe take the last 10 results
         primaryPart1 = 'https://api.thingspeak.com/channels/'
@@ -168,9 +176,9 @@ def uploadPurpleAirData(client):
 
         try:
             start = datetime.strptime(purpleAirDataPrimaryChannel['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-        except ValueError:
+        except ValueError as e:
             # ok if we do not have that date, not crucial
-            # logging.info('No start date')
+            logging.error('No start date. \t%s' % e, exc_info=True)
             pass
 
         point['tags']['Start'] = start
@@ -233,8 +241,16 @@ def uploadPurpleAirData(client):
 
             # go through the primary feed's fields
             for standardKey, purpleKey in PURPLE_AIR_FIELDS_PRI_FEED.iteritems():
+
+                # if parentID = null then we have channel A --> field6=temp and field7=Humidity
+                # if parentID != null then we have channel B --> field6!=temp and field7!=Humidity --> do not take field6/7
                 if purpleKey in aMeasurement.keys():
-                    point['fields'][standardKey] = aMeasurement[purpleKey]
+                    if station['ParentID'] is None and purpleKey in ['field6', 'field7', 'field8']:
+                        # Channel A
+                        point['fields'][standardKey] = aMeasurement[purpleKey]
+                    elif station['ParentID'] is not None and purpleKey in ['field8']:
+                        # Channel B
+                        point['fields'][standardKey] = aMeasurement[purpleKey]
 
             LOGGER.debug('purpleAirDataSecondaryFeed')
             LOGGER.debug(purpleAirDataSecondaryFeed)
