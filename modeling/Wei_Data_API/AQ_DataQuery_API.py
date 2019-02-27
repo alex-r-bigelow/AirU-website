@@ -23,9 +23,9 @@ def getConfig():
     sys.exit(1)
 
 
-def writeLoggingDataToFile(source, theBinFreq, data):
+def writeLoggingDataToFile(source, start, end, theBinFreq, data):
 
-    fileNameWithTimestamp = "queriedData-%s-%d-%d-%d-%d-%d-%d-%d.csv" % (source, theBinFreq, nowTimestamp.year, nowTimestamp.month, nowTimestamp.day, nowTimestamp.hour, nowTimestamp.minute, nowTimestamp.second)
+    fileNameWithTimestamp = "queriedData-%s-%d%s-%s_%s.csv" % (source, theBinFreq, 's', start, end)
 
     # fileName = 'queriedData10min.csv'
     fileName = fileNameWithTimestamp
@@ -250,7 +250,7 @@ def AQDataQuery(sensorSource, startDate, endDate, binFreq=3600, maxLat=42.001388
 
 if __name__ == "__main__":
 
-    # python AQ_DataQuery_API.py 2018-11-10 2018-11-12 1:00:00 DAQ
+    # w
     # python AQ_DataQuery_API.py 2018-11-10 2018-11-12 1:00:00 PurpleAir+airU
 
     # using CURL to get the data:
@@ -270,14 +270,18 @@ if __name__ == "__main__":
     print "Binning frequency: " + sys.argv[3]  # The frequency that we use to bin the sensor reading (e.g. every 6 hours)
     print "Sensor Source (DAQ, PurpleAir+airU): " + sys.argv[4]
 
-    startDate = datetime.strptime(sys.argv[1], '%Y-%m-%d')
-    endDate   = datetime.strptime(sys.argv[2], '%Y-%m-%d')
+    startDateMST = sys.argv[1]
+    endDateMST = sys.argv[2]
+
+    startDate = datetime.strptime(startDateMST, '%Y-%m-%d')
+    endDate = datetime.strptime(endDateMST, '%Y-%m-%d')
+
     # converting MST to UTC
     startDate = startDate + timedelta(hours=7)
-    endDate   = endDate + timedelta(hours=7)
+    endDate = endDate + timedelta(hours=7)
 
     binFreqT = datetime.strptime(sys.argv[3], '%H:%M:%S')
-    binFreq  = binFreqT.hour * 3600 + binFreqT.minute * 60 + binFreqT.second
+    binFreq = binFreqT.hour * 3600 + binFreqT.minute * 60 + binFreqT.second
 
     # which sensor source
     sensorSource = sys.argv[4]
@@ -347,13 +351,13 @@ if __name__ == "__main__":
                 sensorModels[index] = aSensorModel + '_' + theBatch
 
         # Writing the Purple air and the airU sensor IDs with their coordinates and sensor models into the output file
-        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['ID'], IDs], []))
-        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['Model'], sensorModels], []))
-        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['Latitude'], latitudes], []))
-        writeLoggingDataToFile(sensorSource, binFreq, sum([['time'], ['Longitude'], longitudes], []))
+        writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([[''], ['ID'], IDs], []))
+        writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([[''], ['Model'], sensorModels], []))
+        writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([[''], ['Latitude'], latitudes], []))
+        writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([['time'], ['Longitude'], longitudes], []))
 
         for ind, row in enumerate(pm25):
-            writeLoggingDataToFile(sensorSource, binFreq, sum([[times[ind].strftime('%Y-%m-%dT%H:%M:%SZ')], [''], row], []))
+            writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([[times[ind].strftime('%Y-%m-%dT%H:%M:%SZ')], [''], row], []))
 
         print('DONE')
 
@@ -411,6 +415,14 @@ if __name__ == "__main__":
         sensorModels_daq = daqData[4]
         IDs_daq = daqData[5]
 
+        # change the sensorModel of DAQ sensors to 'DAQ'
+        for idx, aModel in enumerate(sensorModels_daq):
+            sensorModels_daq[idx] = 'DAQ'
+
+        # remove whitespaces for the ID
+        for idx, anID in enumerate(IDs_daq):
+            IDs_daq[idx] = anID.replace(" ", "")
+
         # print(pm25_purpleAirAirU)
         # print(pm25_daq)
 
@@ -434,13 +446,13 @@ if __name__ == "__main__":
         longitudes = longitudes_purpleAirAirU + longitudes_daq
 
         # Writing the Purple air and the airU sensor IDs with their coordinates and sensor models into the output file
-        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['ID'], IDs], []))
-        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['Model'], sensorModels], []))
-        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['Latitude'], latitudes], []))
-        writeLoggingDataToFile(sensorSource, binFreq, sum([['time'], ['Longitude'], longitudes], []))
+        writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([[''], ['ID'], IDs], []))
+        writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([[''], ['Model'], sensorModels], []))
+        writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([[''], ['Latitude'], latitudes], []))
+        writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([['time'], ['Longitude'], longitudes], []))
 
         for ind, row in enumerate(pm25_purpleAirAirU):
-            writeLoggingDataToFile(sensorSource, binFreq, sum([[times_purpleAirAirU[ind].strftime('%Y-%m-%dT%H:%M:%SZ')], [''], row + pm25Aligned_daq[ind]], []))
+            writeLoggingDataToFile(sensorSource, startDateMST, endDateMST, binFreq, sum([[times_purpleAirAirU[ind].strftime('%Y-%m-%dT%H:%M:%SZ')], [''], row + pm25Aligned_daq[ind]], []))
 
         print('DONE')
 
