@@ -1,7 +1,10 @@
 import csv
 import json
-import os
+# import os
+import requests
 import sys
+
+import pandas as pd
 
 from datetime import datetime
 from datetime import timedelta
@@ -9,8 +12,8 @@ from datetime import timedelta
 
 from influxdb import InfluxDBClient
 
-
-TIMESTAMP = datetime.now().isoformat()
+nowTimestamp = datetime.now()
+TIMESTAMP = nowTimestamp.isoformat()
 
 
 def getConfig():
@@ -20,8 +23,12 @@ def getConfig():
     sys.exit(1)
 
 
-def writeLoggingDataToFile(data):
-    fileName = 'queriedData10min.csv'
+def writeLoggingDataToFile(source, theBinFreq, data):
+
+    fileNameWithTimestamp = "queriedData-%s-%d-%d-%d-%d-%d-%d-%d.csv" % (source, theBinFreq, nowTimestamp.year, nowTimestamp.month, nowTimestamp.day, nowTimestamp.hour, nowTimestamp.minute, nowTimestamp.second)
+
+    # fileName = 'queriedData10min.csv'
+    fileName = fileNameWithTimestamp
     with open(fileName, 'ab') as csvFile:
         writer = csv.writer(csvFile, delimiter=',', quoting=csv.QUOTE_ALL)
         writer.writerow(data)
@@ -39,7 +46,7 @@ def generateDatePartitions(start, end, delta):
     return result
 
 
-def AQDataQuery(theSensorSource, startDate, endDate, binFreq=3600, maxLat=42.0013885498047, minLong=-114.053932189941, minLat=36.9979667663574, maxLong=-109.041069030762):
+def AQDataQuery(sensorSource, startDate, endDate, binFreq=3600, maxLat=42.0013885498047, minLong=-114.053932189941, minLat=36.9979667663574, maxLong=-109.041069030762):
     borderBox = {'left':   minLong,
                  'right':  maxLong,
                  'bottom': minLat,
@@ -71,7 +78,7 @@ def AQDataQuery(theSensorSource, startDate, endDate, binFreq=3600, maxLat=42.001
 
     # Creating the time stamps using the start date, end date, and the binning frequency
     tPartsNT = 500
-    datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds = tPartsNT * binFreq))
+    datePartitions = generateDatePartitions(startDate, endDate, timedelta(seconds=tPartsNT * binFreq))
 
     if len(datePartitions)>1:
         nt = (len(datePartitions)-1)*500 + \
@@ -95,6 +102,8 @@ def AQDataQuery(theSensorSource, startDate, endDate, binFreq=3600, maxLat=42.001
         source = 'DAQ'
     else:
         source = 'unknown'
+
+    print(source)
 
     for anEndDate in datePartitions:
         # Querying the Purple Air sensor IDs with their coordinates and sensor model
@@ -173,11 +182,11 @@ def AQDataQuery(theSensorSource, startDate, endDate, binFreq=3600, maxLat=42.001
             result = pAirClient.query('SELECT MEAN("pm2.5 (ug/m^3)") FROM airQuality WHERE "Sensor Source" = \'' + source + '\' AND time >= \'' + initialDate + '\' AND time < \'' + anEndDate + '\' AND ID = \'' + anID + '\' group by time(' + str(binFreq) + 's);')
             result = list(result.get_points())
 
-            print('####### debugging #######')
-            print(result)
-            print('####### debugging #######')
-            print('')
-            print('')
+            # print('####### debugging #######')
+            # print(result)
+            # print('####### debugging #######')
+            # print('')
+            # print('')
 
             if anID == pAirUniqueIDs[0]:
                 if not result:
@@ -241,6 +250,9 @@ def AQDataQuery(theSensorSource, startDate, endDate, binFreq=3600, maxLat=42.001
 
 if __name__ == "__main__":
 
+    # python AQ_DataQuery_API.py 2018-11-10 2018-11-12 1:00:00 DAQ
+    # python AQ_DataQuery_API.py 2018-11-10 2018-11-12 1:00:00 PurpleAir+airU
+
     # using CURL to get the data:
     # curl -G 'http://air.eng.utah.edu:8086/query'
     # --data-urlencode "db=defaultdb" --data-urlencode "chunked=true"
@@ -270,33 +282,28 @@ if __name__ == "__main__":
     # which sensor source
     sensorSource = sys.argv[4]
 
+    # Reading the Geographic area box's GPS coordinates if provided
+    if len(sys.argv) >= 7:
+        print "Geographic area [top left bottom right]: [" + sys.argv[5] + ", " + sys.argv[6] + ", " + sys.argv[7] + ", " + sys.argv[8] + "]"
+        utahBbox = {
+            'left': float(sys.argv[5]),
+            'right': float(sys.argv[7]),
+            'bottom': float(sys.argv[6]),
+            'top': float(sys.argv[4])
+        }
+    else:
+        # Default values for the geographic area box's GPS coordinates (Utah for now)
+        print "Geographic area [top left bottom right]: [42.0013885498047 -114.053932189941 36.9979667663574 -109.041069030762]"
+        utahBbox = {
+            'bottom': 36.9979667663574,
+            'top': 42.0013885498047,
+            'left': -114.053932189941,
+            'right': -109.041069030762
+        }
+
     if sensorSource == 'DAQ' and binFreq < 3600:
         print("bin frenquency needs to be at least 1h")
-    else:
-        # Reading the Geographic area box's GPS coordinates if provided
-        if len(sys.argv) >= 7:
-            print "Geographic area [top left bottom right]: [" + sys.argv[4] + ", " + sys.argv[5] + ", " + sys.argv[6] + ", " + sys.argv[7] + "]"
-            utahBbox = {
-                'left': float(sys.argv[5]),
-                'right': float(sys.argv[7]),
-                'bottom': float(sys.argv[6]),
-                'top': float(sys.argv[4])
-            }
-        else:
-            # Default values for the geographic area box's GPS coordinates (Utah for now)
-            print "Geographic area [top left bottom right]: [42.0013885498047 -114.053932189941 36.9979667663574 -109.041069030762]"
-            utahBbox = {
-                'bottom': 36.9979667663574,
-                'top': 42.0013885498047,
-                'left': -114.053932189941,
-                'right': -109.041069030762
-            }
-
-        # Removing any previous csv file with the same name
-        try:
-            os.remove('queriedData10min.csv')
-        except OSError:
-            pass
+    elif sensorSource in ['PurpleAir+airU', 'DAQ']:
 
         data = AQDataQuery(sensorSource, startDate, endDate, binFreq, utahBbox['top'], utahBbox['left'], utahBbox['bottom'], utahBbox['right'])
 
@@ -307,13 +314,135 @@ if __name__ == "__main__":
         sensorModels = data[4]
         IDs = data[5]
 
+        airuSensorMacs = []
+        for index, aSensorModel in enumerate(sensorModels):
+            anID = IDs[index]
+            if aSensorModel == 'H1.1' and len(anID) == 12:
+                airuSensorMacs.append(anID)
+
+        try:
+            mappingMACTobatch = requests.post("http://air.eng.utah.edu/dbapi/api/macToBatch", json={'mac': airuSensorMacs})
+            mappingMACTobatch.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print 'Problem acquiring mapping data (http://air.eng.utah.edu/dbapi/api/macToBatch);\t%s.' % e
+        except requests.exceptions.Timeout as e:
+            print 'Problem acquiring mapping data (http://air.eng.utah.edu/dbapi/api/macToBatch);\t%s.' % e
+        except requests.exceptions.TooManyRedirects as e:
+            print 'Problem acquiring mapping data (http://air.eng.utah.edu/dbapi/api/macToBatch);\t%s.' % e
+        except requests.exceptions.RequestException as e:
+            print 'Problem acquiring mapping data (http://air.eng.utah.edu/dbapi/api/macToBatch);\t%s.' % e
+
+        try:
+            mappingMACTobatch = mappingMACTobatch.json()
+        except Exception, e:
+            print 'JSON parsing error. \t%s' % e
+
+        print('********** mappingMACTobatch **********')
+        print(mappingMACTobatch)
+
+        for index, aSensorModel in enumerate(sensorModels):
+            anID = IDs[index]
+            if aSensorModel == 'H1.1' and len(anID) == 12:
+                theBatch = mappingMACTobatch[anID]
+                sensorModels[index] = aSensorModel + '_' + theBatch
+
         # Writing the Purple air and the airU sensor IDs with their coordinates and sensor models into the output file
-        writeLoggingDataToFile(sum([[''], ['ID'], IDs], []))
-        writeLoggingDataToFile(sum([[''], ['Model'], sensorModels], []))
-        writeLoggingDataToFile(sum([[''], ['Latitude'], latitudes], []))
-        writeLoggingDataToFile(sum([['time'], ['Longitude'], longitudes], []))
+        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['ID'], IDs], []))
+        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['Model'], sensorModels], []))
+        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['Latitude'], latitudes], []))
+        writeLoggingDataToFile(sensorSource, binFreq, sum([['time'], ['Longitude'], longitudes], []))
 
         for ind, row in enumerate(pm25):
-            writeLoggingDataToFile(sum([[times[ind].strftime('%Y-%m-%dT%H:%M:%SZ')], [''], row], []))
+            writeLoggingDataToFile(sensorSource, binFreq, sum([[times[ind].strftime('%Y-%m-%dT%H:%M:%SZ')], [''], row], []))
 
         print('DONE')
+
+    elif sensorSource == 'all':
+
+        # getting the Purple Air, airUdata
+        purpleAirAndAiruData = AQDataQuery('PurpleAir+airU', startDate, endDate, binFreq, utahBbox['top'], utahBbox['left'], utahBbox['bottom'], utahBbox['right'])
+
+        pm25_purpleAirAirU = purpleAirAndAiruData[0]
+        longitudes_purpleAirAirU = purpleAirAndAiruData[1]
+        latitudes_purpleAirAirU = purpleAirAndAiruData[2]
+        times_purpleAirAirU = purpleAirAndAiruData[3]
+        sensorModels_purpleAirAirU = purpleAirAndAiruData[4]
+        IDs_purpleAirAirU = purpleAirAndAiruData[5]
+
+        airuSensorMacs = []
+        for index, aSensorModel in enumerate(sensorModels_purpleAirAirU):
+            anID = IDs_purpleAirAirU[index]
+            if aSensorModel == 'H1.1' and len(anID) == 12:
+                airuSensorMacs.append(anID)
+
+        try:
+            mappingMACTobatch = requests.post("http://air.eng.utah.edu/dbapi/api/macToBatch", json={'mac': airuSensorMacs})
+            mappingMACTobatch.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print 'Problem acquiring mapping data (http://air.eng.utah.edu/dbapi/api/macToBatch);\t%s.' % e
+        except requests.exceptions.Timeout as e:
+            print 'Problem acquiring mapping data (http://air.eng.utah.edu/dbapi/api/macToBatch);\t%s.' % e
+        except requests.exceptions.TooManyRedirects as e:
+            print 'Problem acquiring mapping data (http://air.eng.utah.edu/dbapi/api/macToBatch);\t%s.' % e
+        except requests.exceptions.RequestException as e:
+            print 'Problem acquiring mapping data (http://air.eng.utah.edu/dbapi/api/macToBatch);\t%s.' % e
+
+        try:
+            mappingMACTobatch = mappingMACTobatch.json()
+        except Exception, e:
+            print 'JSON parsing error. \t%s' % e
+
+        # print('********** mappingMACTobatch **********')
+        # print(mappingMACTobatch)
+
+        for index, aSensorModel in enumerate(sensorModels_purpleAirAirU):
+            anID = IDs_purpleAirAirU[index]
+            if aSensorModel == 'H1.1' and len(anID) == 12:
+                theBatch = mappingMACTobatch[anID]
+                sensorModels_purpleAirAirU[index] = aSensorModel + '_' + theBatch
+
+        # getting the DAQ data
+        daqData = AQDataQuery('DAQ', startDate, endDate, 3600, utahBbox['top'], utahBbox['left'], utahBbox['bottom'], utahBbox['right'])
+
+        pm25_daq = daqData[0]
+        longitudes_daq = daqData[1]
+        latitudes_daq = daqData[2]
+        times_daq = daqData[3]
+        sensorModels_daq = daqData[4]
+        IDs_daq = daqData[5]
+
+        # print(pm25_purpleAirAirU)
+        # print(pm25_daq)
+
+        # print(pd.Series(times_purpleAirAirU[0:10], index=times_purpleAirAirU[0:10]))
+        # print(pd.Series(pm25_purpleAirAirU[0:10], index=times_purpleAirAirU[0:10]))
+        # print(pd.Series(pm25_daq[0:10], index=times_daq[0:10]))
+
+        df1aligned, df2aligned = pd.Series(pm25_purpleAirAirU, index=times_purpleAirAirU).align(pd.Series(pm25_daq, index=times_daq), join='outer', axis=0, method='ffill')
+
+        # print('*********** alignment 1 ***********')
+        # print(df1aligned)
+
+        # print('*********** alignment 2 ***********')
+        pm25Aligned_daq = df2aligned.tolist()
+
+        # print(pm25Aligned_daq)
+
+        IDs = IDs_purpleAirAirU + IDs_daq
+        sensorModels = sensorModels_purpleAirAirU + sensorModels_daq
+        latitudes = latitudes_purpleAirAirU + latitudes_daq
+        longitudes = longitudes_purpleAirAirU + longitudes_daq
+
+        # Writing the Purple air and the airU sensor IDs with their coordinates and sensor models into the output file
+        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['ID'], IDs], []))
+        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['Model'], sensorModels], []))
+        writeLoggingDataToFile(sensorSource, binFreq, sum([[''], ['Latitude'], latitudes], []))
+        writeLoggingDataToFile(sensorSource, binFreq, sum([['time'], ['Longitude'], longitudes], []))
+
+        for ind, row in enumerate(pm25_purpleAirAirU):
+            writeLoggingDataToFile(sensorSource, binFreq, sum([[times_purpleAirAirU[ind].strftime('%Y-%m-%dT%H:%M:%SZ')], [''], row + pm25Aligned_daq[ind]], []))
+
+        print('DONE')
+
+    else:
+        print('Something is wrong with the sensorSource')
