@@ -6,7 +6,7 @@ import requests
 import sys
 
 from datetime import datetime
-from influxdb.exceptions import InfluxDBClientError
+from influxdb.exceptions import InfluxDBClientError, InfluxDBServerError
 from influxdb import InfluxDBClient
 
 
@@ -318,11 +318,19 @@ def uploadPurpleAirData(client):
                 LOGGER.error('point[tags]%s' % str(point['tags']))
                 LOGGER.error('point[fields]%s' % str(point['fields']))
                 LOGGER.error('%s.' % e)
+                continue
                 # sys.stderr.write('%s\tInfluxDBClientError\tWriting Purple Air data to influxdb lead to a write error.\n' % TIMESTAMP)
                 # sys.stderr.write('%s\tpoint[time]%s\n' % (TIMESTAMP, str(point['time'])))
                 # sys.stderr.write('%s\tpoint[tags]%s\n' % (TIMESTAMP, str(point['tags'])))
                 # sys.stderr.write('%s\tpoint[fields]%s\n' % (TIMESTAMP, str(point['fields'])))
                 # sys.stderr.write('%s\t%s.\n' % (TIMESTAMP, e))
+            except InfluxDBServerError as se:
+                LOGGER.error('InfluxDBServerError\tAn error when writing occured. There is an issue with the server.')
+                LOGGER.error('point[time]%s' % str(point['time']))
+                LOGGER.error('point[tags]%s' % str(point['tags']))
+                LOGGER.error('point[fields]%s' % str(point['fields']))
+                LOGGER.error('%s.' % se)
+                continue
             else:
                 LOGGER.info('PURPLE AIR Polling successful.')
                 # sys.stdout.write('%s\tPURPLE AIR Polling successful.\n' % TIMESTAMP)
