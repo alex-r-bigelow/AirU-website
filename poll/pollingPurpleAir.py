@@ -1,7 +1,7 @@
 import json
 import logging
 import logging.handlers as handlers
-import pytz
+# import pytz
 import requests
 import sys
 import time
@@ -28,6 +28,8 @@ logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
 dateStringParserFormat = '%Y-%m-%dT%H:%M:%SZ'
+
+numberOfDataPointsToDownload = 10
 
 
 def getConfig():
@@ -71,16 +73,14 @@ PURPLE_AIR_TAGS = {
 
 
 def isSensorValid(aStation):
-    """  """
 
     # inside/outside check
     if aStation.get('DEVICE_LOCATIONTYPE') == 'inside':
         LOGGER.info('Sensor is located inside, dont store it\'s data')
         return False
 
-    # in Utah check
-    # simplified bbox from:
-    # https://gist.github.com/mishari/5ecfccd219925c04ac32
+    # checks if sensor is in Utah
+    # simplified bbox from: https://gist.github.com/mishari/5ecfccd219925c04ac32
     utahBbox = {
         'left': 36.9979667663574,
         'right': 42.0013885498047,
@@ -93,11 +93,12 @@ def isSensorValid(aStation):
         LOGGER.info('Sensor has no ID')
         return False
 
+    # sensor needs primary ID and Key
     if aStation.get('THINGSPEAK_PRIMARY_ID') is None or aStation.get('THINGSPEAK_PRIMARY_ID_READ_KEY') is None:
         LOGGER.info('Sensor has None value(s) for primary Thingspeak id or key.')
         return False
 
-    # both lat and long valid
+    # sensor needs valid lat and long
     # lat = specifies north-south position
     # log = specifies east-west position
     if aStation.get('Lat') is None or aStation.get('Lon') is None:
@@ -129,7 +130,7 @@ def requests_retry_session(retries=3, backoff_factor=0.3, status_forcelist=(500,
 
 
 def getTimeStamp(dateString):
-    """  """
+    """ parse string to get a datetime object """
 
     result = None
     try:
@@ -139,6 +140,44 @@ def getTimeStamp(dateString):
         return None
 
     return result
+
+
+def isMeasurementNewerThanDBData(aMeasurement_unixTimestamp, aSensorID):
+
+    try:
+        lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % aSensorID)
+    except Exception as e:
+        LOGGER.info('querying influxdb did not work: %s', e)
+        return False
+
+    if len(lastPoint) > 0:
+        lastPoint = lastPoint.get_points().next()
+        lastPointParsed = datetime.strptime(lastPoint['time'], '%Y-%m-%dT%H:%M:%SZ')
+        lastPointUnixTimestamp = (lastPointParsed - datetime(1970, 1, 1)).total_seconds()
+
+        if aMeasurement_unixTimestamp <= lastPointUnixTimestamp:
+            return False
+
+    return True
+
+# def isMeasurementNewerThanDBData(aMeasurement):
+#
+#     try:
+#         lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % aMeasurement['tags']['ID'])
+#     except Exception as e:
+#         LOGGER.info('querying influxdb did not work: %s', e)
+#         return False
+#
+#     if len(lastPoint) > 0:
+#         lastPoint = lastPoint.get_points().next()
+#
+#         lastPointParsed = datetime.strptime(lastPoint['time'], dateStringParserFormat)
+#         lastPointLocalized = pytz.utc.localize(lastPointParsed, is_dst=None)
+#
+#         if pytz.utc.localize(aMeasurement['time']) <= lastPointLocalized:
+#             return False
+#
+#     return True
 
 
 def getData(dataSource, aURL, theKeys, timeoutValue=5):
@@ -204,6 +243,41 @@ def getTagData(primaryDataChannel, aStation):
     return tagData
 
 
+def getSecondaryStreamData(secondaryID, secondaryKey):
+
+    # purpleAirDataSecondaryFeed = []
+    if secondaryID is not None and secondaryKey is not None:
+        # secondary id and key are available
+
+        secondaryPart1 = 'https://api.thingspeak.com/channels/'
+        secondaryPart2 = '/feed.json?results=' + numberOfDataPointsToDownload + '&api_key='
+
+        querySecondaryFeed = secondaryPart1 + secondaryID + secondaryPart2 + secondaryKey
+
+        purpleAirDataSecondary = getData('PurpleAir data from SECONDARY feed', querySecondaryFeed, ['feeds'])
+
+        if purpleAirDataSecondary:
+            return purpleAirDataSecondary['feeds']
+        else:
+            return []
+
+
+def castToFloat(aPoint_fields):
+
+    for key, value in aPoint_fields.iteritems():
+        try:
+            aPoint_fields[key] = float(value)
+        except (ValueError, TypeError):
+            pass    # just leave bad
+
+    # Convert the purple air deg F to deg C
+    tempVal = aPoint_fields.get('Temp (*C)')
+    if tempVal is not None:
+        aPoint_fields['Temp (*C)'] = (tempVal - 32) * 5 / 9
+
+    return aPoint_fields
+
+
 def storePoints(client, anID, pointsToStore):
     try:
         client.write_points(pointsToStore)
@@ -238,6 +312,13 @@ def uploadPurpleAirData(client):
         if not isSensorValid(station):
             continue
 
+        sensorLastSeen = station.get('LastSeen')
+        sensorID = station.get('ID')
+        if not isMeasurementNewerThanDBData(sensorLastSeen, sensorID):
+            # sensor was last seen before or same as latest DB measurement
+            LOGGER.info('station skipped: no new measurement for %s' % sensorID)
+            continue
+
         point = {
             'measurement': 'airQuality',
             'fields': {},
@@ -249,21 +330,9 @@ def uploadPurpleAirData(client):
         primaryID = station['THINGSPEAK_PRIMARY_ID']
         primaryIDReadKey = station['THINGSPEAK_PRIMARY_ID_READ_KEY']
 
-        # if primaryID is None or primaryIDReadKey is None:
-        #     # if one of the two is missing pm value cannot be gathered
-        #     # logging.info('primaryID or primaryIDReadKey is None')
-        #     continue
-
-        # theID = str(station.get('ID'))
-        # print(theID)
-
-        # # temp and humidity not gotten from thingspeak
-        # station.get('temp_f')
-        # station.get('humidity')
-
         # because we poll every 5min, and purple Air has a new value roughly every 1min 10sec, to be safe take the last 10 results
         primaryPart1 = 'https://api.thingspeak.com/channels/'
-        primaryPart2 = '/feed.json?results=10&api_key='
+        primaryPart2 = '/feed.json?results=' + numberOfDataPointsToDownload + '&api_key='
         queryPrimaryFeed = primaryPart1 + primaryID + primaryPart2 + primaryIDReadKey
 
         purpleAirDataPrimary = getData('PurpleAir data from the PRIMARY feed', queryPrimaryFeed, ['channel', 'feeds'])
@@ -274,140 +343,19 @@ def uploadPurpleAirData(client):
         else:
             continue
 
-        # try:
-        #     purpleAirDataPrimary = requests.get(queryPrimaryFeed)
-        #     purpleAirDataPrimary.raise_for_status()
-        # except requests.exceptions.HTTPError as e:
-        #     LOGGER.error('Problem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.' % (theID, e))
-        #     # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
-        #     continue
-        # except requests.exceptions.Timeout as e:
-        #     LOGGER.error('Problem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.' % (theID, e))
-        #     # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
-        #     continue
-        # except requests.exceptions.TooManyRedirects as e:
-        #     LOGGER.error('Problem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.' % (theID, e))
-        #     # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
-        #     continue
-        # except requests.exceptions.RequestException as e:
-        #     LOGGER.error('Problem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.' % (theID, e))
-        #     # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the PRIMARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
-        #     continue
-        #
-        # try:
-        #     purpleAirDataPrimary = purpleAirDataPrimary.json()
-        # except Exception as e:
-        #     LOGGER.error('JSON parsing error. \t%s' % e, exc_info=True)
-        #     continue
-        #
-        # try:
-        #     purpleAirDataPrimaryChannel = purpleAirDataPrimary['channel']
-        # except ValueError as e:
-        #     LOGGER.error('Not able to decode the json object;\t%s.' % e, exc_info=True)
-        #     continue
-        #
-        # try:
-        #     purpleAirDataPrimaryFeed = purpleAirDataPrimary['feeds']
-        # except ValueError as e:
-        #     LOGGER.error('Not able to decode the json object;\t%s.' % e, exc_info=True)
-        #     continue
-
-        # purpleAirDataPrimaryChannel = purpleAirDataPrimary.json()['channel']
-        # purpleAirDataPrimaryFeed = purpleAirDataPrimary.json()['feeds']
-
-        # try:
-        #     start = datetime.strptime(purpleAirDataPrimaryChannel['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-        # except ValueError as e:
-        #     # ok if we do not have that date, not crucial
-        #     logging.error('No start date. \t%s' % e, exc_info=True)
-        #     pass
-
         # Attach the tags - values about the station that shouldn't change
         point['tags'] = getTagData(purpleAirDataPrimaryChannel, station)
-
-        # start = getTimeStamp(purpleAirDataPrimaryChannel['created_at'])
-        # if start is not None:
-        #     point['tags']['Start'] = start
-        #
-        # # change across measurements
-        # for standardKey, purpleKey in PURPLE_AIR_TAGS.iteritems():
-        #     tagValue = station.get(purpleKey)
-        #     if tagValue is not None:
-        #         point['tags'][standardKey] = tagValue
-        #
-        # # get the dual sensor 2nd sensor a Sensor Model instead of null
-        # if station.get('ParentID') is not None:
-        #     point['tags']['Sensor Model'] = 'PMS5003'
 
         # getting thingspeak secondary feed data: PM1 and PM10
         secondaryID = station.get('THINGSPEAK_SECONDARY_ID')
         secondaryIDReadKey = station.get('THINGSPEAK_SECONDARY_ID_READ_KEY')
 
-        purpleAirDataSecondaryFeed = []
-        if secondaryID is not None and secondaryIDReadKey is not None:
-            # secondary id and key are available
-
-            secondaryPart1 = 'https://api.thingspeak.com/channels/'
-            secondaryPart2 = '/feed.json?results=10&api_key='
-
-            querySecondaryFeed = secondaryPart1 + secondaryID + secondaryPart2 + secondaryIDReadKey
-
-            purpleAirDataSecondary = getData('PurpleAir data from the PRIMARY feed', querySecondaryFeed, ['feeds'])
-
-            if purpleAirDataSecondary:
-                purpleAirDataSecondaryFeed = purpleAirDataSecondary['feeds']
-            # else:
-            #     continue
-
-            # try:
-            #     purpleAirDataSecondary = requests.get(querySecondaryFeed)
-            #     purpleAirDataSecondary.raise_for_status()
-            # except requests.exceptions.HTTPError as e:
-            #     LOGGER.error('Problem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.' % (theID, e))
-            #     # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
-            #     continue
-            # except requests.exceptions.Timeout as e:
-            #     LOGGER.error('Problem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.' % (theID, e))
-            #     # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
-            #     continue
-            # except requests.exceptions.TooManyRedirects as e:
-            #     LOGGER.error('Problem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.' % (theID, e))
-            #     # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
-            #     continue
-            # except requests.exceptions.RequestException as e:
-            #     LOGGER.error('Problem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.' % (theID, e))
-            #     # sys.stderr.write('%s\tProblem acquiring PurpleAir data from the SECONDARY feed, sensor ID: %s.\t%s.\n' % (TIMESTAMP, theID, e))
-            #     continue
-            #
-            # # purpleAirDataSecondaryFeed = purpleAirDataSecondary.json()['feeds']
-            # try:
-            #     purpleAirDataSecondary = purpleAirDataSecondary.json()
-            # except Exception as e:
-            #     LOGGER.error('JSON parsing error. \t%s' % e, exc_info=True)
-            #     purpleAirDataSecondary = {}
-            #
-            # # if there is an exception return empty array
-            # try:
-            #     purpleAirDataSecondaryFeed = purpleAirDataSecondary['feeds']
-            # except ValueError as e:
-            #     LOGGER.error('Not able to decode the json object;\t%s.' % e, exc_info=True)
-            #     purpleAirDataSecondaryFeed = []
-            # except KeyError as e:
-            #     LOGGER.error('Key error;\t%s.' % e, exc_info=True)
-            #     purpleAirDataSecondaryFeed = []
-            # # if not purpleAirDataSecondaryFeed:
-            # #     continue
+        purpleAirDataSecondaryFeed = getSecondaryStreamData(secondaryID, secondaryIDReadKey)
 
         pointsToStore = []
 
         # go through the primary feed data
         for idx, aMeasurement in enumerate(purpleAirDataPrimaryFeed):
-
-            # try:
-            #     timePrimary = datetime.strptime(aMeasurement['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-            # except ValueError:
-            #     # don't include the point if we can't parse the timestamp
-            #     continue
 
             timePrimary = getTimeStamp(aMeasurement['created_at'])
             if timePrimary is None:
@@ -416,10 +364,6 @@ def uploadPurpleAirData(client):
 
             # use the primary feed's time as the measuremnts time
             point['time'] = timePrimary
-
-            # LOGGER.debug('idx then aMeasurement')
-            # LOGGER.debug(idx)
-            # LOGGER.debug(aMeasurement)
 
             point['fields'] = {}
 
@@ -445,47 +389,23 @@ def uploadPurpleAirData(client):
                         # Channel B
                         point['fields'][standardKey] = aMeasurement[purpleKey]
 
-            # idTag = point['tags'].get('ID')
-            # if idTag is None:
-            #     # print 'ID is none'
-            #     continue    # don't include the point if it doesn't have an ID
-
-            # prefix the ID with "Purple Air " so that there aren't
-            # collisions with other data sources
-            # point['tags']['ID'] = idTag
-            # print point['tags']['ID']
-
-            try:
-                # Only include the point if we haven't stored this measurement before
-                lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % point['tags']['ID'])
-                # print "new POINT"
-                # print pytz.utc.localize(point['time'])
-            except Exception as e:
-                LOGGER.info('querying influxdb did not work: %s', e)
+            # Only include the point if we haven't stored this measurement before
+            time_unixtimestamp = (point['time'] - datetime(1970, 1, 1)).total_seconds()
+            if not isMeasurementNewerThanDBData(time_unixtimestamp, point['tags']['ID']):
                 continue
 
-            if len(lastPoint) > 0:
-                lastPoint = lastPoint.get_points().next()
-                # print parser.parse(lastPoint['time'], tzinfo=pytz.utc)
-                # print point['time']
-                # print lastPoint['time']
-                lastPointParsed = datetime.strptime(lastPoint['time'], dateStringParserFormat)
-                lastPointLocalized = pytz.utc.localize(lastPointParsed, is_dst=None)
-                # print lastPointLocalized
-                # if point['time'] <= parser.parse(lastPoint['time'], None, tzinfo=pytz.utc):
-                if pytz.utc.localize(point['time']) <= lastPointLocalized:
-                    continue
+            point['fields'] = castToFloat(point['fields'])
 
-            for key, value in point['fields'].iteritems():
-                try:
-                    point['fields'][key] = float(value)
-                except (ValueError, TypeError):
-                    pass    # just leave bad
-
-            # Convert the purple air deg F to deg C
-            tempVal = point['fields'].get('Temp (*C)')
-            if tempVal is not None:
-                point['fields']['Temp (*C)'] = (tempVal - 32) * 5 / 9
+            # for key, value in point['fields'].iteritems():
+            #     try:
+            #         point['fields'][key] = float(value)
+            #     except (ValueError, TypeError):
+            #         pass    # just leave bad
+            #
+            # # Convert the purple air deg F to deg C
+            # tempVal = point['fields'].get('Temp (*C)')
+            # if tempVal is not None:
+            #     point['fields']['Temp (*C)'] = (tempVal - 32) * 5 / 9
 
             pointsToStore.append(point)
 
@@ -493,26 +413,6 @@ def uploadPurpleAirData(client):
             LOGGER.info('PURPLE AIR Polling successful.')
         else:
             continue
-
-        # try:
-        #     client.write_points(pointsToStore)
-        #     LOGGER.info('data point for %s and ID= %s stored' % (str(point['time']), str(point['tags']['ID'])))
-        # except InfluxDBClientError as e:
-        #     LOGGER.error('InfluxDBClientError\tWriting Purple Air data to influxdb lead to a write error.')
-        #     LOGGER.error('point[time]%s' % str(point['time']))
-        #     LOGGER.error('point[tags]%s' % str(point['tags']))
-        #     LOGGER.error('point[fields]%s' % str(point['fields']))
-        #     LOGGER.error('%s.' % e)
-        #     continue
-        # except InfluxDBServerError as se:
-        #     LOGGER.error('InfluxDBServerError\tAn error when writing occured. There is an issue with the server.')
-        #     LOGGER.error('point[time]%s' % str(point['time']))
-        #     LOGGER.error('point[tags]%s' % str(point['tags']))
-        #     LOGGER.error('point[fields]%s' % str(point['fields']))
-        #     LOGGER.error('%s.' % se)
-        #     continue
-        # else:
-        #     LOGGER.info('PURPLE AIR Polling successful.')
 
     endScript = time.time()
     LOGGER.info("*********** total time for script:", endScript - startScript)
@@ -525,7 +425,8 @@ if __name__ == '__main__':
         8086,
         config['pollingUsername'],
         config['pollingPassword'],
-        'defaultdb',
+        # 'defaultdb',
+        'purpleAirScriptTester',
         ssl=True,
         verify_ssl=True
     )
