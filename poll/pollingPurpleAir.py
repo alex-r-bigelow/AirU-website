@@ -415,7 +415,7 @@ def uploadPurpleAirData(client):
             continue
 
     endScript = time.time()
-    LOGGER.info("*********** total time for script:", endScript - startScript)
+    LOGGER.info("*********** total time for script: %s" % (endScript - startScript))
 
 
 if __name__ == '__main__':
