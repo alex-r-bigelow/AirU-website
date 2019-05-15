@@ -332,7 +332,7 @@ def uploadPurpleAirData(client):
 
         # because we poll every 5min, and purple Air has a new value roughly every 1min 10sec, to be safe take the last 10 results
         primaryPart1 = 'https://api.thingspeak.com/channels/'
-        primaryPart2 = '/feed.json?results=' + numberOfDataPointsToDownload + '&api_key='
+        primaryPart2 = '/feed.json?results=' + str(numberOfDataPointsToDownload) + '&api_key='
         queryPrimaryFeed = primaryPart1 + primaryID + primaryPart2 + primaryIDReadKey
 
         purpleAirDataPrimary = getData('PurpleAir data from the PRIMARY feed', queryPrimaryFeed, ['channel', 'feeds'])
