@@ -18,12 +18,12 @@ from requests.packages.urllib3.util.retry import Retry
 TIMESTAMP = datetime.now().isoformat()
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.ERROR)
+LOGGER.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - [%(funcName)s:%(lineno)d] - %(levelname)s - %(message)s')
 
 logHandler = handlers.RotatingFileHandler('purpleAirPoller.log', maxBytes=5000000, backupCount=5)
-logHandler.setLevel(logging.ERROR)
+logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 LOGGER.addHandler(logHandler)
 
@@ -144,6 +144,9 @@ def getTimeStamp(dateString):
 
 def isMeasurementNewerThanDBData(aMeasurement_unixTimestamp, aSensorID):
 
+    if aMeasurement_unixTimestamp is None or aSensorID is None:
+        return False
+
     try:
         lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % aSensorID)
     except Exception as e:
@@ -250,7 +253,7 @@ def getSecondaryStreamData(secondaryID, secondaryKey):
         # secondary id and key are available
 
         secondaryPart1 = 'https://api.thingspeak.com/channels/'
-        secondaryPart2 = '/feed.json?results=' + numberOfDataPointsToDownload + '&api_key='
+        secondaryPart2 = '/feed.json?results=' + str(numberOfDataPointsToDownload) + '&api_key='
 
         querySecondaryFeed = secondaryPart1 + secondaryID + secondaryPart2 + secondaryKey
 
@@ -263,19 +266,27 @@ def getSecondaryStreamData(secondaryID, secondaryKey):
 
 
 def castToFloat(aPoint_fields):
+    # influx field values cannot be None
+
+    # if pm25 is None no need to store data point
+    tmpPM25 = aPoint_fields.get('pm2.5 (ug/m^3)')
+    if tmpPM25 is None:
+        return None
+
+    castedToFloat = {}
 
     for key, value in aPoint_fields.iteritems():
         try:
-            aPoint_fields[key] = float(value)
+            castedToFloat[key] = float(value)
         except (ValueError, TypeError):
-            pass    # just leave bad
+            pass    # skip that key/value pair
 
     # Convert the purple air deg F to deg C
-    tempVal = aPoint_fields.get('Temp (*C)')
+    tempVal = castedToFloat.get('Temp (*C)')
     if tempVal is not None:
-        aPoint_fields['Temp (*C)'] = (tempVal - 32) * 5 / 9
+        castedToFloat['Temp (*C)'] = (tempVal - 32) * 5 / 9
 
-    return aPoint_fields
+    return castedToFloat
 
 
 def storePoints(client, anID, pointsToStore):
@@ -319,12 +330,6 @@ def uploadPurpleAirData(client):
             LOGGER.info('station skipped: no new measurement for %s' % sensorID)
             continue
 
-        point = {
-            'measurement': 'airQuality',
-            'fields': {},
-            'tags': {}
-        }
-
         # to get pm2.5, humidity and temperature Thingspeak primary feed
         # we know primary ID and Key exist, therefore not using .get()
         primaryID = station['THINGSPEAK_PRIMARY_ID']
@@ -344,7 +349,7 @@ def uploadPurpleAirData(client):
             continue
 
         # Attach the tags - values about the station that shouldn't change
-        point['tags'] = getTagData(purpleAirDataPrimaryChannel, station)
+        tagDataForPoint = getTagData(purpleAirDataPrimaryChannel, station)
 
         # getting thingspeak secondary feed data: PM1 and PM10
         secondaryID = station.get('THINGSPEAK_SECONDARY_ID')
@@ -357,6 +362,12 @@ def uploadPurpleAirData(client):
         # go through the primary feed data
         for idx, aMeasurement in enumerate(purpleAirDataPrimaryFeed):
 
+            point = {
+                'measurement': 'airQuality',
+                'fields': {},
+                'tags': tagDataForPoint
+            }
+
             timePrimary = getTimeStamp(aMeasurement['created_at'])
             if timePrimary is None:
                 # don't include the point if we can't parse the timestamp
@@ -364,8 +375,6 @@ def uploadPurpleAirData(client):
 
             # use the primary feed's time as the measuremnts time
             point['time'] = timePrimary
-
-            point['fields'] = {}
 
             # deal first with secondary feed
             if purpleAirDataSecondaryFeed:
@@ -394,18 +403,12 @@ def uploadPurpleAirData(client):
             if not isMeasurementNewerThanDBData(time_unixtimestamp, point['tags']['ID']):
                 continue
 
-            point['fields'] = castToFloat(point['fields'])
-
-            # for key, value in point['fields'].iteritems():
-            #     try:
-            #         point['fields'][key] = float(value)
-            #     except (ValueError, TypeError):
-            #         pass    # just leave bad
-            #
-            # # Convert the purple air deg F to deg C
-            # tempVal = point['fields'].get('Temp (*C)')
-            # if tempVal is not None:
-            #     point['fields']['Temp (*C)'] = (tempVal - 32) * 5 / 9
+            castedFields = castToFloat(point['fields'])
+            if castedFields is not None:
+                point['fields'] = castedFields
+            else:
+                print('a None field value for PM25')
+                continue
 
             pointsToStore.append(point)
 
