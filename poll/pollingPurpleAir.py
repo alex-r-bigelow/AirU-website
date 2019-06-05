@@ -326,6 +326,7 @@ def uploadPurpleAirData(client):
         LOGGER.info('sensor %s' % sensorID)
 
         if not isSensorValid(station):
+            LOGGER.info('invalid sensor %s' % sensorID)
             continue
 
         sensorLastSeen = station.get('LastSeen')
@@ -420,8 +421,9 @@ def uploadPurpleAirData(client):
             pointsToStore.append(point)
 
         if storePoints(client, point['tags']['ID'], pointsToStore):
-            LOGGER.info('PURPLE AIR Polling successful.')
+            LOGGER.info('successfully stored data for sensor %s.' % point['tags']['ID'])
         else:
+            LOGGER.info('problem with storing data for sensor %s.' % point['tags']['ID'])
             continue
 
     endScript = time.time()
