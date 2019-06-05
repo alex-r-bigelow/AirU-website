@@ -291,6 +291,7 @@ def castToFloat(aPoint_fields):
 
 def storePoints(client, anID, pointsToStore):
     try:
+        LOGGER.info('worked')
         client.write_points(pointsToStore)
         LOGGER.info('%s data points for ID= %s stored' % (str(len(pointsToStore)), str(anID)))
     except InfluxDBClientError as e:
@@ -401,13 +402,14 @@ def uploadPurpleAirData(client):
             # Only include the point if we haven't stored this measurement before
             time_unixtimestamp = (point['time'] - datetime(1970, 1, 1)).total_seconds()
             if not isMeasurementNewerThanDBData(time_unixtimestamp, point['tags']['ID']):
+                LOGGER.info('measurement skipped: measurement is older %s' % point['tags']['ID'])
                 continue
 
             castedFields = castToFloat(point['fields'])
             if castedFields is not None:
                 point['fields'] = castedFields
             else:
-                print('a None field value for PM25')
+                LOGGER.info('a None field value for PM25, for sensor %s' % point['tags']['ID'])
                 continue
 
             pointsToStore.append(point)
