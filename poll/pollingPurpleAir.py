@@ -321,11 +321,14 @@ def uploadPurpleAirData(client):
     # go through all the stations
     for station in purpleAirData:
 
+        sensorID = station.get('ID')
+
+        LOGGER.info('sensor %s' % sensorID)
+
         if not isSensorValid(station):
             continue
 
         sensorLastSeen = station.get('LastSeen')
-        sensorID = station.get('ID')
         if not isMeasurementNewerThanDBData(sensorLastSeen, sensorID):
             # sensor was last seen before or same as latest DB measurement
             LOGGER.info('station skipped: no new measurement for %s' % sensorID)
@@ -347,6 +350,7 @@ def uploadPurpleAirData(client):
             purpleAirDataPrimaryChannel = purpleAirDataPrimary['channel']
             purpleAirDataPrimaryFeed = purpleAirDataPrimary['feeds']
         else:
+            LOGGER.info('no primary data stream for sensor %s' % sensorID)
             continue
 
         # Attach the tags - values about the station that shouldn't change
@@ -372,6 +376,7 @@ def uploadPurpleAirData(client):
             timePrimary = getTimeStamp(aMeasurement['created_at'])
             if timePrimary is None:
                 # don't include the point if we can't parse the timestamp
+                LOGGER.info('cannot parse the timestamp %s' % sensorID)
                 continue
 
             # use the primary feed's time as the measuremnts time
