@@ -136,7 +136,8 @@ def getTimeStamp(dateString):
     try:
         result = datetime.strptime(dateString, dateStringParserFormat)
     except ValueError as e:
-        LOGGER.error('No start date. \t%s' % e, exc_info=True)
+        valueErrorMessage = 'No start date. \t%s' % e
+        LOGGER.error(valueErrorMessage, exc_info=True)
         return None
 
     return result
@@ -150,7 +151,8 @@ def isMeasurementNewerThanDBData(aMeasurement_unixTimestamp, aSensorID):
     try:
         lastPoint = client.query("""SELECT last("pm2.5 (ug/m^3)") FROM airQuality WHERE "ID" = '%s' AND "Sensor Source" = 'Purple Air'""" % aSensorID)
     except Exception as e:
-        LOGGER.info('querying influxdb did not work: %s', e)
+        exceptionQueryInfluxMessage = 'querying influxdb did not work: %s', e
+        LOGGER.info(exceptionQueryInfluxMessage)
         return False
 
     if len(lastPoint) > 0:
@@ -189,25 +191,31 @@ def getData(dataSource, aURL, theKeys, timeoutValue=5):
         theData = requests_retry_session().get(aURL, timeout=timeoutValue)
         theData.raise_for_status()
     except ConnectionError as e:
-        LOGGER.error('ConnectionError: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e, exc_info=True)
+        connectionErrorMessage = 'ConnectionError: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        LOGGER.error(connectionErrorMessage, exc_info=True)
         return []
     except HTTPError as e:
-        LOGGER.error('HTTPError: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e, exc_info=True)
+        httpErrorMessage = 'HTTPError: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        LOGGER.error(httpErrorMessage, exc_info=True)
         return []
     except Timeout as e:
-        LOGGER.error('Timeout: Problem acquiring %s with %s;\t%s.' % dataSource, aURL, e)
+        timeoutMessage = 'Timeout: Problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        LOGGER.error(timeoutMessage)
         return []
     except TooManyRedirects as e:
-        LOGGER.error('TooManyRedirects: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e)
+        tooManyRedirectsMessage = 'TooManyRedirects: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        LOGGER.error(tooManyRedirectsMessage)
         return []
     except RequestException as e:
-        LOGGER.error('RequestException: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e, exc_info=True)
+        requestExceptionMessage = 'RequestException: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        LOGGER.error(requestExceptionMessage, exc_info=True)
         return []
 
     try:
         theData = theData.json()
     except Exception as e:
-        LOGGER.error('JSON parsing error for %s with %s. \t%s' % dataSource, aURL, e, exc_info=True)
+        jsonErrorMessage = 'JSON parsing error for %s with %s. \t%s' % dataSource, aURL, e
+        LOGGER.error(jsonErrorMessage, exc_info=True)
         return []
 
     result = {}
@@ -215,10 +223,12 @@ def getData(dataSource, aURL, theKeys, timeoutValue=5):
         try:
             result[aKey] = theData[aKey]
         except ValueError as e:
-            LOGGER.error('Not able to decode the json object for %s with %s;\t%s.' % dataSource, aURL, e, exc_info=True)
+            valueErrorMessage = 'Not able to decode the json object for %s with %s;\t%s.' % dataSource, aURL, e
+            LOGGER.error(valueErrorMessage, exc_info=True)
             return []
         except KeyError as e:
-            LOGGER.error('Key error for %s with %s;\t%s.' % dataSource, aURL, e, exc_info=True)
+            keyErrorMessage = 'Key error for %s with %s;\t%s.' % dataSource, aURL, e
+            LOGGER.error(keyErrorMessage, exc_info=True)
             return []
 
     return result
