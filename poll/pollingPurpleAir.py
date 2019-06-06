@@ -191,30 +191,30 @@ def getData(dataSource, aURL, theKeys, timeoutValue=5):
         theData = requests_retry_session().get(aURL, timeout=timeoutValue)
         theData.raise_for_status()
     except ConnectionError as e:
-        connectionErrorMessage = 'ConnectionError: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        connectionErrorMessage = 'ConnectionError: problem acquiring %s with %s;\t%s.' % (dataSource, aURL, e)
         LOGGER.error(connectionErrorMessage, exc_info=True)
         return []
     except HTTPError as e:
-        httpErrorMessage = 'HTTPError: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        httpErrorMessage = 'HTTPError: problem acquiring %s with %s;\t%s.' % (dataSource, aURL, e)
         LOGGER.error(httpErrorMessage, exc_info=True)
         return []
     except Timeout as e:
-        timeoutMessage = 'Timeout: Problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        timeoutMessage = 'Timeout: Problem acquiring %s with %s;\t%s.' % (dataSource, aURL, e)
         LOGGER.error(timeoutMessage)
         return []
     except TooManyRedirects as e:
-        tooManyRedirectsMessage = 'TooManyRedirects: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        tooManyRedirectsMessage = 'TooManyRedirects: problem acquiring %s with %s;\t%s.' % (dataSource, aURL, e)
         LOGGER.error(tooManyRedirectsMessage)
         return []
     except RequestException as e:
-        requestExceptionMessage = 'RequestException: problem acquiring %s with %s;\t%s.' % dataSource, aURL, e
+        requestExceptionMessage = 'RequestException: problem acquiring %s with %s;\t%s.' % (dataSource, aURL, e)
         LOGGER.error(requestExceptionMessage, exc_info=True)
         return []
 
     try:
         theData = theData.json()
     except Exception as e:
-        jsonErrorMessage = 'JSON parsing error for %s with %s. \t%s' % dataSource, aURL, e
+        jsonErrorMessage = 'JSON parsing error for %s with %s. \t%s' % (dataSource, aURL, e)
         LOGGER.error(jsonErrorMessage, exc_info=True)
         return []
 
@@ -223,11 +223,11 @@ def getData(dataSource, aURL, theKeys, timeoutValue=5):
         try:
             result[aKey] = theData[aKey]
         except ValueError as e:
-            valueErrorMessage = 'Not able to decode the json object for %s with %s;\t%s.' % dataSource, aURL, e
+            valueErrorMessage = 'Not able to decode the json object for %s with %s;\t%s.' % (dataSource, aURL, e)
             LOGGER.error(valueErrorMessage, exc_info=True)
             return []
         except KeyError as e:
-            keyErrorMessage = 'Key error for %s with %s;\t%s.' % dataSource, aURL, e
+            keyErrorMessage = 'Key error for %s with %s;\t%s.' % (dataSource, aURL, e)
             LOGGER.error(keyErrorMessage, exc_info=True)
             return []
 
