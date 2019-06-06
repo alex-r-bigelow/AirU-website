@@ -155,7 +155,7 @@ def isMeasurementNewerThanDBData(aMeasurement_unixTimestamp, aSensorID):
 
     if len(lastPoint) > 0:
         lastPoint = lastPoint.get_points().next()
-        lastPointParsed = datetime.strptime(lastPoint['time'], '%Y-%m-%dT%H:%M:%SZ')
+        lastPointParsed = getTimeStamp(lastPoint['time'])
         lastPointUnixTimestamp = (lastPointParsed - datetime(1970, 1, 1)).total_seconds()
 
         if aMeasurement_unixTimestamp <= lastPointUnixTimestamp:
@@ -347,7 +347,7 @@ def uploadPurpleAirData(client):
 
         purpleAirDataPrimary = getData('PurpleAir data from the PRIMARY feed', queryPrimaryFeed, ['channel', 'feeds'])
 
-        if not purpleAirDataPrimary:
+        if purpleAirDataPrimary:
             purpleAirDataPrimaryChannel = purpleAirDataPrimary['channel']
             purpleAirDataPrimaryFeed = purpleAirDataPrimary['feeds']
         else:
