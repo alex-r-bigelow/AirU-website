@@ -443,12 +443,11 @@ def uploadPurpleAirData(client):
 if __name__ == '__main__':
     config = getConfig()
     client = InfluxDBClient(
-        'air.eng.utah.edu',
-        8086,
+        config['INFLUX_HOST'],
+        config['INFLUX_PORT'],
         config['pollingUsername'],
         config['pollingPassword'],
-        # 'defaultdb',
-        'purpleAirScriptTester',
+        config['PURPLE_AIR_DB'],
         ssl=True,
         verify_ssl=True
     )
